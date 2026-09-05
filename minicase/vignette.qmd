@@ -1,0 +1,68 @@
+---
+title: "minicase"
+---
+
+```{r}
+#| include: false
+source(file.path("minicase", "minicase.R"))
+```
+
+`minicase` provides a single function, `mcase_case_when()`, a minimal
+reimplementation of `dplyr::case_when()`: vectorised if/else across a
+sequence of `condition ~ value` formulas, first match wins. See the
+[README](https://github.com/djnavarro/minis/tree/main/minicase) for
+scope notes; this page walks through it on the same toy fruits data
+frame used in the [minifilter vignette](../minifilter/).
+
+```{r}
+fruits <- data.frame(
+  name     = c("apple", "banana", "cherry", "date", "elderberry"),
+  price    = c(1.20, 0.50, 3.00, NA, 4.50),
+  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)
+)
+fruits
+```
+
+## No data-masking: reference columns with `$`, or wrap in `with()`
+
+Unlike `dplyr::case_when()`, conditions and values are evaluated in
+the *caller's* environment, not the data frame's -- so bare column
+names don't resolve on their own:
+
+```{r}
+with(fruits, mcase_case_when(
+  price < 1 ~ "cheap",
+  price < 3 ~ "mid",
+  price >= 3 ~ "pricey"
+))
+```
+
+## First match wins
+
+`cherry` (price 3.00) fails `price < 3` but matches `price >= 3`;
+formulas are checked in order, and the first `TRUE` condition for each
+position determines its value even if a later condition would also
+match.
+
+## Unmatched positions are `NA`
+
+`date` has a missing price, so every condition above evaluates to `NA`
+for that row, and `date` itself gets `NA` in the result -- there's no
+condition it definitively satisfies. Add a `TRUE ~ ...` formula at the
+end as a catch-all default, the same way you would in `dplyr`:
+
+```{r}
+with(fruits, mcase_case_when(
+  price < 1  ~ "cheap",
+  price < 3  ~ "mid",
+  price >= 3 ~ "pricey",
+  TRUE       ~ "unknown"
+))
+```
+
+## Scope: no `.default`/`.ptype`/`.size`
+
+That trailing `TRUE ~ "unknown"` formula *is* the idiomatic way to get
+a default in both `dplyr::case_when()` and `mcase_case_when()` --
+`minicase` just doesn't implement dplyr's newer, separate `.default`
+argument as an alternative spelling of the same thing.

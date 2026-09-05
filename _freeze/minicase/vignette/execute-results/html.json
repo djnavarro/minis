@@ -1,0 +1,15 @@
+{
+  "hash": "1037255003cc73c28e1aa8488bd5a9f3",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"minicase\"\n---\n\n\n\n\n\n`minicase` provides a single function, `mcase_case_when()`, a minimal\nreimplementation of `dplyr::case_when()`: vectorised if/else across a\nsequence of `condition ~ value` formulas, first match wins. See the\n[README](https://github.com/djnavarro/minis/tree/main/minicase) for\nscope notes; this page walks through it on the same toy fruits data\nframe used in the [minifilter vignette](../minifilter/).\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfruits <- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE\n```\n\n\n:::\n:::\n\n\n\n## No data-masking: reference columns with `$`, or wrap in `with()`\n\nUnlike `dplyr::case_when()`, conditions and values are evaluated in\nthe *caller's* environment, not the data frame's -- so bare column\nnames don't resolve on their own:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nwith(fruits, mcase_case_when(\n  price < 1 ~ \"cheap\",\n  price < 3 ~ \"mid\",\n  price >= 3 ~ \"pricey\"\n))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n```\n\n\n:::\n:::\n\n\n\n## First match wins\n\n`cherry` (price 3.00) fails `price < 3` but matches `price >= 3`;\nformulas are checked in order, and the first `TRUE` condition for each\nposition determines its value even if a later condition would also\nmatch.\n\n## Unmatched positions are `NA`\n\n`date` has a missing price, so every condition above evaluates to `NA`\nfor that row, and `date` itself gets `NA` in the result -- there's no\ncondition it definitively satisfies. Add a `TRUE ~ ...` formula at the\nend as a catch-all default, the same way you would in `dplyr`:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nwith(fruits, mcase_case_when(\n  price < 1  ~ \"cheap\",\n  price < 3  ~ \"mid\",\n  price >= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\" \n```\n\n\n:::\n:::\n\n\n\n## Scope: no `.default`/`.ptype`/`.size`\n\nThat trailing `TRUE ~ \"unknown\"` formula *is* the idiomatic way to get\na default in both `dplyr::case_when()` and `mcase_case_when()` --\n`minicase` just doesn't implement dplyr's newer, separate `.default`\nargument as an alternative spelling of the same thing.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
