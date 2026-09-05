@@ -1,0 +1,73 @@
+---
+title: "minijoin"
+---
+
+```{r}
+#| include: false
+source(file.path("minijoin", "minijoin.R"))
+```
+
+`minijoin` provides four mutating joins --
+`mjoin_inner_join()`/`_left_join()`/`_right_join()`/`_full_join()` --
+built on base `merge()`. See the
+[README](https://github.com/djnavarro/minis/tree/main/minijoin) for
+the full argument reference; this page compares all four side by side
+on two small toy data frames with a partial overlap.
+
+```{r}
+bands <- data.frame(
+  band = c("Beatles", "Rolling Stones", "Kinks"),
+  founded = c(1960, 1962, 1963)
+)
+albums <- data.frame(
+  band = c("Beatles", "Kinks", "Queen"),
+  album = c("Abbey Road", "Arthur", "A Night at the Opera")
+)
+bands
+albums
+```
+
+`bands` and `albums` share `"Beatles"` and `"Kinks"`; `"Rolling
+Stones"` exists only in `bands`, and `"Queen"` only in `albums`.
+
+## Inner join: only rows matching in both
+
+```{r}
+mjoin_inner_join(bands, albums, by = "band")
+```
+
+## Left join: all rows of `x` (`bands`)
+
+`"Rolling Stones"` is kept, with `NA` for `album`:
+
+```{r}
+mjoin_left_join(bands, albums, by = "band")
+```
+
+## Right join: all rows of `y` (`albums`)
+
+`"Queen"` is kept, with `NA` for `founded`. Note the row order: matched
+rows still come first, in `bands`' original order, with the
+unmatched-in-`x` row (`"Queen"`) appended at the end -- `minijoin`
+always restores `x`'s original row order for matched rows, rather than
+`y`'s:
+
+```{r}
+mjoin_right_join(bands, albums, by = "band")
+```
+
+## Full join: all rows of both
+
+Both `"Rolling Stones"` and `"Queen"` are kept, each with an `NA` in
+the column they don't have a match for:
+
+```{r}
+mjoin_full_join(bands, albums, by = "band")
+```
+
+## `by` is always explicit
+
+Unlike `dplyr`, there's no auto-detection of shared column names --
+`by` must always be supplied. This is a deliberate simplification, not
+an oversight, to avoid a class of silent bugs from an unintended
+shared column name.

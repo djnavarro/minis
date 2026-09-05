@@ -24,7 +24,7 @@ README.
 | `minitrap` | Minimal `purrr`-style `safely()`/`quietly()` function adverbs. | [Vignette](minitrap/) |
 | `minifilter` | Minimal `dplyr`-style `filter()`. | [Vignette](minifilter/) |
 | `minicase` | Minimal `dplyr`-style `case_when()`. | [Vignette](minicase/) |
-| `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [README](https://github.com/djnavarro/minis/tree/main/minijoin) |
+| `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [Vignette](minijoin/) |
 | `minitable` | Minimal `tibble`-style construction/coercion helpers. | [README](https://github.com/djnavarro/minis/tree/main/minitable) |
 | `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [README](https://github.com/djnavarro/minis/tree/main/minicondition) |
 
