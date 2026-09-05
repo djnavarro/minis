@@ -32,7 +32,7 @@
     "href": "index.html#available-minis",
     "title": "minis",
     "section": "Available minis",
-    "text": "Available minis\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nREADME\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nREADME\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
+    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nREADME\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nREADME\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
   },
   {
     "objectID": "minimap/index.html",
