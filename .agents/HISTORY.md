@@ -102,3 +102,11 @@ walks every `<mini>/tests/testthat/` directory. Added a GitHub Actions
 workflow (`test.yaml`) that installs those two packages and runs
 `run_tests.R` on push/PR. Published as a public repo at
 github.com/djnavarro/minis via `gh repo create --source=. --remote=origin`.
+
+Confirmed via `gh run list`/`gh run view` that the `test-minis` workflow
+passes on GitHub's actual runners (not just locally) -- both the
+`minitable` push and the subsequent `AGENTS.md` push completed
+successfully in under a minute each. One informational, non-blocking
+annotation appeared (`actions/checkout@v4` being forced onto Node.js 24
+due to Node 20's deprecation on GitHub Actions runners); no action
+needed.

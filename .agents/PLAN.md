@@ -25,12 +25,6 @@ Other `emaxnls` internal helpers that haven't been reviewed/ported yet:
   explicitly deferred out of `minitrap`'s scope when it was built; would
   be its own mini if ever added, not folded into `minitrap`.
 
-## Confirm CI passes on GitHub's runners
-
-The `.github/workflows/test.yaml` workflow was added and the repo
-pushed, but a green run on GitHub's actual runners (as opposed to local
-`Rscript run_tests.R`) hasn't been confirmed yet.
-
 ## Discoverability
 
 Consider adding GitHub repo topics (e.g. `r`, `zero-dependency`,
