@@ -1,0 +1,29 @@
+---
+title: "minis"
+---
+
+A collection of small, standalone, zero-runtime-dependency R
+components ("minis"), each shipped as a single `.R` file with its own
+drop-in test suite. When a package needs a little bit of `cli`-style
+formatting, or a little bit of `purrr`-style mapping, or some other
+small convenience, but taking on the full dependency isn't worth it,
+grab the relevant mini and copy it straight into `R/`.
+
+See the [repository README](https://github.com/djnavarro/minis) for
+the full philosophy and usage instructions. This site collects
+worked-example **vignettes** for minis that have one; minis without a
+vignette yet are still listed below, linking straight to their GitHub
+README.
+
+## Available minis
+
+| Mini | Purpose | Docs |
+|---|---|---|
+| `minicli` | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe. | [README](https://github.com/djnavarro/minis/tree/main/minicli) |
+| `minimap` | Minimal `purrr`-style `map()`/`map2()`/`imap()`/`walk()`/`iwalk()` and type-stable `map_dbl()`/`map_lgl()`/`map_chr()`. | [Vignette](minimap/) |
+| `minitrap` | Minimal `purrr`-style `safely()`/`quietly()` function adverbs. | [Vignette](minitrap/) |
+| `minifilter` | Minimal `dplyr`-style `filter()`. | [README](https://github.com/djnavarro/minis/tree/main/minifilter) |
+| `minicase` | Minimal `dplyr`-style `case_when()`. | [README](https://github.com/djnavarro/minis/tree/main/minicase) |
+| `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [README](https://github.com/djnavarro/minis/tree/main/minijoin) |
+| `minitable` | Minimal `tibble`-style construction/coercion helpers. | [README](https://github.com/djnavarro/minis/tree/main/minitable) |
+| `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [README](https://github.com/djnavarro/minis/tree/main/minicondition) |

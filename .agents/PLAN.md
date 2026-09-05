@@ -22,5 +22,10 @@ Other `emaxnls` internal helpers that haven't been reviewed/ported yet:
 ## Discoverability
 
 Consider adding GitHub repo topics (e.g. `r`, `zero-dependency`,
-`vendoring`) for discoverability, and possibly a short listing page if
-the mini count grows significantly.
+`vendoring`) for discoverability.
+
+A short listing/vignette site now exists (`_quarto.yml`/`index.qmd`,
+published via `.github/workflows/site.yaml`) -- see AGENTS.md's
+"Vignettes and the minis site" section. Only `minitrap` has a
+`vignette.qmd` so far; retrofitting the remaining minis with vignettes
+is future work, one mini at a time.

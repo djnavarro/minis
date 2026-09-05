@@ -1,0 +1,15 @@
+{
+  "hash": "6975936119922abe8d46df87919dd770",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"minitrap\"\n---\n\n\n\n\n\n\n`minitrap` provides two `purrr`-style function adverbs, `mtrap_safely()`\nand `mtrap_quietly()`, that trap errors or console output instead of\nletting them reach the console. See the\n[README](https://github.com/djnavarro/minis/tree/main/minitrap) for the\nfull API reference and scope notes; this page walks through both in\naction.\n\n## `mtrap_safely()`\n\nWrap a function so a call that would normally error instead returns a\nlist with the error captured alongside a `NULL` result:\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsafe_log <- mtrap_safely(log)\nsafe_log(-1)\n```\n\n::: {.cell-output .cell-output-stderr}\n\n```\nWarning in .f(...): NaNs produced\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stdout}\n\n```\n$result\n[1] NaN\n\n$error\nNULL\n```\n\n\n:::\n:::\n\n\n\n\nA successful call returns the result with `error` set to `NULL`:\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsafe_log(10)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n$result\n[1] 2.302585\n\n$error\nNULL\n```\n\n\n:::\n:::\n\n\n\n\n## `mtrap_quietly()`\n\nWrap a function so printed output, warnings, and messages are captured\ninstead of shown:\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nquiet_fn <- mtrap_quietly(function() {\n  message(\"starting\")\n  warning(\"using a default\")\n  42\n})\nquiet_fn()\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n$result\n[1] 42\n\n$output\n[1] \"\"\n\n$warnings\n[1] \"using a default\"\n\n$messages\n[1] \"starting\\n\"\n```\n\n\n:::\n:::\n\n\n\n\n`mtrap_quietly()` does not catch errors -- compose with\n`mtrap_safely()` for that:\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nrobust_fn <- mtrap_safely(mtrap_quietly(function() stop(\"boom\")))\nrobust_fn()\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n$result\nNULL\n\n$error\n<simpleError in .f(...): boom>\n```\n\n\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

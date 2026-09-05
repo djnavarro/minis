@@ -7,3 +7,5 @@
 man/
 NAMESPACE
 .DS_Store
+/_site/
+/.quarto/

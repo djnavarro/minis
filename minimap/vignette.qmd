@@ -1,0 +1,75 @@
+---
+title: "minimap"
+---
+
+```{r}
+#| include: false
+source(file.path("minimap", "minimap.R"))
+```
+
+`minimap` provides `purrr`-style mapping functions -- `mmap_map()`,
+`mmap_map2()`, `mmap_imap()`, `mmap_walk()`, `mmap_iwalk()`, and the
+type-stable `mmap_map_dbl()`/`mmap_map_lgl()`/`mmap_map_chr()` -- built
+entirely on `lapply()`/`vapply()`. See the
+[README](https://github.com/djnavarro/minis/tree/main/minimap) for the
+full API reference and scope notes; this page walks through each in
+action.
+
+## `mmap_map()`
+
+Applies a function to each element of a list or vector, always
+returning a list, with names preserved:
+
+```{r}
+mmap_map(1:3, function(x) x + 1)
+```
+
+```{r}
+mmap_map(c(a = 1, b = 2), function(x) x * 10)
+```
+
+## Type-stable variants
+
+`mmap_map_dbl()`, `mmap_map_lgl()`, and `mmap_map_chr()` return an
+atomic vector instead of a list, erroring if `.f` doesn't return a
+length-1 value of the expected type for every element:
+
+```{r}
+mmap_map_dbl(1:3, function(x) x + 1)
+```
+
+```{r}
+mmap_map_lgl(1:5, function(x) x %% 2 == 0)
+```
+
+```{r}
+#| error: true
+mmap_map_dbl(1:3, function(x) c(x, x))
+```
+
+## `mmap_map2()` and `mmap_imap()`
+
+`mmap_map2()` walks two same-length vectors in parallel:
+
+```{r}
+mmap_map2(1:3, 4:6, function(x, y) x + y)
+```
+
+`mmap_imap()` walks a named vector together with its names, passing
+`.f` the element then its name:
+
+```{r}
+mmap_imap(c(a = 1, b = 2), function(val, name) paste0(name, "=", val))
+```
+
+## `mmap_walk()` and `mmap_iwalk()`
+
+Both run `.f` for its side effects only, returning `.x` invisibly:
+
+```{r}
+mmap_walk(1:3, function(x) cat("value:", x, "\n"))
+```
+
+```{r}
+mmap_iwalk(c(a = 1, b = 2), function(val, name) cat(name, "->", val, "\n"))
+```

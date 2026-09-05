@@ -131,6 +131,66 @@ it maps directly onto base R's own name for this subsystem ("the
 condition system"), rather than either of the two narrower verbs
 (throw/signal) that undersell the warn/inform half of the API.
 
+## Optional vignettes and the minis site: README vs. vignette split
+
+Considered making every mini's `README.md` an `.Rmd`/`.qmd` that knits
+to `README.md`, so code examples would be executed and verified
+instead of hand-typed. Rejected: it makes the mandatory, zero-tooling
+GitHub-facing doc require a knit step before every commit (with a new
+"did you forget to re-knit" CI failure mode), for every mini, just to
+add a mini at all -- too large a burden increase for the benefit, and
+several existing READMEs (e.g. `minitrap`, `minimap`) already showed
+that hand-typed `#>` output can drift silently, which is the actual
+problem worth solving.
+
+Chose instead: keep `README.md` plain and mandatory (unchanged), and
+add a wholly optional `<mini>/vignette.qmd` that gets executed and
+rendered into a small Quarto website. The two docs are deliberately
+complementary rather than duplicates: the README stays the terse
+reference (API table, scope notes, install instructions); the vignette
+is the executed, worked-example walkthrough, and is the one guaranteed
+to still be true after a render since its code actually runs. Adding a
+mini's vignette is a separate, later, per-mini step -- it never gates
+"Adding a new mini".
+
+Scaffolded as: `_quarto.yml` (website project) + `index.qmd` (front
+page listing every mini, linking to the rendered vignette when one
+exists and to the GitHub README otherwise) + `.github/workflows/
+site.yaml` (renders and publishes to GitHub Pages) + a committed
+`_freeze/` cache (so unchanged vignettes aren't re-executed every
+render, and non-R environments can still `quarto render`). Piloted on
+one mini (`minitrap/vignette.qmd`) before deciding whether/how to
+retrofit the rest.
+
+One real bug surfaced while testing this end to end: Quarto website
+projects render every `.qmd`/`.md` under the project root by default,
+which was silently pulling `AGENTS.md` and `.agents/*.md` into the
+rendered site as pages. Fixed by giving `_quarto.yml`'s
+`project.render` an explicit list (`index.qmd`, `*/vignette.qmd`)
+rather than relying on the default "render everything" behaviour.
+
+## Pretty per-mini URLs without renaming `vignette.qmd`
+
+Once the site existed, `<mini>/vignette.qmd` rendered to
+`<mini>/vignette.html`, giving URLs like `baseurl/minitrap/vignette.html`
+rather than the tidier `baseurl/minitrap/`. The obvious fix -- rename
+each mini's vignette source file to `<mini>/index.qmd` -- was
+considered and rejected: every mini folder would then contain both
+`README.md` and `index.qmd` side by side, and it's not obvious at a
+glance which one is "the" index without already knowing the Quarto
+convention, especially since `README.md` already plays that role for
+GitHub.
+
+Verified experimentally that Quarto's per-format `output-file` option
+solves this without a rename: setting `format.html.output-file: index`
+project-wide in `_quarto.yml` makes every rendered page (the vignettes,
+and the already-named-index root page) emit as `index.html` in its own
+output directory, giving `baseurl/<mini>/` for free. Note the value
+must be `index`, not `index.html` -- passing an extension raises
+`Invalid value for 'output-file': paths are not allowed`. Source files
+keep their self-documenting `vignette.qmd` name; only the rendered
+output path changes.
+
 ## Repository setup and publication
 
 Scaffolded as a plain git repo (not an R package -- no `DESCRIPTION`,

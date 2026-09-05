@@ -1,0 +1,29 @@
+project:
+  type: website
+  output-dir: _site
+  execute-dir: project
+  render:
+    - index.qmd
+    - "*/vignette.qmd"
+
+execute:
+  freeze: auto
+
+website:
+  title: "minis"
+  description: >
+    Small, standalone, zero-runtime-dependency R components, each
+    shipped as a single copy-and-paste .R file.
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+    right:
+      - icon: github
+        href: https://github.com/djnavarro/minis
+
+format:
+  html:
+    theme: cosmo
+    toc: false
+    output-file: index

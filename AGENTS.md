@@ -29,10 +29,15 @@ minis/
   README.md                     # Philosophy, index of minis, usage instructions
   LICENSE                       # MIT
   run_tests.R                   # Runs every mini's tests/testthat/ suite; exits non-zero on failure
+  _quarto.yml                   # Site config for the optional minis Quarto site (see below)
+  index.qmd                     # Site front page: philosophy blurb + mini index, linking to READMEs/vignettes
+  _freeze/                      # Committed Quarto render cache (see "Vignettes and the minis site")
   .github/workflows/test.yaml   # CI: installs testthat+withr, runs run_tests.R
+  .github/workflows/site.yaml   # CI: renders the Quarto site and publishes it to GitHub Pages
   <mini>/
     <mini>.R                    # The single, zero-dependency source file
     README.md                   # What it does, scope, deliberate fixes/restrictions vs. the source it's adapted from
+    vignette.qmd                # OPTIONAL: executed worked-example page rendered into the minis site
     tests/
       testthat/
         test-<mini>.R           # testthat tests; source the mini via testthat::test_path("..", "..", "<mini>.R")
@@ -78,6 +83,56 @@ minis/
 |---|---|
 | Run every mini's tests | `Rscript run_tests.R` (from repo root; requires `testthat`, `withr`) |
 | Run one mini's tests | `testthat::test_dir("<mini>/tests/testthat")` from R |
+
+### Vignettes and the minis site
+
+Every mini's `README.md` is mandatory and renders as plain markdown on
+GitHub with no build step -- that stays true regardless of anything
+below. Separately, a mini **may** also have a `<mini>/vignette.qmd`:
+an executed, worked-example page that gets rendered into a small
+Quarto website (`_quarto.yml`/`index.qmd` at the repo root) and
+published to GitHub Pages by `.github/workflows/site.yaml`.
+
+- **Optional and additive.** Adding a mini never requires a vignette;
+  see "Adding a new mini" below, which is unchanged. Retrofit vignettes
+  onto existing minis independently, one at a time.
+- **Complementary to the README, not a duplicate of it.** The README
+  stays the terse reference (API table, scope notes, install
+  instructions). The vignette is the executed narrative walkthrough --
+  if the two disagree, the vignette's *executed* code is the one that's
+  guaranteed to still be true; the README's prose is not automatically
+  checked.
+- **Sourcing convention.** A vignette sources its mini the same way
+  tests do, but relative to the repo root (the project's
+  `execute-dir: project` setting in `_quarto.yml` guarantees this
+  resolves correctly regardless of which page triggered the render):
+  ```r
+  source(file.path("<mini>", "<mini>.R"))
+  ```
+- **Pretty URLs without renaming the source file.** `_quarto.yml` sets
+  `format.html.output-file: index` project-wide, so every rendered
+  `<mini>/vignette.qmd` produces `<mini>/index.html` and is reachable
+  at `baseurl/<mini>/` -- while the source file keeps the
+  self-documenting `vignette.qmd` name (as opposed to naming the source
+  file itself `<mini>/index.qmd`, which would read ambiguously next to
+  `<mini>/README.md`).
+- **Site scope is explicit.** `_quarto.yml`'s `project.render` list
+  (`index.qmd` plus `*/vignette.qmd`) is deliberately narrow -- Quarto
+  website projects render every `.qmd`/`.md` file under the project
+  root by default, which would otherwise pull in `AGENTS.md` and the
+  `.agents/` files as site pages. Any new top-level `.qmd` intended for
+  the site must be added to that list explicitly.
+- **`index.qmd`** lists every mini, linking to the rendered vignette
+  page when one exists and to the GitHub README otherwise. Keep both
+  the root `README.md` table and `index.qmd`'s table in sync when
+  adding a mini.
+- **`_freeze/`** is Quarto's render cache and is committed (not
+  gitignored) so that unchanged vignettes aren't re-executed on every
+  render, and so `quarto render` doesn't require R for unchanged pages.
+  Re-render (`quarto render`) after editing a `vignette.qmd` or its
+  mini's `.R` file, and commit the resulting `_freeze/` changes
+  alongside.
+- Local preview: `quarto preview` from the repo root.
 
 ### Adding a new mini
 

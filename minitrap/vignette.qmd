@@ -1,0 +1,53 @@
+---
+title: "minitrap"
+---
+
+```{r}
+#| include: false
+source(file.path("minitrap", "minitrap.R"))
+```
+
+`minitrap` provides two `purrr`-style function adverbs, `mtrap_safely()`
+and `mtrap_quietly()`, that trap errors or console output instead of
+letting them reach the console. See the
+[README](https://github.com/djnavarro/minis/tree/main/minitrap) for the
+full API reference and scope notes; this page walks through both in
+action.
+
+## `mtrap_safely()`
+
+Wrap a function so a call that would normally error instead returns a
+list with the error captured alongside a `NULL` result:
+
+```{r}
+safe_log <- mtrap_safely(log)
+safe_log(-1)
+```
+
+A successful call returns the result with `error` set to `NULL`:
+
+```{r}
+safe_log(10)
+```
+
+## `mtrap_quietly()`
+
+Wrap a function so printed output, warnings, and messages are captured
+instead of shown:
+
+```{r}
+quiet_fn <- mtrap_quietly(function() {
+  message("starting")
+  warning("using a default")
+  42
+})
+quiet_fn()
+```
+
+`mtrap_quietly()` does not catch errors -- compose with
+`mtrap_safely()` for that:
+
+```{r}
+robust_fn <- mtrap_safely(mtrap_quietly(function() stop("boom")))
+robust_fn()
+```

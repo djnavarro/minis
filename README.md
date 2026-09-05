@@ -31,6 +31,11 @@ relevant mini and copy it straight into `R/`.
   suite that lives in *this* repo for development purposes. Consumers of
   a mini just take the single source file — the tests use `testthat` and
   `withr` as dev dependencies of this repo only.
+- **Vignettes are optional, READMEs are not.** A mini may also have a
+  `vignette.qmd`, an executed worked-example page rendered into the
+  [minis site](https://djnavarro.github.io/minis/) (once published).
+  It's purely additive — the plain README above is what every mini is
+  required to have.
 
 ## Available minis
 
