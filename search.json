@@ -21,46 +21,123 @@
     "text": "mtrap_quietly()\nWrap a function so printed output, warnings, and messages are captured instead of shown:\n\nquiet_fn &lt;- mtrap_quietly(function() {\n  message(\"starting\")\n  warning(\"using a default\")\n  42\n})\nquiet_fn()\n\n$result\n[1] 42\n\n$output\n[1] \"\"\n\n$warnings\n[1] \"using a default\"\n\n$messages\n[1] \"starting\\n\"\n\n\nmtrap_quietly() does not catch errors – compose with mtrap_safely() for that:\n\nrobust_fn &lt;- mtrap_safely(mtrap_quietly(function() stop(\"boom\")))\nrobust_fn()\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): boom&gt;"
   },
   {
-    "objectID": "minijoin/index.html",
-    "href": "minijoin/index.html",
-    "title": "minijoin",
+    "objectID": "minimap/index.html",
+    "href": "minimap/index.html",
+    "title": "minimap",
     "section": "",
-    "text": "minijoin provides four mutating joins – mjoin_inner_join()/_left_join()/_right_join()/_full_join() – built on base merge(). See the README for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap.\nbands &lt;- data.frame(\n  band = c(\"Beatles\", \"Rolling Stones\", \"Kinks\"),\n  founded = c(1960, 1962, 1963)\n)\nalbums &lt;- data.frame(\n  band = c(\"Beatles\", \"Kinks\", \"Queen\"),\n  album = c(\"Abbey Road\", \"Arthur\", \"A Night at the Opera\")\n)\nbands\n\n            band founded\n1        Beatles    1960\n2 Rolling Stones    1962\n3          Kinks    1963\n\nalbums\n\n     band                album\n1 Beatles           Abbey Road\n2   Kinks               Arthur\n3   Queen A Night at the Opera\nbands and albums share \"Beatles\" and \"Kinks\"; \"Rolling Stones\" exists only in bands, and \"Queen\" only in albums."
+    "text": "minimap provides purrr-style mapping functions – mmap_map(), mmap_map2(), mmap_imap(), mmap_walk(), mmap_iwalk(), and the type-stable mmap_map_dbl()/mmap_map_lgl()/mmap_map_chr() – built entirely on lapply()/vapply(). See the README for the full API reference and scope notes; this page walks through each in action."
   },
   {
-    "objectID": "minijoin/index.html#inner-join-only-rows-matching-in-both",
-    "href": "minijoin/index.html#inner-join-only-rows-matching-in-both",
-    "title": "minijoin",
-    "section": "Inner join: only rows matching in both",
-    "text": "Inner join: only rows matching in both\n\nmjoin_inner_join(bands, albums, by = \"band\")\n\n     band founded      album\n1 Beatles    1960 Abbey Road\n2   Kinks    1963     Arthur"
+    "objectID": "minimap/index.html#mmap_map",
+    "href": "minimap/index.html#mmap_map",
+    "title": "minimap",
+    "section": "mmap_map()",
+    "text": "mmap_map()\nApplies a function to each element of a list or vector, always returning a list, with names preserved:\n\nmmap_map(1:3, function(x) x + 1)\n\n[[1]]\n[1] 2\n\n[[2]]\n[1] 3\n\n[[3]]\n[1] 4\n\n\n\nmmap_map(c(a = 1, b = 2), function(x) x * 10)\n\n$a\n[1] 10\n\n$b\n[1] 20"
   },
   {
-    "objectID": "minijoin/index.html#left-join-all-rows-of-x-bands",
-    "href": "minijoin/index.html#left-join-all-rows-of-x-bands",
-    "title": "minijoin",
-    "section": "Left join: all rows of x (bands)",
-    "text": "Left join: all rows of x (bands)\n\"Rolling Stones\" is kept, with NA for album:\n\nmjoin_left_join(bands, albums, by = \"band\")\n\n            band founded      album\n1        Beatles    1960 Abbey Road\n2 Rolling Stones    1962       &lt;NA&gt;\n3          Kinks    1963     Arthur"
+    "objectID": "minimap/index.html#type-stable-variants",
+    "href": "minimap/index.html#type-stable-variants",
+    "title": "minimap",
+    "section": "Type-stable variants",
+    "text": "Type-stable variants\nmmap_map_dbl(), mmap_map_lgl(), and mmap_map_chr() return an atomic vector instead of a list, erroring if .f doesn’t return a length-1 value of the expected type for every element:\n\nmmap_map_dbl(1:3, function(x) x + 1)\n\n[1] 2 3 4\n\n\n\nmmap_map_lgl(1:5, function(x) x %% 2 == 0)\n\n[1] FALSE  TRUE FALSE  TRUE FALSE\n\n\n\nmmap_map_dbl(1:3, function(x) c(x, x))\n\nError in `vapply()`:\n! values must be length 1,\n but FUN(X[[1]]) result is length 2"
   },
   {
-    "objectID": "minijoin/index.html#right-join-all-rows-of-y-albums",
-    "href": "minijoin/index.html#right-join-all-rows-of-y-albums",
-    "title": "minijoin",
-    "section": "Right join: all rows of y (albums)",
-    "text": "Right join: all rows of y (albums)\n\"Queen\" is kept, with NA for founded. Note the row order: matched rows still come first, in bands’ original order, with the unmatched-in-x row (\"Queen\") appended at the end – minijoin always restores x’s original row order for matched rows, rather than y’s:\n\nmjoin_right_join(bands, albums, by = \"band\")\n\n     band founded                album\n1 Beatles    1960           Abbey Road\n2   Kinks    1963               Arthur\n3   Queen      NA A Night at the Opera"
+    "objectID": "minimap/index.html#mmap_map2-and-mmap_imap",
+    "href": "minimap/index.html#mmap_map2-and-mmap_imap",
+    "title": "minimap",
+    "section": "mmap_map2() and mmap_imap()",
+    "text": "mmap_map2() and mmap_imap()\nmmap_map2() walks two same-length vectors in parallel:\n\nmmap_map2(1:3, 4:6, function(x, y) x + y)\n\n[[1]]\n[1] 5\n\n[[2]]\n[1] 7\n\n[[3]]\n[1] 9\n\n\nmmap_imap() walks a named vector together with its names, passing .f the element then its name:\n\nmmap_imap(c(a = 1, b = 2), function(val, name) paste0(name, \"=\", val))\n\n$a\n[1] \"a=1\"\n\n$b\n[1] \"b=2\""
   },
   {
-    "objectID": "minijoin/index.html#full-join-all-rows-of-both",
-    "href": "minijoin/index.html#full-join-all-rows-of-both",
-    "title": "minijoin",
-    "section": "Full join: all rows of both",
-    "text": "Full join: all rows of both\nBoth \"Rolling Stones\" and \"Queen\" are kept, each with an NA in the column they don’t have a match for:\n\nmjoin_full_join(bands, albums, by = \"band\")\n\n            band founded                album\n1        Beatles    1960           Abbey Road\n2 Rolling Stones    1962                 &lt;NA&gt;\n3          Kinks    1963               Arthur\n4          Queen      NA A Night at the Opera"
+    "objectID": "minimap/index.html#mmap_walk-and-mmap_iwalk",
+    "href": "minimap/index.html#mmap_walk-and-mmap_iwalk",
+    "title": "minimap",
+    "section": "mmap_walk() and mmap_iwalk()",
+    "text": "mmap_walk() and mmap_iwalk()\nBoth run .f for its side effects only, returning .x invisibly:\n\nmmap_walk(1:3, function(x) cat(\"value:\", x, \"\\n\"))\n\nvalue: 1 \nvalue: 2 \nvalue: 3 \n\n\n\nmmap_iwalk(c(a = 1, b = 2), function(val, name) cat(name, \"-&gt;\", val, \"\\n\"))\n\na -&gt; 1 \nb -&gt; 2"
   },
   {
-    "objectID": "minijoin/index.html#by-is-always-explicit",
-    "href": "minijoin/index.html#by-is-always-explicit",
-    "title": "minijoin",
-    "section": "by is always explicit",
-    "text": "by is always explicit\nUnlike dplyr, there’s no auto-detection of shared column names – by must always be supplied. This is a deliberate simplification, not an oversight, to avoid a class of silent bugs from an unintended shared column name."
+    "objectID": "minifilter/index.html",
+    "href": "minifilter/index.html",
+    "title": "minifilter",
+    "section": "",
+    "text": "minifilter provides a single function, mfilter_filter(), a minimal reimplementation of dplyr::filter(): it keeps rows of a data frame where all of a set of unquoted conditions are TRUE. See the README for scope notes; this page walks through its behaviour on a small toy data frame.\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#a-single-condition",
+    "href": "minifilter/index.html#a-single-condition",
+    "title": "minifilter",
+    "section": "A single condition",
+    "text": "A single condition\nColumns are referred to by bare name, evaluated in the scope of the data frame:\n\nmfilter_filter(fruits, in_stock)\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#multiple-conditions-combine-with-and",
+    "href": "minifilter/index.html#multiple-conditions-combine-with-and",
+    "title": "minifilter",
+    "section": "Multiple conditions combine with AND",
+    "text": "Multiple conditions combine with AND\nPassing more than one condition is equivalent to combining them with &:\n\nmfilter_filter(fruits, in_stock, price &lt; 4)\n\n    name price in_stock\n1  apple   1.2     TRUE\n2 banana   0.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#na-conditions-drop-the-row",
+    "href": "minifilter/index.html#na-conditions-drop-the-row",
+    "title": "minifilter",
+    "section": "NA conditions drop the row",
+    "text": "NA conditions drop the row\ndate has a missing price, so any condition involving price is NA for that row rather than TRUE/FALSE – and mfilter_filter() drops it, matching dplyr::filter()’s treatment of NA as “not kept”:\n\nmfilter_filter(fruits, price &gt; 1)\n\n        name price in_stock\n1      apple   1.2     TRUE\n3     cherry   3.0    FALSE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
+    "href": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
+    "title": "minifilter",
+    "section": "No conditions returns the data frame unchanged",
+    "text": "No conditions returns the data frame unchanged\n\nidentical(mfilter_filter(fruits), fruits)\n\n[1] TRUE\n\n\nThis is a deliberate fix relative to the poorman logic minifilter was adapted from, which didn’t guard against empty ... and would have silently dropped every row instead – see the README for details."
+  },
+  {
+    "objectID": "minicase/index.html",
+    "href": "minicase/index.html",
+    "title": "minicase",
+    "section": "",
+    "text": "minicase provides a single function, mcase_case_when(), a minimal reimplementation of dplyr::case_when(): vectorised if/else across a sequence of condition ~ value formulas, first match wins. See the README for scope notes; this page walks through it on the same toy fruits data frame used in the minifilter vignette.\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
+    "href": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
+    "title": "minicase",
+    "section": "No data-masking: reference columns with $, or wrap in with()",
+    "text": "No data-masking: reference columns with $, or wrap in with()\nUnlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\""
+  },
+  {
+    "objectID": "minicase/index.html#first-match-wins",
+    "href": "minicase/index.html#first-match-wins",
+    "title": "minicase",
+    "section": "First match wins",
+    "text": "First match wins\ncherry (price 3.00) fails price &lt; 3 but matches price &gt;= 3; formulas are checked in order, and the first TRUE condition for each position determines its value even if a later condition would also match."
+  },
+  {
+    "objectID": "minicase/index.html#unmatched-positions-are-na",
+    "href": "minicase/index.html#unmatched-positions-are-na",
+    "title": "minicase",
+    "section": "Unmatched positions are NA",
+    "text": "Unmatched positions are NA\ndate has a missing price, so every condition above evaluates to NA for that row, and date itself gets NA in the result – there’s no condition it definitively satisfies. Add a TRUE ~ ... formula at the end as a catch-all default, the same way you would in dplyr:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1  ~ \"cheap\",\n  price &lt; 3  ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\""
+  },
+  {
+    "objectID": "minicase/index.html#scope-no-.default.ptype.size",
+    "href": "minicase/index.html#scope-no-.default.ptype.size",
+    "title": "minicase",
+    "section": "Scope: no .default/.ptype/.size",
+    "text": "Scope: no .default/.ptype/.size\nThat trailing TRUE ~ \"unknown\" formula is the idiomatic way to get a default in both dplyr::case_when() and mcase_case_when() – minicase just doesn’t implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "minis",
+    "section": "",
+    "text": "A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into R/.\nSee the repository README for the full philosophy and usage instructions. This site collects worked-example vignettes for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README."
+  },
+  {
+    "objectID": "index.html#available-minis",
+    "href": "index.html#available-minis",
+    "title": "minis",
+    "section": "Available minis",
+    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nVignette\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nVignette\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
   },
   {
     "objectID": "minicli/index.html",
@@ -105,122 +182,87 @@
     "text": "Colours and styles\nmcli_col_*()/mcli_style_*() wrap text in an ANSI code, and are no-ops (returning the text unchanged) whenever ANSI is disabled – which, per the note above, is always true on this page:\n\nidentical(mcli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(mcli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "minis",
+    "objectID": "minijoin/index.html",
+    "href": "minijoin/index.html",
+    "title": "minijoin",
     "section": "",
-    "text": "A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into R/.\nSee the repository README for the full philosophy and usage instructions. This site collects worked-example vignettes for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README."
+    "text": "minijoin provides four mutating joins – mjoin_inner_join()/_left_join()/_right_join()/_full_join() – built on base merge(). See the README for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap.\nbands &lt;- data.frame(\n  band = c(\"Beatles\", \"Rolling Stones\", \"Kinks\"),\n  founded = c(1960, 1962, 1963)\n)\nalbums &lt;- data.frame(\n  band = c(\"Beatles\", \"Kinks\", \"Queen\"),\n  album = c(\"Abbey Road\", \"Arthur\", \"A Night at the Opera\")\n)\nbands\n\n            band founded\n1        Beatles    1960\n2 Rolling Stones    1962\n3          Kinks    1963\n\nalbums\n\n     band                album\n1 Beatles           Abbey Road\n2   Kinks               Arthur\n3   Queen A Night at the Opera\nbands and albums share \"Beatles\" and \"Kinks\"; \"Rolling Stones\" exists only in bands, and \"Queen\" only in albums."
   },
   {
-    "objectID": "index.html#available-minis",
-    "href": "index.html#available-minis",
-    "title": "minis",
-    "section": "Available minis",
-    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nVignette\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
+    "objectID": "minijoin/index.html#inner-join-only-rows-matching-in-both",
+    "href": "minijoin/index.html#inner-join-only-rows-matching-in-both",
+    "title": "minijoin",
+    "section": "Inner join: only rows matching in both",
+    "text": "Inner join: only rows matching in both\n\nmjoin_inner_join(bands, albums, by = \"band\")\n\n     band founded      album\n1 Beatles    1960 Abbey Road\n2   Kinks    1963     Arthur"
   },
   {
-    "objectID": "minicase/index.html",
-    "href": "minicase/index.html",
-    "title": "minicase",
+    "objectID": "minijoin/index.html#left-join-all-rows-of-x-bands",
+    "href": "minijoin/index.html#left-join-all-rows-of-x-bands",
+    "title": "minijoin",
+    "section": "Left join: all rows of x (bands)",
+    "text": "Left join: all rows of x (bands)\n\"Rolling Stones\" is kept, with NA for album:\n\nmjoin_left_join(bands, albums, by = \"band\")\n\n            band founded      album\n1        Beatles    1960 Abbey Road\n2 Rolling Stones    1962       &lt;NA&gt;\n3          Kinks    1963     Arthur"
+  },
+  {
+    "objectID": "minijoin/index.html#right-join-all-rows-of-y-albums",
+    "href": "minijoin/index.html#right-join-all-rows-of-y-albums",
+    "title": "minijoin",
+    "section": "Right join: all rows of y (albums)",
+    "text": "Right join: all rows of y (albums)\n\"Queen\" is kept, with NA for founded. Note the row order: matched rows still come first, in bands’ original order, with the unmatched-in-x row (\"Queen\") appended at the end – minijoin always restores x’s original row order for matched rows, rather than y’s:\n\nmjoin_right_join(bands, albums, by = \"band\")\n\n     band founded                album\n1 Beatles    1960           Abbey Road\n2   Kinks    1963               Arthur\n3   Queen      NA A Night at the Opera"
+  },
+  {
+    "objectID": "minijoin/index.html#full-join-all-rows-of-both",
+    "href": "minijoin/index.html#full-join-all-rows-of-both",
+    "title": "minijoin",
+    "section": "Full join: all rows of both",
+    "text": "Full join: all rows of both\nBoth \"Rolling Stones\" and \"Queen\" are kept, each with an NA in the column they don’t have a match for:\n\nmjoin_full_join(bands, albums, by = \"band\")\n\n            band founded                album\n1        Beatles    1960           Abbey Road\n2 Rolling Stones    1962                 &lt;NA&gt;\n3          Kinks    1963               Arthur\n4          Queen      NA A Night at the Opera"
+  },
+  {
+    "objectID": "minijoin/index.html#by-is-always-explicit",
+    "href": "minijoin/index.html#by-is-always-explicit",
+    "title": "minijoin",
+    "section": "by is always explicit",
+    "text": "by is always explicit\nUnlike dplyr, there’s no auto-detection of shared column names – by must always be supplied. This is a deliberate simplification, not an oversight, to avoid a class of silent bugs from an unintended shared column name."
+  },
+  {
+    "objectID": "minitable/index.html",
+    "href": "minitable/index.html",
+    "title": "minitable",
     "section": "",
-    "text": "minicase provides a single function, mcase_case_when(), a minimal reimplementation of dplyr::case_when(): vectorised if/else across a sequence of condition ~ value formulas, first match wins. See the README for scope notes; this page walks through it on the same toy fruits data frame used in the minifilter vignette.\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+    "text": "minitable provides a few tibble-style construction/coercion helpers – mtable_tibble(), mtable_as_tibble(), mtable_rownames_to_column(), mtable_add_row() – built entirely on data.frame()/as.data.frame(). Results are plain data frames, not tibbles. See the README for the full scope notes; this page walks through each function, including the cross-column-reference behaviour that took real rework to get right (see .agents/HISTORY.md in the repository for the bug that surfaced along the way)."
   },
   {
-    "objectID": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
-    "href": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
-    "title": "minicase",
-    "section": "No data-masking: reference columns with $, or wrap in with()",
-    "text": "No data-masking: reference columns with $, or wrap in with()\nUnlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\""
+    "objectID": "minitable/index.html#mtable_tibble-sequential-cross-referencing-construction",
+    "href": "minitable/index.html#mtable_tibble-sequential-cross-referencing-construction",
+    "title": "minitable",
+    "section": "mtable_tibble(): sequential, cross-referencing construction",
+    "text": "mtable_tibble(): sequential, cross-referencing construction\nLike tibble::tibble(), later columns can refer to earlier ones by name – each column is evaluated in order, in an environment built from the columns already constructed:\n\nmtable_tibble(a = 1:3, b = a * 2, c = a + b)\n\n  a b c\n1 1 2 3\n2 2 4 6\n3 3 6 9\n\n\nThis only works because the sequential-evaluation logic lives directly inside mtable_tibble() itself, rather than in a shared helper that ... gets forwarded through – forwarding ... turns each argument into an opaque ..1/..2 pronoun that resolves free variables against the caller’s environment instead of the custom one being built up column by column, silently breaking exactly this feature."
   },
   {
-    "objectID": "minicase/index.html#first-match-wins",
-    "href": "minicase/index.html#first-match-wins",
-    "title": "minicase",
-    "section": "First match wins",
-    "text": "First match wins\ncherry (price 3.00) fails price &lt; 3 but matches price &gt;= 3; formulas are checked in order, and the first TRUE condition for each position determines its value even if a later condition would also match."
+    "objectID": "minitable/index.html#unnamed-arguments-are-named-after-their-deparsed-expression",
+    "href": "minitable/index.html#unnamed-arguments-are-named-after-their-deparsed-expression",
+    "title": "minitable",
+    "section": "Unnamed arguments are named after their deparsed expression",
+    "text": "Unnamed arguments are named after their deparsed expression\nJust as in tibble::tibble(), an argument with no name = is named after its own source expression:\n\nmtable_tibble(1:3, sqrt(1:3))\n\n  1:3 sqrt(1:3)\n1   1  1.000000\n2   2  1.414214\n3   3  1.732051"
   },
   {
-    "objectID": "minicase/index.html#unmatched-positions-are-na",
-    "href": "minicase/index.html#unmatched-positions-are-na",
-    "title": "minicase",
-    "section": "Unmatched positions are NA",
-    "text": "Unmatched positions are NA\ndate has a missing price, so every condition above evaluates to NA for that row, and date itself gets NA in the result – there’s no condition it definitively satisfies. Add a TRUE ~ ... formula at the end as a catch-all default, the same way you would in dplyr:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1  ~ \"cheap\",\n  price &lt; 3  ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\""
+    "objectID": "minitable/index.html#mtable_as_tibble-coercion-only",
+    "href": "minitable/index.html#mtable_as_tibble-coercion-only",
+    "title": "minitable",
+    "section": "mtable_as_tibble(): coercion only",
+    "text": "mtable_as_tibble(): coercion only\nThere’s no tibble class or special printing here – it’s just as.data.frame() with check.names = FALSE (so literal, non-syntactic column names survive):\n\nmtable_as_tibble(list(a = 1:2, b = c(\"x\", \"y\")))\n\n  a b\n1 1 x\n2 2 y"
   },
   {
-    "objectID": "minicase/index.html#scope-no-.default.ptype.size",
-    "href": "minicase/index.html#scope-no-.default.ptype.size",
-    "title": "minicase",
-    "section": "Scope: no .default/.ptype/.size",
-    "text": "Scope: no .default/.ptype/.size\nThat trailing TRUE ~ \"unknown\" formula is the idiomatic way to get a default in both dplyr::case_when() and mcase_case_when() – minicase just doesn’t implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing."
+    "objectID": "minitable/index.html#mtable_rownames_to_column-no-op-on-default-row-names",
+    "href": "minitable/index.html#mtable_rownames_to_column-no-op-on-default-row-names",
+    "title": "minitable",
+    "section": "mtable_rownames_to_column(): no-op on default row names",
+    "text": "mtable_rownames_to_column(): no-op on default row names\nA data frame with only the default sequential row names (\"1\", \"2\", …) is returned unchanged – there’s nothing meaningful to move into a column:\n\nidentical(\n  mtable_rownames_to_column(data.frame(x = 1:3), var = \"id\"),\n  data.frame(x = 1:3)\n)\n\n[1] TRUE\n\n\nReal (non-default) row names do get moved into a new column:\n\nmtable_rownames_to_column(head(mtcars, 3), var = \"model\")\n\n          model  mpg cyl disp  hp drat    wt  qsec vs am gear carb\n1     Mazda RX4 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4\n2 Mazda RX4 Wag 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4\n3    Datsun 710 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1"
   },
   {
-    "objectID": "minifilter/index.html",
-    "href": "minifilter/index.html",
-    "title": "minifilter",
-    "section": "",
-    "text": "minifilter provides a single function, mfilter_filter(), a minimal reimplementation of dplyr::filter(): it keeps rows of a data frame where all of a set of unquoted conditions are TRUE. See the README for scope notes; this page walks through its behaviour on a small toy data frame.\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
-  },
-  {
-    "objectID": "minifilter/index.html#a-single-condition",
-    "href": "minifilter/index.html#a-single-condition",
-    "title": "minifilter",
-    "section": "A single condition",
-    "text": "A single condition\nColumns are referred to by bare name, evaluated in the scope of the data frame:\n\nmfilter_filter(fruits, in_stock)\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
-  },
-  {
-    "objectID": "minifilter/index.html#multiple-conditions-combine-with-and",
-    "href": "minifilter/index.html#multiple-conditions-combine-with-and",
-    "title": "minifilter",
-    "section": "Multiple conditions combine with AND",
-    "text": "Multiple conditions combine with AND\nPassing more than one condition is equivalent to combining them with &:\n\nmfilter_filter(fruits, in_stock, price &lt; 4)\n\n    name price in_stock\n1  apple   1.2     TRUE\n2 banana   0.5     TRUE"
-  },
-  {
-    "objectID": "minifilter/index.html#na-conditions-drop-the-row",
-    "href": "minifilter/index.html#na-conditions-drop-the-row",
-    "title": "minifilter",
-    "section": "NA conditions drop the row",
-    "text": "NA conditions drop the row\ndate has a missing price, so any condition involving price is NA for that row rather than TRUE/FALSE – and mfilter_filter() drops it, matching dplyr::filter()’s treatment of NA as “not kept”:\n\nmfilter_filter(fruits, price &gt; 1)\n\n        name price in_stock\n1      apple   1.2     TRUE\n3     cherry   3.0    FALSE\n5 elderberry   4.5     TRUE"
-  },
-  {
-    "objectID": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
-    "href": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
-    "title": "minifilter",
-    "section": "No conditions returns the data frame unchanged",
-    "text": "No conditions returns the data frame unchanged\n\nidentical(mfilter_filter(fruits), fruits)\n\n[1] TRUE\n\n\nThis is a deliberate fix relative to the poorman logic minifilter was adapted from, which didn’t guard against empty ... and would have silently dropped every row instead – see the README for details."
-  },
-  {
-    "objectID": "minimap/index.html",
-    "href": "minimap/index.html",
-    "title": "minimap",
-    "section": "",
-    "text": "minimap provides purrr-style mapping functions – mmap_map(), mmap_map2(), mmap_imap(), mmap_walk(), mmap_iwalk(), and the type-stable mmap_map_dbl()/mmap_map_lgl()/mmap_map_chr() – built entirely on lapply()/vapply(). See the README for the full API reference and scope notes; this page walks through each in action."
-  },
-  {
-    "objectID": "minimap/index.html#mmap_map",
-    "href": "minimap/index.html#mmap_map",
-    "title": "minimap",
-    "section": "mmap_map()",
-    "text": "mmap_map()\nApplies a function to each element of a list or vector, always returning a list, with names preserved:\n\nmmap_map(1:3, function(x) x + 1)\n\n[[1]]\n[1] 2\n\n[[2]]\n[1] 3\n\n[[3]]\n[1] 4\n\n\n\nmmap_map(c(a = 1, b = 2), function(x) x * 10)\n\n$a\n[1] 10\n\n$b\n[1] 20"
-  },
-  {
-    "objectID": "minimap/index.html#type-stable-variants",
-    "href": "minimap/index.html#type-stable-variants",
-    "title": "minimap",
-    "section": "Type-stable variants",
-    "text": "Type-stable variants\nmmap_map_dbl(), mmap_map_lgl(), and mmap_map_chr() return an atomic vector instead of a list, erroring if .f doesn’t return a length-1 value of the expected type for every element:\n\nmmap_map_dbl(1:3, function(x) x + 1)\n\n[1] 2 3 4\n\n\n\nmmap_map_lgl(1:5, function(x) x %% 2 == 0)\n\n[1] FALSE  TRUE FALSE  TRUE FALSE\n\n\n\nmmap_map_dbl(1:3, function(x) c(x, x))\n\nError in `vapply()`:\n! values must be length 1,\n but FUN(X[[1]]) result is length 2"
-  },
-  {
-    "objectID": "minimap/index.html#mmap_map2-and-mmap_imap",
-    "href": "minimap/index.html#mmap_map2-and-mmap_imap",
-    "title": "minimap",
-    "section": "mmap_map2() and mmap_imap()",
-    "text": "mmap_map2() and mmap_imap()\nmmap_map2() walks two same-length vectors in parallel:\n\nmmap_map2(1:3, 4:6, function(x, y) x + y)\n\n[[1]]\n[1] 5\n\n[[2]]\n[1] 7\n\n[[3]]\n[1] 9\n\n\nmmap_imap() walks a named vector together with its names, passing .f the element then its name:\n\nmmap_imap(c(a = 1, b = 2), function(val, name) paste0(name, \"=\", val))\n\n$a\n[1] \"a=1\"\n\n$b\n[1] \"b=2\""
-  },
-  {
-    "objectID": "minimap/index.html#mmap_walk-and-mmap_iwalk",
-    "href": "minimap/index.html#mmap_walk-and-mmap_iwalk",
-    "title": "minimap",
-    "section": "mmap_walk() and mmap_iwalk()",
-    "text": "mmap_walk() and mmap_iwalk()\nBoth run .f for its side effects only, returning .x invisibly:\n\nmmap_walk(1:3, function(x) cat(\"value:\", x, \"\\n\"))\n\nvalue: 1 \nvalue: 2 \nvalue: 3 \n\n\n\nmmap_iwalk(c(a = 1, b = 2), function(val, name) cat(name, \"-&gt;\", val, \"\\n\"))\n\na -&gt; 1 \nb -&gt; 2"
+    "objectID": "minitable/index.html#mtable_add_row-the-same-cross-referencing-support",
+    "href": "minitable/index.html#mtable_add_row-the-same-cross-referencing-support",
+    "title": "minitable",
+    "section": "mtable_add_row(): the same cross-referencing support",
+    "text": "mtable_add_row(): the same cross-referencing support\nAppending a row supports the same sequential evaluation as mtable_tibble(), so a later value in the new row can refer to an earlier one:\n\ndf &lt;- mtable_tibble(a = 1:2, b = a * 10)\nmtable_add_row(df, a = 3, b = a * 10)\n\n  a  b\n1 1 10\n2 2 20\n3 3 30"
   }
 ]
