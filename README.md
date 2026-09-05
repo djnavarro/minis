@@ -1,0 +1,76 @@
+# minis
+
+A collection of small, standalone, zero-runtime-dependency R components
+("minis"), each shipped as a single `.R` file with its own drop-in test
+suite. The idea: when a package needs a little bit of `cli`-style
+formatting, or a little bit of `purrr`-style mapping, or some other small
+convenience, but taking on the full dependency isn't worth it, grab the
+relevant mini and copy it straight into `R/`.
+
+## Philosophy
+
+- **One file, one job.** Each mini lives in its own directory and does one
+  thing (e.g. coloured console messages, a `purrr`-like `map()` family).
+  No mini depends on another mini or on any external package at runtime.
+- **Copy, don't install.** These are not meant to be installed as a
+  package or added to `Imports`/`Depends`. Copy the `.R` file into your
+  own package's `R/` directory (renaming if useful) and vendor it as your
+  own code. Keep the license header comment intact.
+- **Namespaced defensively.** Every exported function is prefixed
+  (`mcli_*`, `mpurrr_*`, etc.) so a dropped-in mini is unlikely to collide
+  with anything already in the consuming package.
+- **Tested, but the tests don't ship.** Each mini has a `tests/testthat/`
+  suite that lives in *this* repo for development purposes. Consumers of
+  a mini just take the single source file — the tests use `testthat` and
+  `withr` as dev dependencies of this repo only.
+
+## Available minis
+
+| Mini | Purpose |
+|---|---|
+| [`minicli`](minicli/) | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe (e.g. knitr/Quarto renders, redirected output). |
+
+## Using a mini
+
+1. Open the mini's directory (e.g. [`minicli/`](minicli/)) and read its README.
+2. Copy the single `.R` file into your package's `R/` directory.
+3. Optionally rename the file and/or the function prefix if it clashes
+   with something in your codebase.
+4. Add `@export` roxygen tags / `NAMESPACE` entries as needed for the
+   functions you actually use, or leave them unexported and call with
+   `:::` internally — either is fine since there's no dependency to
+   declare either way.
+
+## Running the test suites
+
+From the repo root (requires `testthat` and `withr` installed):
+
+```r
+Rscript run_tests.R
+```
+
+This runs every mini's `tests/testthat/` suite and exits non-zero if any
+fail.
+
+## Adding a new mini
+
+Follow the layout of `minicli/`:
+
+```
+minis/
+  <name>/
+    <name>.R                       # the single, zero-dependency source file
+    README.md                      # what it does, how to drop it in
+    tests/
+      testthat/
+        test-<name>.R              # testthat tests, using withr for
+                                    # deterministic option/env-var scoping
+```
+
+Then add a row to the table above.
+
+## License
+
+MIT. See [LICENSE](LICENSE). Each mini's source file also carries its own
+short license note in the header comment, since files are meant to be
+copied out of this repo individually.
