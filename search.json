@@ -21,6 +21,48 @@
     "text": "mtrap_quietly()\nWrap a function so printed output, warnings, and messages are captured instead of shown:\n\nquiet_fn &lt;- mtrap_quietly(function() {\n  message(\"starting\")\n  warning(\"using a default\")\n  42\n})\nquiet_fn()\n\n$result\n[1] 42\n\n$output\n[1] \"\"\n\n$warnings\n[1] \"using a default\"\n\n$messages\n[1] \"starting\\n\"\n\n\nmtrap_quietly() does not catch errors – compose with mtrap_safely() for that:\n\nrobust_fn &lt;- mtrap_safely(mtrap_quietly(function() stop(\"boom\")))\nrobust_fn()\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): boom&gt;"
   },
   {
+    "objectID": "minicli/index.html",
+    "href": "minicli/index.html",
+    "title": "minicli",
+    "section": "",
+    "text": "minicli is a minimal stand-in for the small slice of cli most packages actually use: coloured alert messages, unicode symbols with an ascii fallback, a rule, and a bullet list. See the README for the full API reference and capability-detection details; this page walks through each piece.\nOne thing to note about the output below: Quarto/knitr renders are detected as a non-terminal (getOption(\"knitr.in.progress\")), so ANSI colour is automatically disabled here – the alerts below print in plain text with their symbol prefix, exactly as they would in a captured log or a non-interactive session, rather than showing colour codes as literal text."
+  },
+  {
+    "objectID": "minicli/index.html#alerts",
+    "href": "minicli/index.html#alerts",
+    "title": "minicli",
+    "section": "Alerts",
+    "text": "Alerts\nmcli_alert_success()/_danger()/_warning()/_info() are thin message() wrappers with a symbol prefix; extra ... arguments are passed through sprintf():\n\nmcli_alert_success(\"Wrote %d files to %s\", 3, \"output/\")\n\n✔ Wrote 3 files to output/\n\n\n\nmcli_alert_warning(\"Skipped %d rows with missing values\", 12)\n\n⚠ Skipped 12 rows with missing values\n\n\n\nmcli_alert_danger(\"Failed to connect to %s\", \"database\")\n\n✖ Failed to connect to database\n\n\n\nmcli_alert_info(\"Using default configuration\")\n\nℹ Using default configuration"
+  },
+  {
+    "objectID": "minicli/index.html#symbols",
+    "href": "minicli/index.html#symbols",
+    "title": "minicli",
+    "section": "Symbols",
+    "text": "Symbols\nmcli_symbol() looks up a named symbol, respecting unicode availability:\n\nmcli_symbol(\"tick\")\n\n[1] \"✔\"\n\nmcli_symbol(\"cross\")\n\n[1] \"✖\"\n\nmcli_symbol(\"arrow_right\")\n\n[1] \"→\""
+  },
+  {
+    "objectID": "minicli/index.html#rule",
+    "href": "minicli/index.html#rule",
+    "title": "minicli",
+    "section": "Rule",
+    "text": "Rule\nmcli_rule() prints a horizontal divider, optionally with a centred title:\n\nmcli_rule(\"Summary\")\n\n─────────────────────────────────── Summary ────────────────────────────────────"
+  },
+  {
+    "objectID": "minicli/index.html#bullets",
+    "href": "minicli/index.html#bullets",
+    "title": "minicli",
+    "section": "Bullets",
+    "text": "Bullets\nmcli_bullets() prints a simple bulleted list, one entry per line:\n\nmcli_bullets(c(\"one\", \"two\", \"three\"))\n\n• one\n• two\n• three"
+  },
+  {
+    "objectID": "minicli/index.html#colours-and-styles",
+    "href": "minicli/index.html#colours-and-styles",
+    "title": "minicli",
+    "section": "Colours and styles",
+    "text": "Colours and styles\nmcli_col_*()/mcli_style_*() wrap text in an ANSI code, and are no-ops (returning the text unchanged) whenever ANSI is disabled – which, per the note above, is always true on this page:\n\nidentical(mcli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(mcli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "minis",
@@ -32,7 +74,7 @@
     "href": "index.html#available-minis",
     "title": "minis",
     "section": "Available minis",
-    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nREADME\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nREADME\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
+    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nREADME\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
   },
   {
     "objectID": "minimap/index.html",

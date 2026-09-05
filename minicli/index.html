@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>minis</title>
+<title>minicli – minis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,30 +26,65 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-d18a60a485a739da09060858cb0fd121.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-d18a60a485a739da09060858cb0fd121.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -259,7 +294,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">minis</span>
     </a>
   </div>
@@ -270,7 +305,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
 </ul>
@@ -299,7 +334,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">minis</h1>
+<h1 class="title">minicli</h1>
 </div>
 
 
@@ -316,66 +351,89 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single <code>.R</code> file with its own drop-in test suite. When a package needs a little bit of <code>cli</code>-style formatting, or a little bit of <code>purrr</code>-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into <code>R/</code>.</p>
-<p>See the <a href="https://github.com/djnavarro/minis">repository README</a> for the full philosophy and usage instructions. This site collects worked-example <strong>vignettes</strong> for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README.</p>
-<section id="available-minis" class="level2">
-<h2 class="anchored" data-anchor-id="available-minis">Available minis</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 65%">
-<col style="width: 20%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Mini</th>
-<th>Purpose</th>
-<th>Docs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>minicli</code></td>
-<td>Minimal <code>cli</code>-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.</td>
-<td><a href="minicli/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minimap</code></td>
-<td>Minimal <code>purrr</code>-style <code>map()</code>/<code>map2()</code>/<code>imap()</code>/<code>walk()</code>/<code>iwalk()</code> and type-stable <code>map_dbl()</code>/<code>map_lgl()</code>/<code>map_chr()</code>.</td>
-<td><a href="minimap/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitrap</code></td>
-<td>Minimal <code>purrr</code>-style <code>safely()</code>/<code>quietly()</code> function adverbs.</td>
-<td><a href="minitrap/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minifilter</code></td>
-<td>Minimal <code>dplyr</code>-style <code>filter()</code>.</td>
-<td><a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a></td>
-</tr>
-<tr class="odd">
-<td><code>minicase</code></td>
-<td>Minimal <code>dplyr</code>-style <code>case_when()</code>.</td>
-<td><a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a></td>
-</tr>
-<tr class="even">
-<td><code>minijoin</code></td>
-<td>Minimal <code>dplyr</code>-style mutating joins, built on <code>merge()</code>.</td>
-<td><a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitable</code></td>
-<td>Minimal <code>tibble</code>-style construction/coercion helpers.</td>
-<td><a href="https://github.com/djnavarro/minis/tree/main/minitable">README</a></td>
-</tr>
-<tr class="even">
-<td><code>minicondition</code></td>
-<td>Minimal <code>rlang</code>-style classed conditions, plus <code>assert()</code>.</td>
-<td><a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a></td>
-</tr>
-</tbody>
-</table>
+<p><code>minicli</code> is a minimal stand-in for the small slice of <code>cli</code> most packages actually use: coloured alert messages, unicode symbols with an ascii fallback, a rule, and a bullet list. See the <a href="https://github.com/djnavarro/minis/tree/main/minicli">README</a> for the full API reference and capability-detection details; this page walks through each piece.</p>
+<p>One thing to note about the output below: Quarto/knitr renders are detected as a non-terminal (<code>getOption("knitr.in.progress")</code>), so ANSI colour is automatically disabled here – the alerts below print in plain text with their symbol prefix, exactly as they would in a captured log or a non-interactive session, rather than showing colour codes as literal text.</p>
+<section id="alerts" class="level2">
+<h2 class="anchored" data-anchor-id="alerts">Alerts</h2>
+<p><code>mcli_alert_success()</code>/<code>_danger()</code>/<code>_warning()</code>/<code>_info()</code> are thin <code>message()</code> wrappers with a symbol prefix; extra <code>...</code> arguments are passed through <code>sprintf()</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_alert_success</span>(<span class="st">"Wrote %d files to %s"</span>, <span class="dv">3</span>, <span class="st">"output/"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>✔ Wrote 3 files to output/</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_alert_warning</span>(<span class="st">"Skipped %d rows with missing values"</span>, <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>⚠ Skipped 12 rows with missing values</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_alert_danger</span>(<span class="st">"Failed to connect to %s"</span>, <span class="st">"database"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>✖ Failed to connect to database</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_alert_info</span>(<span class="st">"Using default configuration"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>ℹ Using default configuration</code></pre>
+</div>
+</div>
+</section>
+<section id="symbols" class="level2">
+<h2 class="anchored" data-anchor-id="symbols">Symbols</h2>
+<p><code>mcli_symbol()</code> looks up a named symbol, respecting unicode availability:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_symbol</span>(<span class="st">"tick"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "✔"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_symbol</span>(<span class="st">"cross"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "✖"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_symbol</span>(<span class="st">"arrow_right"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "→"</code></pre>
+</div>
+</div>
+</section>
+<section id="rule" class="level2">
+<h2 class="anchored" data-anchor-id="rule">Rule</h2>
+<p><code>mcli_rule()</code> prints a horizontal divider, optionally with a centred title:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_rule</span>(<span class="st">"Summary"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>─────────────────────────────────── Summary ────────────────────────────────────</code></pre>
+</div>
+</div>
+</section>
+<section id="bullets" class="level2">
+<h2 class="anchored" data-anchor-id="bullets">Bullets</h2>
+<p><code>mcli_bullets()</code> prints a simple bulleted list, one entry per line:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcli_bullets</span>(<span class="fu">c</span>(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>• one
+• two
+• three</code></pre>
+</div>
+</div>
+</section>
+<section id="colours-and-styles" class="level2">
+<h2 class="anchored" data-anchor-id="colours-and-styles">Colours and styles</h2>
+<p><code>mcli_col_*()</code>/<code>mcli_style_*()</code> wrap text in an ANSI code, and are no-ops (returning the text unchanged) whenever ANSI is disabled – which, per the note above, is always true on this page:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">mcli_col_red</span>(<span class="st">"danger"</span>), <span class="st">"danger"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">mcli_style_bold</span>(<span class="st">"emphasis"</span>), <span class="st">"emphasis"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
 
 
 </section>
