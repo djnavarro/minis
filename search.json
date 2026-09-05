@@ -56,6 +56,41 @@
     "text": "No conditions returns the data frame unchanged\n\nidentical(mfilter_filter(fruits), fruits)\n\n[1] TRUE\n\n\nThis is a deliberate fix relative to the poorman logic minifilter was adapted from, which didn’t guard against empty ... and would have silently dropped every row instead – see the README for details."
   },
   {
+    "objectID": "minicase/index.html",
+    "href": "minicase/index.html",
+    "title": "minicase",
+    "section": "",
+    "text": "minicase provides a single function, mcase_case_when(), a minimal reimplementation of dplyr::case_when(): vectorised if/else across a sequence of condition ~ value formulas, first match wins. See the README for scope notes; this page walks through it on the same toy fruits data frame used in the minifilter vignette.\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
+    "href": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
+    "title": "minicase",
+    "section": "No data-masking: reference columns with $, or wrap in with()",
+    "text": "No data-masking: reference columns with $, or wrap in with()\nUnlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\""
+  },
+  {
+    "objectID": "minicase/index.html#first-match-wins",
+    "href": "minicase/index.html#first-match-wins",
+    "title": "minicase",
+    "section": "First match wins",
+    "text": "First match wins\ncherry (price 3.00) fails price &lt; 3 but matches price &gt;= 3; formulas are checked in order, and the first TRUE condition for each position determines its value even if a later condition would also match."
+  },
+  {
+    "objectID": "minicase/index.html#unmatched-positions-are-na",
+    "href": "minicase/index.html#unmatched-positions-are-na",
+    "title": "minicase",
+    "section": "Unmatched positions are NA",
+    "text": "Unmatched positions are NA\ndate has a missing price, so every condition above evaluates to NA for that row, and date itself gets NA in the result – there’s no condition it definitively satisfies. Add a TRUE ~ ... formula at the end as a catch-all default, the same way you would in dplyr:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1  ~ \"cheap\",\n  price &lt; 3  ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\""
+  },
+  {
+    "objectID": "minicase/index.html#scope-no-.default.ptype.size",
+    "href": "minicase/index.html#scope-no-.default.ptype.size",
+    "title": "minicase",
+    "section": "Scope: no .default/.ptype/.size",
+    "text": "Scope: no .default/.ptype/.size\nThat trailing TRUE ~ \"unknown\" formula is the idiomatic way to get a default in both dplyr::case_when() and mcase_case_when() – minicase just doesn’t implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "minis",
@@ -67,7 +102,7 @@
     "href": "index.html#available-minis",
     "title": "minis",
     "section": "Available minis",
-    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
+    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
   },
   {
     "objectID": "minicli/index.html",
