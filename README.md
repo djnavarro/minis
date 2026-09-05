@@ -25,8 +25,8 @@ relevant mini and copy it straight into `R/`.
   own code. Keep the license header comment intact.
 - **Namespaced defensively.** Every exported function is prefixed
   (`mcli_*`, `mmap_*`, `mtrap_*`, `mfilter_*`, `mcase_*`, `mjoin_*`,
-  `mtable_*`, etc.) so a dropped-in mini is unlikely to collide with
-  anything already in the consuming package.
+  `mtable_*`, `mcond_*`, etc.) so a dropped-in mini is unlikely to
+  collide with anything already in the consuming package.
 - **Tested, but the tests don't ship.** Each mini has a `tests/testthat/`
   suite that lives in *this* repo for development purposes. Consumers of
   a mini just take the single source file — the tests use `testthat` and
@@ -43,6 +43,7 @@ relevant mini and copy it straight into `R/`.
 | [`minicase`](minicase/) | Minimal `dplyr`-style `case_when()`: vectorised if/else via a sequence of formulas. |
 | [`minijoin`](minijoin/) | Minimal `dplyr`-style mutating joins (`inner_join()`/`left_join()`/`right_join()`/`full_join()`), built on `merge()`. |
 | [`minitable`](minitable/) | Minimal `tibble`-style construction/coercion helpers (`tibble()`/`as_tibble()`/`rownames_to_column()`/`add_row()`), returning plain data frames. |
+| [`minicondition`](minicondition/) | Minimal `rlang`-style `abort()`/`warn()`/`inform()` classed conditions, plus `assert()`, built on base R's own condition system. |
 
 ## Using a mini
 

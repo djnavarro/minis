@@ -93,6 +93,44 @@ default sequential row names (matching tibble's `has_rownames()`)
 instead of just `is.null(rownames(.data))`, which is never true for an
 ordinary data frame.
 
+## `minicondition`: custom condition classes don't actually require rlang
+
+`emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` were thin
+wrappers around `rlang::abort()`/`warn()`/`inform()`, seemingly
+reaching for rlang specifically for its classed-condition support
+(catching a raised condition by a custom class name via `tryCatch(f(),
+my_class = handler)`). This looked, at first, like a genuine
+capability rlang added over base R -- notably, `minimap`'s
+`.mmap_assert()` had already made this exact trade-off, dropping
+custom condition classes and falling back to plain `stop()` specifically
+to avoid the rlang dependency.
+
+Verified experimentally that this trade-off wasn't actually necessary:
+base R's own condition system supports the same catch-by-class
+behaviour without rlang. Building a classed condition object directly
+(`structure(class = c(class, "error", "condition"), list(message = ...,
+call = ...))`) and signalling it via plain `stop()`/`warning()`/
+`message()` is caught by `tryCatch()`/`withCallingHandlers()` on the
+custom class exactly as an `rlang::abort()`-raised one would be. This
+was confirmed by executing both versions side by side before writing
+`minicondition`, not just inferred from documentation.
+
+Two defaults were deliberately changed relative to the source: `class`
+now defaults to `NULL` rather than a package-specific string (the
+original always defaulted to e.g. `"emaxnls_error"`, which doesn't make
+sense for a mini meant to be copied into any package), and `message`
+has no default at all (the original defaulted to placeholder text like
+`"emax_nls error"`, which isn't useful to any caller). Also fixed:
+`mcond_assert()` treats `NA` in its logical vector as a failure --
+the original's `if (any(expr == FALSE))` would itself error ("missing
+value where TRUE/FALSE needed") on `NA` input instead of raising the
+intended assertion error.
+
+Named `minicondition` (over `minisignal`/`minithrow`/`minierr`) since
+it maps directly onto base R's own name for this subsystem ("the
+condition system"), rather than either of the two narrower verbs
+(throw/signal) that undersell the warn/inform half of the API.
+
 ## Repository setup and publication
 
 Scaffolded as a plain git repo (not an R package -- no `DESCRIPTION`,

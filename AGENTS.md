@@ -49,6 +49,7 @@ minis/
 | `minicase` | `mcase_` | poorman's `case_when()` (from `dplyr`) | Vectorised if/else via formulas |
 | `minijoin` | `mjoin_` | poorman's `joins.R` (from `dplyr`) | `inner_join`/`left_join`/`right_join`/`full_join` via `merge()` |
 | `minitable` | `mtable_` | `emaxnls`'s `.tibble()` family (from `tibble`) | `tibble`/`as_tibble`/`rownames_to_column`/`add_row` |
+| `minicondition` | `mcond_` | `emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` (from `rlang`) | Classed errors/warnings/messages, plus `assert()`, via base R's condition system |
 
 ### Design philosophy
 

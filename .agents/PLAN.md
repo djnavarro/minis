@@ -10,12 +10,6 @@ this file rather than marked "done" in place.
 
 Other `emaxnls` internal helpers that haven't been reviewed/ported yet:
 
-- **Conditions/assertions** (`utils-conditions.R`: `.assert()`,
-  `.abort()`, `.warn()`, `.inform()`) -- currently reimplemented as a
-  simplified inline assert per-mini (e.g. `minimap`'s
-  `.mmap_assert()`), rather than extracted as their own mini; worth
-  revisiting if a richer condition-signalling mini (with custom
-  condition classes, base R only) turns out to be broadly useful.
 - **mvtnorm wrappers** (`utils-mvtnorm.R`: `.rmvnorm()`, `.qmvnorm()`)
   -- not yet reviewed for zero-dependency feasibility; `mvtnorm` itself
   has no pure-base-R equivalent, so this would need to be a genuine
