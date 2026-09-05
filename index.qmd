@@ -27,3 +27,5 @@ README.
 | `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [README](https://github.com/djnavarro/minis/tree/main/minijoin) |
 | `minitable` | Minimal `tibble`-style construction/coercion helpers. | [README](https://github.com/djnavarro/minis/tree/main/minitable) |
 | `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [README](https://github.com/djnavarro/minis/tree/main/minicondition) |
+
+: {tbl-colwidths="[15,65,20]"}
