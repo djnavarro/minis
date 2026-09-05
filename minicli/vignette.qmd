@@ -1,0 +1,83 @@
+---
+title: "minicli"
+---
+
+```{r}
+#| include: false
+source(file.path("minicli", "minicli.R"))
+```
+
+`minicli` is a minimal stand-in for the small slice of `cli` most
+packages actually use: coloured alert messages, unicode symbols with
+an ascii fallback, a rule, and a bullet list. See the
+[README](https://github.com/djnavarro/minis/tree/main/minicli) for the
+full API reference and capability-detection details; this page walks
+through each piece.
+
+One thing to note about the output below: Quarto/knitr renders are
+detected as a non-terminal (`getOption("knitr.in.progress")`), so ANSI
+colour is automatically disabled here -- the alerts below print in
+plain text with their symbol prefix, exactly as they would in a
+captured log or a non-interactive session, rather than showing colour
+codes as literal text.
+
+## Alerts
+
+`mcli_alert_success()`/`_danger()`/`_warning()`/`_info()` are thin
+`message()` wrappers with a symbol prefix; extra `...` arguments are
+passed through `sprintf()`:
+
+```{r}
+mcli_alert_success("Wrote %d files to %s", 3, "output/")
+```
+
+```{r}
+mcli_alert_warning("Skipped %d rows with missing values", 12)
+```
+
+```{r}
+mcli_alert_danger("Failed to connect to %s", "database")
+```
+
+```{r}
+mcli_alert_info("Using default configuration")
+```
+
+## Symbols
+
+`mcli_symbol()` looks up a named symbol, respecting unicode
+availability:
+
+```{r}
+mcli_symbol("tick")
+mcli_symbol("cross")
+mcli_symbol("arrow_right")
+```
+
+## Rule
+
+`mcli_rule()` prints a horizontal divider, optionally with a centred
+title:
+
+```{r}
+mcli_rule("Summary")
+```
+
+## Bullets
+
+`mcli_bullets()` prints a simple bulleted list, one entry per line:
+
+```{r}
+mcli_bullets(c("one", "two", "three"))
+```
+
+## Colours and styles
+
+`mcli_col_*()`/`mcli_style_*()` wrap text in an ANSI code, and are
+no-ops (returning the text unchanged) whenever ANSI is disabled --
+which, per the note above, is always true on this page:
+
+```{r}
+identical(mcli_col_red("danger"), "danger")
+identical(mcli_style_bold("emphasis"), "emphasis")
+```
