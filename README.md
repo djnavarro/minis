@@ -10,14 +10,21 @@ relevant mini and copy it straight into `R/`.
 ## Philosophy
 
 - **One file, one job.** Each mini lives in its own directory and does one
-  thing (e.g. coloured console messages, a `purrr`-like `map()` family).
-  No mini depends on another mini or on any external package at runtime.
+  narrow thing (e.g. coloured console messages, or just the `map()`
+  family of a purrr-like interface). No mini depends on another mini or
+  on any external package at runtime.
+- **No 1:1 mapping to the packages minis are inspired by.** A single
+  source package can and usually should split into several minis, scoped
+  by functionality rather than by origin. purrr's mapping functions live
+  in `minimap`; purrr's `safely()`/`quietly()`-style adverbs are a
+  separate mini, not bolted onto `minimap`. When in doubt, prefer more,
+  smaller minis over fewer, broader ones.
 - **Copy, don't install.** These are not meant to be installed as a
   package or added to `Imports`/`Depends`. Copy the `.R` file into your
   own package's `R/` directory (renaming if useful) and vendor it as your
   own code. Keep the license header comment intact.
 - **Namespaced defensively.** Every exported function is prefixed
-  (`mcli_*`, `mpurrr_*`, etc.) so a dropped-in mini is unlikely to collide
+  (`mcli_*`, `mmap_*`, etc.) so a dropped-in mini is unlikely to collide
   with anything already in the consuming package.
 - **Tested, but the tests don't ship.** Each mini has a `tests/testthat/`
   suite that lives in *this* repo for development purposes. Consumers of
@@ -29,6 +36,7 @@ relevant mini and copy it straight into `R/`.
 | Mini | Purpose |
 |---|---|
 | [`minicli`](minicli/) | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe (e.g. knitr/Quarto renders, redirected output). |
+| [`minimap`](minimap/) | Minimal `purrr`-style `map()`/`map2()`/`imap()`/`walk()`/`iwalk()` and type-stable `map_dbl()`/`map_lgl()`/`map_chr()`, built on `lapply()`/`vapply()`. |
 
 ## Using a mini
 
