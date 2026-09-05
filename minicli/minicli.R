@@ -12,6 +12,12 @@
 ## - Detection honours the same session options {cli} itself uses
 ##   (`cli.num_colors`, `cli.unicode`), so behaviour stays consistent
 ##   if a user or a calling package has already configured cli.
+## - ANSI detection also recognises Positron's and RStudio's Console
+##   panes explicitly, since neither is a real tty (isatty(stdout())
+##   is FALSE in both), which would otherwise disable colour there.
+##   Ported from djnavarro/sessioncheck's R/display.R after this gap
+##   surfaced while reimplementing minicli-style helpers in that
+##   package.
 ## - Deliberately excluded: glue-style interpolation (use sprintf()),
 ##   theming/nesting scopes, progress bars, trees, boxes, colour-depth
 ##   detection (256/truecolor) -- none of this is needed to get
@@ -26,7 +32,44 @@
 
 # --- capability detection ---------------------------------------------
 
+#' Does RStudio's Console pane support ANSI colour?
+#'
+#' RStudio (>= 1.3) sets `RSTUDIO_CONSOLE_COLOR` only in the Console pane,
+#' not in the Terminal pane, Build pane, or RStudio Jobs, so this is a
+#' safe, console-scoped signal -- unlike a bare `RSTUDIO == "1"` check,
+#' which is set in all of those contexts. Mirrors the approach used by
+#' crayon/cli's `rstudio_with_ansi_support()`.
+#' @noRd
+.mcli_rstudio_console_with_color <- function() {
+  if (!identical(Sys.getenv("RSTUDIO", ""), "1")) return(FALSE)
+  cols <- Sys.getenv("RSTUDIO_CONSOLE_COLOR", "")
+  !is.na(suppressWarnings(as.numeric(cols)))
+}
+
+#' Does Positron's console support ANSI colour?
+#'
+#' ark (Positron's R kernel) sets `options(cli.default_num_colors = <n>)`
+#' directly at session startup to tell `cli` that its console can render
+#' ANSI colour, bypassing `isatty()`/RSTUDIO-style detection entirely --
+#' Positron's console is not a real tty, and it does not set
+#' `RSTUDIO = "1"`. Scoped to `Sys.getenv("POSITRON") == "1"` so this
+#' doesn't trust `cli.default_num_colors` if something else set it
+#' outside of a Positron session.
+#' @noRd
+.mcli_positron_console_with_color <- function() {
+  if (!identical(Sys.getenv("POSITRON", ""), "1")) return(FALSE)
+  n <- getOption("cli.default_num_colors", NULL)
+  is.numeric(n) && n > 1
+}
+
 #' Is ANSI styling safe to emit right now?
+#'
+#' `cli.num_colors` is checked first so that this defers to detection
+#' already performed by other packages (e.g. cli) when present. After
+#' that, front-end signals are checked in order: Positron's console, then
+#' RStudio's console, falling back to `isatty(stdout())` for plain
+#' terminals -- both consoles are not real ttys, so without these checks
+#' colour would be silently disabled in them.
 #' @noRd
 .mcli_ansi_enabled <- function() {
   opt <- getOption("cli.num_colors", NULL)
@@ -40,6 +83,9 @@
 
   # output has been redirected/captured (e.g. capture.output(), testthat)
   if (sink.number() > 0) return(FALSE)
+
+  if (.mcli_positron_console_with_color()) return(TRUE)
+  if (.mcli_rstudio_console_with_color()) return(TRUE)
 
   isatty(stdout())
 }

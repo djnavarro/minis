@@ -37,8 +37,13 @@ through each piece and builds up to how they combine.
 
 - `.mcli_ansi_enabled()` -- decide whether it's currently safe to emit
   ANSI escape codes (checks `cli.num_colors`, `NO_COLOR`, whether
-  knitr/Quarto is rendering, whether output is being captured, and
-  whether stdout is a real terminal).
+  knitr/Quarto is rendering, whether output is being captured, whether
+  it's running in Positron's or RStudio's Console pane, and whether
+  stdout is a real terminal).
+- `.mcli_positron_console_with_color()`/
+  `.mcli_rstudio_console_with_color()` -- recognise Positron's and
+  RStudio's Console panes explicitly, since neither is a real tty but
+  both do support ANSI colour.
 - `.mcli_unicode_enabled()` -- decide whether it's currently safe to
   print unicode symbols (checks `cli.unicode`, then the session's
   locale).
@@ -52,13 +57,15 @@ through each piece and builds up to how they combine.
 Every colour/symbol decision in `minicli` runs through
 `.mcli_ansi_enabled()` and `.mcli_unicode_enabled()`, so the same code
 looks right whether it's running in an interactive terminal that
-supports unicode and colour, a plain terminal that supports neither, or
--- as on this page -- a Quarto render. Quarto/knitr renders are
-detected as a non-terminal (`getOption("knitr.in.progress")`), so ANSI
-colour is disabled automatically here. That means the alerts below
-print in plain text with their symbol prefix, exactly as they would in
-a captured log or a non-interactive session, rather than showing colour
-codes as literal text on the page.
+supports unicode and colour, Positron's or RStudio's Console pane
+(neither of which is a real tty, but both of which do support ANSI
+colour), a plain terminal that supports neither, or -- as on this page
+-- a Quarto render. Quarto/knitr renders are detected as a non-terminal
+(`getOption("knitr.in.progress")`), so ANSI colour is disabled
+automatically here. That means the alerts below print in plain text
+with their symbol prefix, exactly as they would in a captured log or a
+non-interactive session, rather than showing colour codes as literal
+text on the page.
 
 ## Alerts
 

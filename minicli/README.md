@@ -28,7 +28,10 @@ call them internally.
 - **ANSI colour**: disabled when `NO_COLOR` is set, when
   `getOption("knitr.in.progress")` is `TRUE` (Rmd/Quarto renders), when
   output is being captured via `sink()`, or when stdout isn't a real
-  terminal. Can be forced either way with `options(cli.num_colors = ...)`.
+  terminal — except that Positron's and RStudio's Console panes are
+  each detected explicitly first, since neither is a real tty but both
+  do support ANSI colour. Can be forced either way with
+  `options(cli.num_colors = ...)`.
 - **Unicode symbols**: based on `l10n_info()[["UTF-8"]]`, overridable with
   `options(cli.unicode = ...)`.
 

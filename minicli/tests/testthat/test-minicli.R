@@ -33,6 +33,36 @@ test_that("an explicit cli.num_colors option overrides the knitr fallback", {
   expect_equal(mcli_col_red("x"), "\033[31mx\033[0m")
 })
 
+test_that("Positron's console is detected as ansi-capable even though it's not a tty", {
+  withr::local_options(cli.num_colors = NULL, cli.default_num_colors = 8)
+  withr::local_envvar(POSITRON = "1", RSTUDIO = "", NO_COLOR = "")
+  expect_true(.mcli_positron_console_with_color())
+  expect_equal(mcli_col_red("x"), "\033[31mx\033[0m")
+})
+
+test_that("Positron detection requires both the env var and the option", {
+  withr::local_options(cli.num_colors = NULL, cli.default_num_colors = NULL)
+  withr::local_envvar(POSITRON = "1", RSTUDIO = "", NO_COLOR = "")
+  expect_false(.mcli_positron_console_with_color())
+
+  withr::local_options(cli.default_num_colors = 8)
+  withr::local_envvar(POSITRON = "", RSTUDIO = "", NO_COLOR = "")
+  expect_false(.mcli_positron_console_with_color())
+})
+
+test_that("RStudio's Console pane is detected as ansi-capable even though it's not a tty", {
+  withr::local_options(cli.num_colors = NULL)
+  withr::local_envvar(RSTUDIO = "1", RSTUDIO_CONSOLE_COLOR = "256", POSITRON = "", NO_COLOR = "")
+  expect_true(.mcli_rstudio_console_with_color())
+  expect_equal(mcli_col_red("x"), "\033[31mx\033[0m")
+})
+
+test_that("RStudio detection excludes non-Console panes (no RSTUDIO_CONSOLE_COLOR)", {
+  withr::local_options(cli.num_colors = NULL)
+  withr::local_envvar(RSTUDIO = "1", RSTUDIO_CONSOLE_COLOR = "", POSITRON = "", NO_COLOR = "")
+  expect_false(.mcli_rstudio_console_with_color())
+})
+
 test_that("symbols fall back to ascii when unicode is disabled", {
   withr::local_options(cli.unicode = FALSE)
   expect_equal(mcli_symbol("tick"), "v")

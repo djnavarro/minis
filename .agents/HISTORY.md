@@ -228,3 +228,34 @@ successfully in under a minute each. One informational, non-blocking
 annotation appeared (`actions/checkout@v4` being forced onto Node.js 24
 due to Node 20's deprecation on GitHub Actions runners); no action
 needed.
+
+## `minicli`: ANSI detection gap in Positron/RStudio consoles
+
+While reimplementing `minicli`-style helpers inside a separate package
+(`djnavarro/sessioncheck`, `R/display.R`), the original
+`.mcli_ansi_enabled()` was found to silently disable colour in both
+Positron's and RStudio's Console panes: its final fallback,
+`isatty(stdout())`, is `FALSE` in both, since neither is a real tty.
+`sessioncheck` had already worked around this with two additional
+front-end checks, verified against real console sessions rather than
+inferred: `.rstudio_console_with_color()`, which trusts
+`RSTUDIO_CONSOLE_COLOR` only when `RSTUDIO == "1"` (this env var is set
+specifically in RStudio's Console pane, not its Terminal/Build panes or
+RStudio Jobs, mirroring crayon/cli's own `rstudio_with_ansi_support()`);
+and `.positron_console_with_color()`, which trusts ark's
+`options(cli.default_num_colors = <n>)` only when `POSITRON == "1"`,
+since Positron's R kernel sets that option directly at startup rather
+than relying on tty detection at all.
+
+Ported both checks into `minicli.R` verbatim (as
+`.mcli_positron_console_with_color()`/
+`.mcli_rstudio_console_with_color()`), inserted into
+`.mcli_ansi_enabled()` after the `sink.number()`/`knitr.in.progress`
+short-circuits but before the `isatty()` fallback -- the same ordering
+`sessioncheck` used, so that captured/non-interactive output still
+correctly suppresses colour regardless of which front end is hosting
+the session. Confirmed while testing that this environment's own
+`Rscript` sessions run with `NO_COLOR=1` set ambiently, which the new
+tests must clear explicitly via `withr::local_envvar()` alongside the
+Positron/RStudio env vars they set, or the ambient value leaks in and
+masks the behaviour under test.
