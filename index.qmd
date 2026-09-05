@@ -15,8 +15,6 @@ worked-example **vignettes** for minis that have one; minis without a
 vignette yet are still listed below, linking straight to their GitHub
 README.
 
-## Available minis
-
 | Mini | Purpose | Docs |
 |---|---|---|
 | `minicli` | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe. | [Vignette](minicli/) |
