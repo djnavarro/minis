@@ -24,8 +24,9 @@ relevant mini and copy it straight into `R/`.
   own package's `R/` directory (renaming if useful) and vendor it as your
   own code. Keep the license header comment intact.
 - **Namespaced defensively.** Every exported function is prefixed
-  (`mcli_*`, `mmap_*`, `mtrap_*`, etc.) so a dropped-in mini is unlikely
-  to collide with anything already in the consuming package.
+  (`mcli_*`, `mmap_*`, `mtrap_*`, `mfilter_*`, `mcase_*`, `mjoin_*`,
+  `mtable_*`, etc.) so a dropped-in mini is unlikely to collide with
+  anything already in the consuming package.
 - **Tested, but the tests don't ship.** Each mini has a `tests/testthat/`
   suite that lives in *this* repo for development purposes. Consumers of
   a mini just take the single source file — the tests use `testthat` and
@@ -38,6 +39,10 @@ relevant mini and copy it straight into `R/`.
 | [`minicli`](minicli/) | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe (e.g. knitr/Quarto renders, redirected output). |
 | [`minimap`](minimap/) | Minimal `purrr`-style `map()`/`map2()`/`imap()`/`walk()`/`iwalk()` and type-stable `map_dbl()`/`map_lgl()`/`map_chr()`, built on `lapply()`/`vapply()`. |
 | [`minitrap`](minitrap/) | Minimal `purrr`-style `safely()`/`quietly()` function adverbs: trap errors, or trap printed output/warnings/messages, instead of letting them hit the console. |
+| [`minifilter`](minifilter/) | Minimal `dplyr`-style `filter()`: subset rows of a data frame by unquoted conditions. |
+| [`minicase`](minicase/) | Minimal `dplyr`-style `case_when()`: vectorised if/else via a sequence of formulas. |
+| [`minijoin`](minijoin/) | Minimal `dplyr`-style mutating joins (`inner_join()`/`left_join()`/`right_join()`/`full_join()`), built on `merge()`. |
+| [`minitable`](minitable/) | Minimal `tibble`-style construction/coercion helpers (`tibble()`/`as_tibble()`/`rownames_to_column()`/`add_row()`), returning plain data frames. |
 
 ## Using a mini
 
