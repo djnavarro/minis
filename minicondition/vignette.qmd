@@ -1,0 +1,96 @@
+---
+title: "minicondition"
+---
+
+```{r}
+#| include: false
+source(file.path("minicondition", "minicondition.R"))
+```
+
+`minicondition` provides `mcond_abort()`/`_warn()`/`_inform()` -- thin
+wrappers around base R's own condition system that signal a *classed*
+condition, catchable specifically by that class -- plus `mcond_assert()`
+built on top of `mcond_abort()`. See the
+[README](https://github.com/djnavarro/minis/tree/main/minicondition)
+for the rlang-parity notes; this page focuses on the catch-by-class
+behaviour and `mcond_assert()`'s `NA` handling.
+
+## Catching a classed error by its class
+
+`tryCatch()` dispatches on a condition's class, whether that condition
+was signalled via `rlang::abort()` or, as here, via a plain classed
+condition object passed to base `stop()`:
+
+```{r}
+tryCatch(
+  mcond_abort("bad input", class = "mypkg_invalid_input"),
+  mypkg_invalid_input = function(e) message("caught: ", conditionMessage(e))
+)
+```
+
+A handler for an unrelated class doesn't match -- the condition is
+still an ordinary `error` underneath, so a generic `error` handler
+catches it as a fallback:
+
+```{r}
+tryCatch(
+  mcond_abort("bad input", class = "mypkg_invalid_input"),
+  mypkg_other_class = function(e) message("this handler never runs"),
+  error = function(e) message("caught generically as a plain error: ", conditionMessage(e))
+)
+```
+
+## Warnings and messages work the same way
+
+`mcond_warn()` signals a classed warning, catchable via
+`withCallingHandlers()`:
+
+```{r}
+withCallingHandlers(
+  mcond_warn("using a fallback default", class = "mypkg_fallback_used"),
+  mypkg_fallback_used = function(w) {
+    message("caught warning: ", conditionMessage(w))
+    invokeRestart("muffleWarning")
+  }
+)
+```
+
+`mcond_inform()` signals a classed message -- uncaught, it just prints
+like an ordinary `message()` call:
+
+```{r}
+mcond_inform("starting up", class = "mypkg_startup")
+```
+
+## `mcond_assert()`: abort if a condition doesn't hold
+
+A passing assertion is silent:
+
+```{r}
+x <- 5
+mcond_assert(x > 0, "x must be positive.")
+```
+
+A failing one raises a classed `mcond_abort()` error, catchable the
+same way:
+
+```{r}
+tryCatch(
+  mcond_assert(x > 0 && x < 3, "x must be between 0 and 3.", class = "mypkg_range_error"),
+  mypkg_range_error = function(e) message("caught: ", conditionMessage(e))
+)
+```
+
+## `NA` counts as a failure, not a crash
+
+This is a deliberate fix relative to the source this was adapted from:
+`if (any(expr == FALSE))` errors outright when `expr` contains `NA`
+("missing value where TRUE/FALSE needed"), rather than raising the
+intended assertion error. `mcond_assert()` checks `anyNA(expr)`
+explicitly, so a vector containing `NA` fails the assertion cleanly:
+
+```{r}
+#| error: true
+y <- c(TRUE, TRUE, NA)
+mcond_assert(y, "y must not contain NA.", class = "mypkg_na_error")
+```

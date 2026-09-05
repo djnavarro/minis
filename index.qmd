@@ -26,6 +26,6 @@ README.
 | `minicase` | Minimal `dplyr`-style `case_when()`. | [Vignette](minicase/) |
 | `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [Vignette](minijoin/) |
 | `minitable` | Minimal `tibble`-style construction/coercion helpers. | [Vignette](minitable/) |
-| `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [README](https://github.com/djnavarro/minis/tree/main/minicondition) |
+| `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [Vignette](minicondition/) |
 
 : {tbl-colwidths="[15,65,20]"}
