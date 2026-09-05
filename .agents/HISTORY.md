@@ -191,6 +191,26 @@ must be `index`, not `index.html` -- passing an extension raises
 keep their self-documenting `vignette.qmd` name; only the rendered
 output path changes.
 
+## Retrofitting all eight minis with vignettes
+
+Following the scaffolding and pretty-URL work above, each of the
+remaining minis got its own `vignette.qmd`, one at a time
+(`minicli`, `minifilter`, `minicase`, `minijoin`, `minitable`,
+`minicondition`, joining the original `minitrap`/`minimap` pilots) --
+all eight minis now have a rendered site page. `minifilter` and
+`minicase` deliberately share the same small toy `fruits` data frame
+(each vignette redefines it independently, since vignettes don't
+source one another) so the two are easy to compare side by side.
+`minijoin`'s vignette surfaced a real, worth-documenting subtlety
+while verifying output before writing prose: on `right_join()`/
+`full_join()`, matched rows keep `x`'s original order, and rows
+unmatched-in-`x` are *appended at the end* rather than interleaved in
+`y`'s order -- confirmed by executing the join before describing it,
+not inferred from the source code. Every vignette's example output was
+executed and checked against its prose claims before committing,
+consistent with the "verify by executing, not just reading" practice
+already established elsewhere in this repo.
+
 ## Repository setup and publication
 
 Scaffolded as a plain git repo (not an R package -- no `DESCRIPTION`,
