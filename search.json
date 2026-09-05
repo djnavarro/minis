@@ -21,6 +21,55 @@
     "text": "mtrap_quietly()\nWrap a function so printed output, warnings, and messages are captured instead of shown:\n\nquiet_fn &lt;- mtrap_quietly(function() {\n  message(\"starting\")\n  warning(\"using a default\")\n  42\n})\nquiet_fn()\n\n$result\n[1] 42\n\n$output\n[1] \"\"\n\n$warnings\n[1] \"using a default\"\n\n$messages\n[1] \"starting\\n\"\n\n\nmtrap_quietly() does not catch errors – compose with mtrap_safely() for that:\n\nrobust_fn &lt;- mtrap_safely(mtrap_quietly(function() stop(\"boom\")))\nrobust_fn()\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): boom&gt;"
   },
   {
+    "objectID": "minifilter/index.html",
+    "href": "minifilter/index.html",
+    "title": "minifilter",
+    "section": "",
+    "text": "minifilter provides a single function, mfilter_filter(), a minimal reimplementation of dplyr::filter(): it keeps rows of a data frame where all of a set of unquoted conditions are TRUE. See the README for scope notes; this page walks through its behaviour on a small toy data frame.\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#a-single-condition",
+    "href": "minifilter/index.html#a-single-condition",
+    "title": "minifilter",
+    "section": "A single condition",
+    "text": "A single condition\nColumns are referred to by bare name, evaluated in the scope of the data frame:\n\nmfilter_filter(fruits, in_stock)\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#multiple-conditions-combine-with-and",
+    "href": "minifilter/index.html#multiple-conditions-combine-with-and",
+    "title": "minifilter",
+    "section": "Multiple conditions combine with AND",
+    "text": "Multiple conditions combine with AND\nPassing more than one condition is equivalent to combining them with &:\n\nmfilter_filter(fruits, in_stock, price &lt; 4)\n\n    name price in_stock\n1  apple   1.2     TRUE\n2 banana   0.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#na-conditions-drop-the-row",
+    "href": "minifilter/index.html#na-conditions-drop-the-row",
+    "title": "minifilter",
+    "section": "NA conditions drop the row",
+    "text": "NA conditions drop the row\ndate has a missing price, so any condition involving price is NA for that row rather than TRUE/FALSE – and mfilter_filter() drops it, matching dplyr::filter()’s treatment of NA as “not kept”:\n\nmfilter_filter(fruits, price &gt; 1)\n\n        name price in_stock\n1      apple   1.2     TRUE\n3     cherry   3.0    FALSE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
+    "href": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
+    "title": "minifilter",
+    "section": "No conditions returns the data frame unchanged",
+    "text": "No conditions returns the data frame unchanged\n\nidentical(mfilter_filter(fruits), fruits)\n\n[1] TRUE\n\n\nThis is a deliberate fix relative to the poorman logic minifilter was adapted from, which didn’t guard against empty ... and would have silently dropped every row instead – see the README for details."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "minis",
+    "section": "",
+    "text": "A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into R/.\nSee the repository README for the full philosophy and usage instructions. This site collects worked-example vignettes for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README."
+  },
+  {
+    "objectID": "index.html#available-minis",
+    "href": "index.html#available-minis",
+    "title": "minis",
+    "section": "Available minis",
+    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
+  },
+  {
     "objectID": "minicli/index.html",
     "href": "minicli/index.html",
     "title": "minicli",
@@ -61,20 +110,6 @@
     "title": "minicli",
     "section": "Colours and styles",
     "text": "Colours and styles\nmcli_col_*()/mcli_style_*() wrap text in an ANSI code, and are no-ops (returning the text unchanged) whenever ANSI is disabled – which, per the note above, is always true on this page:\n\nidentical(mcli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(mcli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "minis",
-    "section": "",
-    "text": "A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into R/.\nSee the repository README for the full philosophy and usage instructions. This site collects worked-example vignettes for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README."
-  },
-  {
-    "objectID": "index.html#available-minis",
-    "href": "index.html#available-minis",
-    "title": "minis",
-    "section": "Available minis",
-    "text": "Available minis\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nREADME\n\n\nminicase\nMinimal dplyr-style case_when().\nREADME\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nREADME\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nREADME\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nREADME"
   },
   {
     "objectID": "minimap/index.html",
