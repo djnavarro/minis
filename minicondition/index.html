@@ -351,10 +351,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicondition</code> provides <code>mcond_abort()</code>/<code>_warn()</code>/<code>_inform()</code> – thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class – plus <code>mcond_assert()</code> built on top of <code>mcond_abort()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> for the rlang-parity notes; this page focuses on the catch-by-class behaviour and <code>mcond_assert()</code>’s <code>NA</code> handling.</p>
-<section id="catching-a-classed-error-by-its-class" class="level2">
-<h2 class="anchored" data-anchor-id="catching-a-classed-error-by-its-class">Catching a classed error by its class</h2>
-<p><code>tryCatch()</code> dispatches on a condition’s class, whether that condition was signalled via <code>rlang::abort()</code> or, as here, via a plain classed condition object passed to base <code>stop()</code>:</p>
+<p><code>minicondition</code> provides <code>mcond_abort()</code>/<code>_warn()</code>/<code>_inform()</code> – thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class – plus <code>mcond_assert()</code> built on top of <code>mcond_abort()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> for the rlang-parity notes; this page focuses on the catch-by-class behaviour, since that’s the main reason to reach for <code>minicondition</code> over plain <code>stop()</code>/<code>warning()</code>/<code>message()</code>, and finishes with <code>mcond_assert()</code>’s handling of <code>NA</code>.</p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<ul>
+<li><code>mcond_abort(message, class = NULL)</code> – signal a classed error.</li>
+<li><code>mcond_warn(message, class = NULL)</code> – signal a classed warning.</li>
+<li><code>mcond_inform(message, class = NULL)</code> – signal a classed message.</li>
+<li><code>mcond_assert(expr, message, class = NULL)</code> – call <code>mcond_abort()</code> if <code>expr</code> isn’t entirely <code>TRUE</code>; <code>NA</code> counts as a failure.</li>
+</ul>
+<p><code>minicondition</code> has one internal helper, <code>.mcond_condition()</code>, which builds the classed condition object that <code>mcond_abort()</code>/<code>_warn()</code>/ <code>_inform()</code> each hand off to base <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</p>
+</section>
+<section id="why-classes-matter" class="level2">
+<h2 class="anchored" data-anchor-id="why-classes-matter">Why classes matter</h2>
+<p>A plain <code>stop("bad input")</code> produces a condition of class <code>c("simpleError", "error", "condition")</code> – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to <em>this specific kind</em> of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. <code>mcond_abort()</code> solves that by adding an extra class on top of <code>"error"</code>, so <code>tryCatch()</code> can dispatch on it directly:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_abort</span>(<span class="st">"bad input"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>),</span>
@@ -364,36 +374,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>caught: bad input</code></pre>
 </div>
 </div>
-<p>A handler for an unrelated class doesn’t match – the condition is still an ordinary <code>error</code> underneath, so a generic <code>error</code> handler catches it as a fallback:</p>
+<p>Note that <code>mcond_abort()</code> uses base <code>stop()</code> internally, not <code>rlang::abort()</code> – but the mechanics of catching by class are identical either way. <code>tryCatch()</code>/<code>withCallingHandlers()</code> dispatch on a condition object’s <code>class</code> attribute, regardless of what function signalled it:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_abort</span>(<span class="st">"bad input"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_other_class =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"this handler never runs"</span>),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught generically as a plain error: "</span>, <span class="fu">conditionMessage</span>(e))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="fu">mcond_abort</span>(<span class="st">"x"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>), <span class="at">error =</span> <span class="cf">function</span>(e) e)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "mypkg_invalid_input" "error"               "condition"          </code></pre>
+</div>
+</div>
+</section>
+<section id="unmatched-handlers-fall-through-error-still-catches-it" class="level2">
+<h2 class="anchored" data-anchor-id="unmatched-handlers-fall-through-error-still-catches-it">Unmatched handlers fall through; <code>error</code> still catches it</h2>
+<p>A handler for an unrelated class simply doesn’t match – <code>tryCatch()</code> tries each handler in order and uses the first one whose class matches. Since the condition is still, underneath the custom class, an ordinary <code>error</code> (see the <code>class(e)</code> output above), a generic <code>error</code> handler still catches it as a fallback if nothing more specific matches first:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_abort</span>(<span class="st">"bad input"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_other_class =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"this handler never runs"</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught generically as a plain error: "</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>caught generically as a plain error: bad input</code></pre>
 </div>
 </div>
+<p>This is the same layering <code>rlang</code> conditions use: a custom class sits <em>in addition to</em> the base <code>error</code>/<code>warning</code>/<code>message</code> class, not instead of it, so code that only knows about the generic type still works.</p>
 </section>
 <section id="warnings-and-messages-work-the-same-way" class="level2">
 <h2 class="anchored" data-anchor-id="warnings-and-messages-work-the-same-way">Warnings and messages work the same way</h2>
-<p><code>mcond_warn()</code> signals a classed warning, catchable via <code>withCallingHandlers()</code>:</p>
+<p><code>mcond_warn()</code> signals a classed warning, catchable via <code>withCallingHandlers()</code> (warnings, unlike errors, don’t unwind the call stack, so catching them with <code>tryCatch()</code> would abandon whatever code was about to run after the warning – <code>withCallingHandlers()</code> lets the handler run and then hand control back):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">withCallingHandlers</span>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_warn</span>(<span class="st">"using a fallback default"</span>, <span class="at">class =</span> <span class="st">"mypkg_fallback_used"</span>),</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_fallback_used =</span> <span class="cf">function</span>(w) {</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">"caught warning: "</span>, <span class="fu">conditionMessage</span>(w))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">invokeRestart</span>(<span class="st">"muffleWarning"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">withCallingHandlers</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_warn</span>(<span class="st">"using a fallback default"</span>, <span class="at">class =</span> <span class="st">"mypkg_fallback_used"</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_fallback_used =</span> <span class="cf">function</span>(w) {</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">"caught warning: "</span>, <span class="fu">conditionMessage</span>(w))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">invokeRestart</span>(<span class="st">"muffleWarning"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>caught warning: using a fallback default</code></pre>
 </div>
 </div>
-<p><code>mcond_inform()</code> signals a classed message – uncaught, it just prints like an ordinary <code>message()</code> call:</p>
+<p>The <code>invokeRestart("muffleWarning")</code> call suppresses the warning from also being printed by R’s default warning handler – without it, the warning would print a second time after the custom handler runs.</p>
+<p><code>mcond_inform()</code> signals a classed message – uncaught, it just prints like an ordinary <code>message()</code> call, since messages are typically meant to be seen unless something specifically wants to intercept them:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_inform</span>(<span class="st">"starting up"</span>, <span class="at">class =</span> <span class="st">"mypkg_startup"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_inform</span>(<span class="st">"starting up"</span>, <span class="at">class =</span> <span class="st">"mypkg_startup"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>starting up</code></pre>
 </div>
@@ -401,17 +424,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mcond_assert-abort-if-a-condition-doesnt-hold" class="level2">
 <h2 class="anchored" data-anchor-id="mcond_assert-abort-if-a-condition-doesnt-hold"><code>mcond_assert()</code>: abort if a condition doesn’t hold</h2>
-<p>A passing assertion is silent:</p>
+<p><code>mcond_assert()</code> is <code>mcond_abort()</code> plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely <code>TRUE</code>. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"x must be positive."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"x must be positive."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>A failing one raises a classed <code>mcond_abort()</code> error, catchable the same way:</p>
+<p>A failing one raises a classed error, catchable the same way as <code>mcond_abort()</code> – which makes sense, since that’s exactly what it calls internally:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> x <span class="sc">&lt;</span> <span class="dv">3</span>, <span class="st">"x must be between 0 and 3."</span>, <span class="at">class =</span> <span class="st">"mypkg_range_error"</span>),</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_range_error =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught: "</span>, <span class="fu">conditionMessage</span>(e))</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> x <span class="sc">&lt;</span> <span class="dv">3</span>, <span class="st">"x must be between 0 and 3."</span>, <span class="at">class =</span> <span class="st">"mypkg_range_error"</span>),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_range_error =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught: "</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>caught: x must be between 0 and 3.</code></pre>
 </div>
@@ -419,10 +442,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="na-counts-as-a-failure-not-a-crash" class="level2">
 <h2 class="anchored" data-anchor-id="na-counts-as-a-failure-not-a-crash"><code>NA</code> counts as a failure, not a crash</h2>
-<p>This is a deliberate fix relative to the source this was adapted from: <code>if (any(expr == FALSE))</code> errors outright when <code>expr</code> contains <code>NA</code> (“missing value where TRUE/FALSE needed”), rather than raising the intended assertion error. <code>mcond_assert()</code> checks <code>anyNA(expr)</code> explicitly, so a vector containing <code>NA</code> fails the assertion cleanly:</p>
+<p><code>mcond_assert()</code> accepts a vector, not just a single logical value, and checks that <em>every</em> element is <code>TRUE</code>. That raises a subtlety: what should happen if the vector contains <code>NA</code>? This is a deliberate fix relative to the source this was adapted from: a naive <code>if (any(expr == FALSE))</code> errors outright when <code>expr</code> contains <code>NA</code> (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. <code>mcond_assert()</code> checks <code>anyNA(expr)</code> explicitly first, so a vector containing <code>NA</code> fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">NA</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_assert</span>(y, <span class="st">"y must not contain NA."</span>, <span class="at">class =</span> <span class="st">"mypkg_na_error"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">NA</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_assert</span>(y, <span class="st">"y must not contain NA."</span>, <span class="at">class =</span> <span class="st">"mypkg_na_error"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-error">
 <pre><code>Error:
 ! y must not contain NA.</code></pre>

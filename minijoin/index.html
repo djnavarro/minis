@@ -351,7 +351,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minijoin</code> provides four mutating joins – <code>mjoin_inner_join()</code>/<code>_left_join()</code>/<code>_right_join()</code>/<code>_full_join()</code> – built on base <code>merge()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap.</p>
+<p><code>minijoin</code> provides four mutating joins – <code>mjoin_inner_join()</code>/<code>_left_join()</code>/<code>_right_join()</code>/<code>_full_join()</code> – built on base <code>merge()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the <code>by</code> argument in more detail.</p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<ul>
+<li><code>mjoin_inner_join(x, y, by, ...)</code> – keep only rows with a match in both <code>x</code> and <code>y</code>.</li>
+<li><code>mjoin_left_join(x, y, by, ...)</code> – keep all rows of <code>x</code>, filling in <code>NA</code> for <code>y</code>’s columns where there’s no match.</li>
+<li><code>mjoin_right_join(x, y, by, ...)</code> – keep all rows of <code>y</code>, filling in <code>NA</code> for <code>x</code>’s columns where there’s no match.</li>
+<li><code>mjoin_full_join(x, y, by, ...)</code> – keep all rows of both <code>x</code> and <code>y</code>, filling in <code>NA</code> on whichever side has no match.</li>
+</ul>
+<p><code>minijoin</code> has one internal helper, <code>.mjoin_worker()</code>, which all four join functions delegate to after fixing the right combination of <code>merge()</code>’s <code>all.x</code>/<code>all.y</code> arguments; it also restores <code>x</code>’s original row order, which <code>merge()</code> doesn’t guarantee on its own.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">band =</span> <span class="fu">c</span>(<span class="st">"Beatles"</span>, <span class="st">"Rolling Stones"</span>, <span class="st">"Kinks"</span>),</span>
@@ -376,9 +385,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3   Queen A Night at the Opera</code></pre>
 </div>
 </div>
-<p><code>bands</code> and <code>albums</code> share <code>"Beatles"</code> and <code>"Kinks"</code>; <code>"Rolling Stones"</code> exists only in <code>bands</code>, and <code>"Queen"</code> only in <code>albums</code>.</p>
+<p><code>bands</code> and <code>albums</code> share <code>"Beatles"</code> and <code>"Kinks"</code>; <code>"Rolling Stones"</code> exists only in <code>bands</code>, and <code>"Queen"</code> only in <code>albums</code>. The four join types differ only in which of those non-matching rows they keep.</p>
+</section>
 <section id="inner-join-only-rows-matching-in-both" class="level2">
 <h2 class="anchored" data-anchor-id="inner-join-only-rows-matching-in-both">Inner join: only rows matching in both</h2>
+<p>Neither <code>"Rolling Stones"</code> nor <code>"Queen"</code> appears – an inner join is the most restrictive of the four, keeping only rows with a counterpart on the other side:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mjoin_inner_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -390,7 +401,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="left-join-all-rows-of-x-bands" class="level2">
 <h2 class="anchored" data-anchor-id="left-join-all-rows-of-x-bands">Left join: all rows of <code>x</code> (<code>bands</code>)</h2>
-<p><code>"Rolling Stones"</code> is kept, with <code>NA</code> for <code>album</code>:</p>
+<p><code>"Rolling Stones"</code> is kept, with <code>NA</code> for <code>album</code>, since it has no match in <code>albums</code>. This is the join to reach for when <code>x</code> is your “main” table and you’re enriching it with optional data from <code>y</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mjoin_left_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -403,7 +414,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="right-join-all-rows-of-y-albums" class="level2">
 <h2 class="anchored" data-anchor-id="right-join-all-rows-of-y-albums">Right join: all rows of <code>y</code> (<code>albums</code>)</h2>
-<p><code>"Queen"</code> is kept, with <code>NA</code> for <code>founded</code>. Note the row order: matched rows still come first, in <code>bands</code>’ original order, with the unmatched-in-<code>x</code> row (<code>"Queen"</code>) appended at the end – <code>minijoin</code> always restores <code>x</code>’s original row order for matched rows, rather than <code>y</code>’s:</p>
+<p><code>"Queen"</code> is kept, with <code>NA</code> for <code>founded</code>. A right join is really just a left join with the arguments swapped – <code>mjoin_right_join(x, y, ...)</code> behaves like <code>mjoin_left_join(y, x, ...)</code>, with columns in <code>x</code>‘s original order. Note the row order below: matched rows still come first, in <code>bands</code>’ original order, with the unmatched-in-<code>x</code> row (<code>"Queen"</code>) appended at the end – <code>minijoin</code> always restores <code>x</code>’s original row order for matched rows, rather than <code>y</code>’s:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mjoin_right_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -416,7 +427,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="full-join-all-rows-of-both" class="level2">
 <h2 class="anchored" data-anchor-id="full-join-all-rows-of-both">Full join: all rows of both</h2>
-<p>Both <code>"Rolling Stones"</code> and <code>"Queen"</code> are kept, each with an <code>NA</code> in the column they don’t have a match for:</p>
+<p>Both <code>"Rolling Stones"</code> and <code>"Queen"</code> are kept, each with an <code>NA</code> in the column they don’t have a match for – a full join never drops a row from either side, so it’s the join to reach for when you want to see everything and let missing matches show up as <code>NA</code> rather than disappearing silently:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mjoin_full_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -430,7 +441,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="by-is-always-explicit" class="level2">
 <h2 class="anchored" data-anchor-id="by-is-always-explicit"><code>by</code> is always explicit</h2>
-<p>Unlike <code>dplyr</code>, there’s no auto-detection of shared column names – <code>by</code> must always be supplied. This is a deliberate simplification, not an oversight, to avoid a class of silent bugs from an unintended shared column name.</p>
+<p>Unlike <code>dplyr</code>, there’s no auto-detection of shared column names – <code>by</code> must always be supplied. This is a deliberate simplification, not an oversight, to avoid a class of silent bugs from an unintended shared column name (two data frames that happen to both have an <code>id</code> column with unrelated meanings, for instance).</p>
+<p>When the join column has different names on each side, <code>by</code> takes a named character vector instead of a single string, <code>c("x_name" = "y_name")</code> – mirroring <code>dplyr</code>’s own syntax for the same situation:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>albums_renamed <span class="ot">&lt;-</span> albums</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(albums_renamed)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"artist"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>albums_renamed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   artist                album
+1 Beatles           Abbey Road
+2   Kinks               Arthur
+3   Queen A Night at the Opera</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mjoin_inner_join</span>(bands, albums_renamed, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"band"</span> <span class="ot">=</span> <span class="st">"artist"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     band founded      album
+1 Beatles    1960 Abbey Road
+2   Kinks    1963     Arthur</code></pre>
+</div>
+</div>
+<p>Note that the output keeps <code>x</code>’s column name (<code>band</code>), not <code>y</code>’s (<code>artist</code>) – the join collapses the two into a single column, using whichever name <code>x</code> had.</p>
 
 
 </section>

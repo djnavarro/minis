@@ -351,7 +351,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicase</code> provides a single function, <code>mcase_case_when()</code>, a minimal reimplementation of <code>dplyr::case_when()</code>: vectorised if/else across a sequence of <code>condition ~ value</code> formulas, first match wins. See the <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> for scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/">minifilter vignette</a>.</p>
+<p><code>minicase</code> provides a single function, <code>mcase_case_when()</code>, a minimal reimplementation of <code>dplyr::case_when()</code>: vectorised if/else across a sequence of <code>condition ~ value</code> formulas, first match wins. See the <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> for scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/">minifilter vignette</a>, building up to how missing values and default values interact.</p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<ul>
+<li><code>mcase_case_when(...)</code> – given a sequence of <code>condition ~ value</code> formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is <code>TRUE</code> at each position, and <code>NA</code> wherever no condition matched.</li>
+</ul>
+<p><code>minicase</code> has five internal helpers (<code>.mcase_validate_length()</code>, <code>.mcase_replace_with()</code>, <code>.mcase_check_length()</code>, <code>.mcase_check_type()</code>, <code>.mcase_check_class()</code>), all supporting <code>mcase_case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fruits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name     =</span> <span class="fu">c</span>(<span class="st">"apple"</span>, <span class="st">"banana"</span>, <span class="st">"cherry"</span>, <span class="st">"date"</span>, <span class="st">"elderberry"</span>),</span>
@@ -368,9 +374,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 5 elderberry   4.5     TRUE</code></pre>
 </div>
 </div>
+</section>
 <section id="no-data-masking-reference-columns-with-or-wrap-in-with" class="level2">
 <h2 class="anchored" data-anchor-id="no-data-masking-reference-columns-with-or-wrap-in-with">No data-masking: reference columns with <code>$</code>, or wrap in <code>with()</code></h2>
-<p>Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own:</p>
+<p>Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that, mirrored here from base R, is to wrap the whole call in <code>with(data, ...)</code>, which temporarily makes the data frame’s columns available as bare names for the duration of the call:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
@@ -381,21 +388,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] "mid"    "cheap"  "pricey" NA       "pricey"</code></pre>
 </div>
 </div>
+<p>Referring to columns via <code>fruits$price</code> directly, without <code>with()</code>, works exactly the same way – <code>with()</code> is a convenience, not a requirement:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"cheap"</span>, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not cheap"</span>)),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcase_case_when</span>(fruits<span class="sc">$</span>price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"cheap"</span>, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not cheap"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
 </section>
 <section id="first-match-wins" class="level2">
 <h2 class="anchored" data-anchor-id="first-match-wins">First match wins</h2>
-<p><code>cherry</code> (price 3.00) fails <code>price &lt; 3</code> but matches <code>price &gt;= 3</code>; formulas are checked in order, and the first <code>TRUE</code> condition for each position determines its value even if a later condition would also match.</p>
+<p>Formulas are checked in order, and the first <code>TRUE</code> condition for each position determines its value, even if a later condition would also match. <code>cherry</code> (price 3.00) is a good illustration: it fails <code>price &lt; 3</code>, but matches <code>price &gt;= 3</code>, so it’s classified as <code>"pricey"</code> above. Conditions can combine several tests with <code>&amp;</code>, which is useful for layering more specific rules ahead of more general ones:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  in_stock <span class="sc">&amp;</span> price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap and in stock"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  in_stock             <span class="sc">~</span> <span class="st">"in stock"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span>                 <span class="sc">~</span> <span class="st">"out of stock or unknown price"</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "in stock"                      "cheap and in stock"           
+[3] "out of stock or unknown price" "in stock"                     
+[5] "in stock"                     </code></pre>
+</div>
+</div>
+<p><code>banana</code> matches both the first and second formula here (it’s in stock <em>and</em> under $1), but because the first-match-wins rule checks formulas top to bottom, it’s classified by the more specific <code>"cheap and in stock"</code> rule rather than the more general <code>"in stock"</code> one. Ordering formulas from most to least specific is exactly how you get that behaviour deliberately, rather than by accident.</p>
 </section>
 <section id="unmatched-positions-are-na" class="level2">
 <h2 class="anchored" data-anchor-id="unmatched-positions-are-na">Unmatched positions are <code>NA</code></h2>
-<p><code>date</code> has a missing price, so every condition above evaluates to <code>NA</code> for that row, and <code>date</code> itself gets <code>NA</code> in the result – there’s no condition it definitively satisfies. Add a <code>TRUE ~ ...</code> formula at the end as a catch-all default, the same way you would in <code>dplyr</code>:</p>
+<p><code>date</code> has a missing price, so every condition involving <code>price</code> evaluates to <code>NA</code> for that row – neither <code>TRUE</code> nor <code>FALSE</code> – and <code>date</code> itself gets <code>NA</code> in the result, since there’s no condition it definitively satisfies:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span>  <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">3</span>  <span class="sc">~</span> <span class="st">"mid"</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"pricey"</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span>       <span class="sc">~</span> <span class="st">"unknown"</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"mid"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"pricey"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "mid"    "cheap"  "pricey" NA       "pricey"</code></pre>
+</div>
+</div>
+<p>Add a <code>TRUE ~ ...</code> formula at the end as a catch-all default, the same way you would in <code>dplyr</code>, and every remaining position – including ones where every prior condition was <code>NA</code> rather than <code>FALSE</code> – picks up that value instead:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span>  <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">3</span>  <span class="sc">~</span> <span class="st">"mid"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"pricey"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span>       <span class="sc">~</span> <span class="st">"unknown"</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "mid"     "cheap"   "pricey"  "unknown" "pricey" </code></pre>
 </div>
@@ -403,7 +444,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="scope-no-.default.ptype.size" class="level2">
 <h2 class="anchored" data-anchor-id="scope-no-.default.ptype.size">Scope: no <code>.default</code>/<code>.ptype</code>/<code>.size</code></h2>
-<p>That trailing <code>TRUE ~ "unknown"</code> formula <em>is</em> the idiomatic way to get a default in both <code>dplyr::case_when()</code> and <code>mcase_case_when()</code> – <code>minicase</code> just doesn’t implement dplyr’s newer, separate <code>.default</code> argument as an alternative spelling of the same thing.</p>
+<p>That trailing <code>TRUE ~ "unknown"</code> formula <em>is</em> the idiomatic way to get a default in both <code>dplyr::case_when()</code> and <code>mcase_case_when()</code> – <code>minicase</code> just doesn’t implement dplyr’s newer, separate <code>.default</code> argument as an alternative spelling of the same thing, nor <code>.ptype</code>/ <code>.size</code> for controlling the output type/length explicitly. If your use case needs those, a plain <code>TRUE ~ value</code> formula covers <code>.default</code>, and the output length/type simply follow from whatever the conditions and values recycle to, the same way base R vector recycling works elsewhere.</p>
 
 
 </section>
