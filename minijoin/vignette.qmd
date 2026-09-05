@@ -12,7 +12,24 @@ source(file.path("minijoin", "minijoin.R"))
 built on base `merge()`. See the
 [README](https://github.com/djnavarro/minis/tree/main/minijoin) for
 the full argument reference; this page compares all four side by side
-on two small toy data frames with a partial overlap.
+on two small toy data frames with a partial overlap, then covers the
+`by` argument in more detail.
+
+## Functions
+
+- `mjoin_inner_join(x, y, by, ...)` -- keep only rows with a match in
+  both `x` and `y`.
+- `mjoin_left_join(x, y, by, ...)` -- keep all rows of `x`, filling in
+  `NA` for `y`'s columns where there's no match.
+- `mjoin_right_join(x, y, by, ...)` -- keep all rows of `y`, filling in
+  `NA` for `x`'s columns where there's no match.
+- `mjoin_full_join(x, y, by, ...)` -- keep all rows of both `x` and
+  `y`, filling in `NA` on whichever side has no match.
+
+`minijoin` has one internal helper, `.mjoin_worker()`, which all four
+join functions delegate to after fixing the right combination of
+`merge()`'s `all.x`/`all.y` arguments; it also restores `x`'s original
+row order, which `merge()` doesn't guarantee on its own.
 
 ```{r}
 bands <- data.frame(
@@ -28,9 +45,15 @@ albums
 ```
 
 `bands` and `albums` share `"Beatles"` and `"Kinks"`; `"Rolling
-Stones"` exists only in `bands`, and `"Queen"` only in `albums`.
+Stones"` exists only in `bands`, and `"Queen"` only in `albums`. The
+four join types differ only in which of those non-matching rows they
+keep.
 
 ## Inner join: only rows matching in both
+
+Neither `"Rolling Stones"` nor `"Queen"` appears -- an inner join is
+the most restrictive of the four, keeping only rows with a
+counterpart on the other side:
 
 ```{r}
 mjoin_inner_join(bands, albums, by = "band")
@@ -38,7 +61,9 @@ mjoin_inner_join(bands, albums, by = "band")
 
 ## Left join: all rows of `x` (`bands`)
 
-`"Rolling Stones"` is kept, with `NA` for `album`:
+`"Rolling Stones"` is kept, with `NA` for `album`, since it has no
+match in `albums`. This is the join to reach for when `x` is your
+"main" table and you're enriching it with optional data from `y`:
 
 ```{r}
 mjoin_left_join(bands, albums, by = "band")
@@ -46,11 +71,13 @@ mjoin_left_join(bands, albums, by = "band")
 
 ## Right join: all rows of `y` (`albums`)
 
-`"Queen"` is kept, with `NA` for `founded`. Note the row order: matched
-rows still come first, in `bands`' original order, with the
-unmatched-in-`x` row (`"Queen"`) appended at the end -- `minijoin`
-always restores `x`'s original row order for matched rows, rather than
-`y`'s:
+`"Queen"` is kept, with `NA` for `founded`. A right join is really
+just a left join with the arguments swapped -- `mjoin_right_join(x, y,
+...)` behaves like `mjoin_left_join(y, x, ...)`, with columns in `x`'s
+original order. Note the row order below: matched rows still come
+first, in `bands`' original order, with the unmatched-in-`x` row
+(`"Queen"`) appended at the end -- `minijoin` always restores `x`'s
+original row order for matched rows, rather than `y`'s:
 
 ```{r}
 mjoin_right_join(bands, albums, by = "band")
@@ -59,7 +86,10 @@ mjoin_right_join(bands, albums, by = "band")
 ## Full join: all rows of both
 
 Both `"Rolling Stones"` and `"Queen"` are kept, each with an `NA` in
-the column they don't have a match for:
+the column they don't have a match for -- a full join never drops a
+row from either side, so it's the join to reach for when you want to
+see everything and let missing matches show up as `NA` rather than
+disappearing silently:
 
 ```{r}
 mjoin_full_join(bands, albums, by = "band")
@@ -69,5 +99,22 @@ mjoin_full_join(bands, albums, by = "band")
 
 Unlike `dplyr`, there's no auto-detection of shared column names --
 `by` must always be supplied. This is a deliberate simplification, not
-an oversight, to avoid a class of silent bugs from an unintended
-shared column name.
+an oversight, to avoid a class of silent bugs from an unintended shared
+column name (two data frames that happen to both have an `id` column
+with unrelated meanings, for instance).
+
+When the join column has different names on each side, `by` takes a
+named character vector instead of a single string, `c("x_name" =
+"y_name")` -- mirroring `dplyr`'s own syntax for the same situation:
+
+```{r}
+albums_renamed <- albums
+names(albums_renamed)[1] <- "artist"
+albums_renamed
+
+mjoin_inner_join(bands, albums_renamed, by = c("band" = "artist"))
+```
+
+Note that the output keeps `x`'s column name (`band`), not `y`'s
+(`artist`) -- the join collapses the two into a single column, using
+whichever name `x` had.

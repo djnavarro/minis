@@ -12,7 +12,20 @@ reimplementation of `dplyr::filter()`: it keeps rows of a data frame
 where all of a set of unquoted conditions are `TRUE`. See the
 [README](https://github.com/djnavarro/minis/tree/main/minifilter) for
 scope notes; this page walks through its behaviour on a small toy data
-frame.
+frame, including two behaviours worth knowing about before you rely on
+it: how missing values are handled, and what happens with no
+conditions at all.
+
+## Functions
+
+- `mfilter_filter(.data, ...)` -- keep rows of `.data` where every
+  condition in `...` evaluates to `TRUE`. Conditions are evaluated in
+  the scope of `.data`, so columns can be referred to by bare name.
+
+`minifilter` has one internal helper, `.mfilter_dotdotdot()`, which
+captures the unevaluated `...` conditions so each one can be evaluated
+against the data frame individually, rather than evaluated eagerly
+against the caller's environment.
 
 ```{r}
 fruits <- data.frame(
@@ -26,7 +39,9 @@ fruits
 ## A single condition
 
 Columns are referred to by bare name, evaluated in the scope of the
-data frame:
+data frame -- there's no need to write `fruits$in_stock` or wrap the
+call in `with()`, as you would for
+[`minicase`](../minicase/)'s `mcase_case_when()`:
 
 ```{r}
 mfilter_filter(fruits, in_stock)
@@ -35,30 +50,56 @@ mfilter_filter(fruits, in_stock)
 ## Multiple conditions combine with AND
 
 Passing more than one condition is equivalent to combining them with
-`&`:
+`&`, so a row is kept only if every condition holds. This is often more
+readable than a single expression joined with `&&`/`&`, especially as
+the number of conditions grows:
 
 ```{r}
 mfilter_filter(fruits, in_stock, price < 4)
 ```
 
+That's equivalent to writing the conditions out explicitly and
+combining them yourself:
+
+```{r}
+identical(
+  mfilter_filter(fruits, in_stock, price < 4),
+  fruits[fruits$in_stock & fruits$price < 4 & !is.na(fruits$price), ]
+)
+```
+
 ## `NA` conditions drop the row
 
 `date` has a missing `price`, so any condition involving `price` is
-`NA` for that row rather than `TRUE`/`FALSE` -- and `mfilter_filter()`
-drops it, matching `dplyr::filter()`'s treatment of `NA` as "not kept":
+`NA` for that row rather than `TRUE`/`FALSE`. `mfilter_filter()` treats
+`NA` the same way `dplyr::filter()` does: as "not proven to be kept",
+so the row is dropped rather than kept by default or raising an error:
 
 ```{r}
 mfilter_filter(fruits, price > 1)
 ```
 
+Notice that `date` disappears from the result entirely, rather than
+appearing with `NA` values or being kept because "we don't know" --
+this is a common surprise for anyone used to base R's `[` subsetting,
+where an `NA` index instead produces a row of `NA`s:
+
+```{r}
+fruits[fruits$price > 1, ]
+```
+
 ## No conditions returns the data frame unchanged
+
+Calling `mfilter_filter()` with no conditions at all is a legitimate,
+supported no-op -- useful when conditions are built up programmatically
+and might end up empty:
 
 ```{r}
 identical(mfilter_filter(fruits), fruits)
 ```
 
-This is a deliberate fix relative to the poorman logic
-`minifilter` was adapted from, which didn't guard against empty `...`
-and would have silently dropped every row instead -- see the
+This is a deliberate fix relative to the poorman logic `minifilter` was
+adapted from, which didn't guard against empty `...` and would have
+silently dropped every row instead -- see the
 [README](https://github.com/djnavarro/minis/tree/main/minifilter#deliberate-fix-relative-to-the-source-this-was-adapted-from)
 for details.
