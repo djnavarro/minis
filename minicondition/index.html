@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>minis</title>
+<title>minicondition – minis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,30 +26,65 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-d18a60a485a739da09060858cb0fd121.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-d18a60a485a739da09060858cb0fd121.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-69bd8e265693142e3070681f24947865.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -259,7 +294,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">minis</span>
     </a>
   </div>
@@ -270,7 +305,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
 </ul>
@@ -299,7 +334,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">minis</h1>
+<h1 class="title">minicondition</h1>
 </div>
 
 
@@ -316,66 +351,83 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single <code>.R</code> file with its own drop-in test suite. When a package needs a little bit of <code>cli</code>-style formatting, or a little bit of <code>purrr</code>-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into <code>R/</code>.</p>
-<p>See the <a href="https://github.com/djnavarro/minis">repository README</a> for the full philosophy and usage instructions. This site collects worked-example <strong>vignettes</strong> for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README.</p>
-<section id="available-minis" class="level2">
-<h2 class="anchored" data-anchor-id="available-minis">Available minis</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 65%">
-<col style="width: 20%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Mini</th>
-<th>Purpose</th>
-<th>Docs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>minicli</code></td>
-<td>Minimal <code>cli</code>-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.</td>
-<td><a href="minicli/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minimap</code></td>
-<td>Minimal <code>purrr</code>-style <code>map()</code>/<code>map2()</code>/<code>imap()</code>/<code>walk()</code>/<code>iwalk()</code> and type-stable <code>map_dbl()</code>/<code>map_lgl()</code>/<code>map_chr()</code>.</td>
-<td><a href="minimap/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitrap</code></td>
-<td>Minimal <code>purrr</code>-style <code>safely()</code>/<code>quietly()</code> function adverbs.</td>
-<td><a href="minitrap/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minifilter</code></td>
-<td>Minimal <code>dplyr</code>-style <code>filter()</code>.</td>
-<td><a href="minifilter/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minicase</code></td>
-<td>Minimal <code>dplyr</code>-style <code>case_when()</code>.</td>
-<td><a href="minicase/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minijoin</code></td>
-<td>Minimal <code>dplyr</code>-style mutating joins, built on <code>merge()</code>.</td>
-<td><a href="minijoin/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitable</code></td>
-<td>Minimal <code>tibble</code>-style construction/coercion helpers.</td>
-<td><a href="minitable/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minicondition</code></td>
-<td>Minimal <code>rlang</code>-style classed conditions, plus <code>assert()</code>.</td>
-<td><a href="minicondition/">Vignette</a></td>
-</tr>
-</tbody>
-</table>
+<p><code>minicondition</code> provides <code>mcond_abort()</code>/<code>_warn()</code>/<code>_inform()</code> – thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class – plus <code>mcond_assert()</code> built on top of <code>mcond_abort()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> for the rlang-parity notes; this page focuses on the catch-by-class behaviour and <code>mcond_assert()</code>’s <code>NA</code> handling.</p>
+<section id="catching-a-classed-error-by-its-class" class="level2">
+<h2 class="anchored" data-anchor-id="catching-a-classed-error-by-its-class">Catching a classed error by its class</h2>
+<p><code>tryCatch()</code> dispatches on a condition’s class, whether that condition was signalled via <code>rlang::abort()</code> or, as here, via a plain classed condition object passed to base <code>stop()</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_abort</span>(<span class="st">"bad input"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_invalid_input =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught: "</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>caught: bad input</code></pre>
+</div>
+</div>
+<p>A handler for an unrelated class doesn’t match – the condition is still an ordinary <code>error</code> underneath, so a generic <code>error</code> handler catches it as a fallback:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_abort</span>(<span class="st">"bad input"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_other_class =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"this handler never runs"</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">error =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught generically as a plain error: "</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>caught generically as a plain error: bad input</code></pre>
+</div>
+</div>
+</section>
+<section id="warnings-and-messages-work-the-same-way" class="level2">
+<h2 class="anchored" data-anchor-id="warnings-and-messages-work-the-same-way">Warnings and messages work the same way</h2>
+<p><code>mcond_warn()</code> signals a classed warning, catchable via <code>withCallingHandlers()</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">withCallingHandlers</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_warn</span>(<span class="st">"using a fallback default"</span>, <span class="at">class =</span> <span class="st">"mypkg_fallback_used"</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_fallback_used =</span> <span class="cf">function</span>(w) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">"caught warning: "</span>, <span class="fu">conditionMessage</span>(w))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">invokeRestart</span>(<span class="st">"muffleWarning"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>caught warning: using a fallback default</code></pre>
+</div>
+</div>
+<p><code>mcond_inform()</code> signals a classed message – uncaught, it just prints like an ordinary <code>message()</code> call:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_inform</span>(<span class="st">"starting up"</span>, <span class="at">class =</span> <span class="st">"mypkg_startup"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>starting up</code></pre>
+</div>
+</div>
+</section>
+<section id="mcond_assert-abort-if-a-condition-doesnt-hold" class="level2">
+<h2 class="anchored" data-anchor-id="mcond_assert-abort-if-a-condition-doesnt-hold"><code>mcond_assert()</code>: abort if a condition doesn’t hold</h2>
+<p>A passing assertion is silent:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"x must be positive."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A failing one raises a classed <code>mcond_abort()</code> error, catchable the same way:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> x <span class="sc">&lt;</span> <span class="dv">3</span>, <span class="st">"x must be between 0 and 3."</span>, <span class="at">class =</span> <span class="st">"mypkg_range_error"</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mypkg_range_error =</span> <span class="cf">function</span>(e) <span class="fu">message</span>(<span class="st">"caught: "</span>, <span class="fu">conditionMessage</span>(e))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>caught: x must be between 0 and 3.</code></pre>
+</div>
+</div>
+</section>
+<section id="na-counts-as-a-failure-not-a-crash" class="level2">
+<h2 class="anchored" data-anchor-id="na-counts-as-a-failure-not-a-crash"><code>NA</code> counts as a failure, not a crash</h2>
+<p>This is a deliberate fix relative to the source this was adapted from: <code>if (any(expr == FALSE))</code> errors outright when <code>expr</code> contains <code>NA</code> (“missing value where TRUE/FALSE needed”), rather than raising the intended assertion error. <code>mcond_assert()</code> checks <code>anyNA(expr)</code> explicitly, so a vector containing <code>NA</code> fails the assertion cleanly:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">NA</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mcond_assert</span>(y, <span class="st">"y must not contain NA."</span>, <span class="at">class =</span> <span class="st">"mypkg_na_error"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error:
+! y must not contain NA.</code></pre>
+</div>
+</div>
 
 
 </section>
