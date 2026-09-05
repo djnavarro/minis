@@ -31,6 +31,8 @@ minis/
   run_tests.R                   # Runs every mini's tests/testthat/ suite; exits non-zero on failure
   _quarto.yml                   # Site config for the optional minis Quarto site (see below)
   index.qmd                     # Site front page: philosophy blurb + mini index, linking to READMEs/vignettes
+  paleblue.scss                 # Site light-mode theme (shared palette/fonts with djnavarro's other sites)
+  blackpink.scss                # Site dark-mode theme (ditto)
   _freeze/                      # Committed Quarto render cache (see "Vignettes and the minis site")
   .github/workflows/test.yaml   # CI: installs testthat+withr, runs run_tests.R
   .github/workflows/site.yaml   # CI: renders the Quarto site and publishes it to GitHub Pages
@@ -133,6 +135,13 @@ published to GitHub Pages by `.github/workflows/site.yaml`.
   mini's `.R` file, and commit the resulting `_freeze/` changes
   alongside.
 - Local preview: `quarto preview` from the repo root.
+- **Theming.** `_quarto.yml`'s `format.html.theme` points at
+  `paleblue.scss` (light) and `blackpink.scss` (dark), with
+  `respect-user-color-scheme: true` so the site defaults to the
+  visitor's OS preference and Quarto adds a manual toggle to the
+  navbar. Both files are copied from djnavarro's other Quarto sites
+  (e.g. `code.djnavarro.net`) to keep a consistent look across sites --
+  edit them in place here if the minis site ever needs to diverge.
 
 ### Adding a new mini
 

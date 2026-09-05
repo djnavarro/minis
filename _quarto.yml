@@ -24,6 +24,9 @@ website:
 
 format:
   html:
-    theme: cosmo
+    respect-user-color-scheme: true
+    theme:
+      light: paleblue.scss
+      dark: blackpink.scss
     toc: false
     output-file: index
