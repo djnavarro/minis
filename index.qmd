@@ -22,7 +22,7 @@ README.
 | `minicli` | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe. | [Vignette](minicli/) |
 | `minimap` | Minimal `purrr`-style `map()`/`map2()`/`imap()`/`walk()`/`iwalk()` and type-stable `map_dbl()`/`map_lgl()`/`map_chr()`. | [Vignette](minimap/) |
 | `minitrap` | Minimal `purrr`-style `safely()`/`quietly()` function adverbs. | [Vignette](minitrap/) |
-| `minifilter` | Minimal `dplyr`-style `filter()`. | [README](https://github.com/djnavarro/minis/tree/main/minifilter) |
+| `minifilter` | Minimal `dplyr`-style `filter()`. | [Vignette](minifilter/) |
 | `minicase` | Minimal `dplyr`-style `case_when()`. | [README](https://github.com/djnavarro/minis/tree/main/minicase) |
 | `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [README](https://github.com/djnavarro/minis/tree/main/minijoin) |
 | `minitable` | Minimal `tibble`-style construction/coercion helpers. | [README](https://github.com/djnavarro/minis/tree/main/minitable) |

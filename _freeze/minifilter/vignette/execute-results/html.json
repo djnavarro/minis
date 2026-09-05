@@ -1,0 +1,15 @@
+{
+  "hash": "8b250b67dce6ebb46f4e97ba31fea63d",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"minifilter\"\n---\n\n\n\n\n\n`minifilter` provides a single function, `mfilter_filter()`, a minimal\nreimplementation of `dplyr::filter()`: it keeps rows of a data frame\nwhere all of a set of unquoted conditions are `TRUE`. See the\n[README](https://github.com/djnavarro/minis/tree/main/minifilter) for\nscope notes; this page walks through its behaviour on a small toy data\nframe.\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfruits <- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE\n```\n\n\n:::\n:::\n\n\n\n## A single condition\n\nColumns are referred to by bare name, evaluated in the scope of the\ndata frame:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmfilter_filter(fruits, in_stock)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE\n```\n\n\n:::\n:::\n\n\n\n## Multiple conditions combine with AND\n\nPassing more than one condition is equivalent to combining them with\n`&`:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmfilter_filter(fruits, in_stock, price < 4)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n    name price in_stock\n1  apple   1.2     TRUE\n2 banana   0.5     TRUE\n```\n\n\n:::\n:::\n\n\n\n## `NA` conditions drop the row\n\n`date` has a missing `price`, so any condition involving `price` is\n`NA` for that row rather than `TRUE`/`FALSE` -- and `mfilter_filter()`\ndrops it, matching `dplyr::filter()`'s treatment of `NA` as \"not kept\":\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmfilter_filter(fruits, price > 1)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n        name price in_stock\n1      apple   1.2     TRUE\n3     cherry   3.0    FALSE\n5 elderberry   4.5     TRUE\n```\n\n\n:::\n:::\n\n\n\n## No conditions returns the data frame unchanged\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nidentical(mfilter_filter(fruits), fruits)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] TRUE\n```\n\n\n:::\n:::\n\n\n\nThis is a deliberate fix relative to the poorman logic\n`minifilter` was adapted from, which didn't guard against empty `...`\nand would have silently dropped every row instead -- see the\n[README](https://github.com/djnavarro/minis/tree/main/minifilter#deliberate-fix-relative-to-the-source-this-was-adapted-from)\nfor details.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,64 @@
+---
+title: "minifilter"
+---
+
+```{r}
+#| include: false
+source(file.path("minifilter", "minifilter.R"))
+```
+
+`minifilter` provides a single function, `mfilter_filter()`, a minimal
+reimplementation of `dplyr::filter()`: it keeps rows of a data frame
+where all of a set of unquoted conditions are `TRUE`. See the
+[README](https://github.com/djnavarro/minis/tree/main/minifilter) for
+scope notes; this page walks through its behaviour on a small toy data
+frame.
+
+```{r}
+fruits <- data.frame(
+  name     = c("apple", "banana", "cherry", "date", "elderberry"),
+  price    = c(1.20, 0.50, 3.00, NA, 4.50),
+  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)
+)
+fruits
+```
+
+## A single condition
+
+Columns are referred to by bare name, evaluated in the scope of the
+data frame:
+
+```{r}
+mfilter_filter(fruits, in_stock)
+```
+
+## Multiple conditions combine with AND
+
+Passing more than one condition is equivalent to combining them with
+`&`:
+
+```{r}
+mfilter_filter(fruits, in_stock, price < 4)
+```
+
+## `NA` conditions drop the row
+
+`date` has a missing `price`, so any condition involving `price` is
+`NA` for that row rather than `TRUE`/`FALSE` -- and `mfilter_filter()`
+drops it, matching `dplyr::filter()`'s treatment of `NA` as "not kept":
+
+```{r}
+mfilter_filter(fruits, price > 1)
+```
+
+## No conditions returns the data frame unchanged
+
+```{r}
+identical(mfilter_filter(fruits), fruits)
+```
+
+This is a deliberate fix relative to the poorman logic
+`minifilter` was adapted from, which didn't guard against empty `...`
+and would have silently dropped every row instead -- see the
+[README](https://github.com/djnavarro/minis/tree/main/minifilter#deliberate-fix-relative-to-the-source-this-was-adapted-from)
+for details.
