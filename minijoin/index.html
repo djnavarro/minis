@@ -351,16 +351,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minijoin</code> provides four mutating joins – <code>mjoin_inner_join()</code>/<code>_left_join()</code>/<code>_right_join()</code>/<code>_full_join()</code> – built on base <code>merge()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the <code>by</code> argument in more detail.</p>
+<p>The <code>minijoin</code> mini provides a tiny slice of dplyr-like syntax for mutating joins, all built atop base <code>merge()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the <code>by</code> argument in more detail.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>The core functions are these:</p>
 <ul>
 <li><code>mjoin_inner_join(x, y, by, ...)</code> – keep only rows with a match in both <code>x</code> and <code>y</code>.</li>
 <li><code>mjoin_left_join(x, y, by, ...)</code> – keep all rows of <code>x</code>, filling in <code>NA</code> for <code>y</code>’s columns where there’s no match.</li>
 <li><code>mjoin_right_join(x, y, by, ...)</code> – keep all rows of <code>y</code>, filling in <code>NA</code> for <code>x</code>’s columns where there’s no match.</li>
 <li><code>mjoin_full_join(x, y, by, ...)</code> – keep all rows of both <code>x</code> and <code>y</code>, filling in <code>NA</code> on whichever side has no match.</li>
 </ul>
-<p><code>minijoin</code> has one internal helper, <code>.mjoin_worker()</code>, which all four join functions delegate to after fixing the right combination of <code>merge()</code>’s <code>all.x</code>/<code>all.y</code> arguments; it also restores <code>x</code>’s original row order, which <code>merge()</code> doesn’t guarantee on its own.</p>
+<p>Additionally, <code>minijoin</code> has one internal helper, <code>.mjoin_worker()</code>, which all four join functions delegate to after fixing the right combination of <code>merge()</code>’s <code>all.x</code>/<code>all.y</code> arguments; it also restores <code>x</code>’s original row order, which <code>merge()</code> doesn’t guarantee on its own.</p>
+</section>
+<section id="minimal-data-frames" class="level2">
+<h2 class="anchored" data-anchor-id="minimal-data-frames">Minimal data frames</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">band =</span> <span class="fu">c</span>(<span class="st">"Beatles"</span>, <span class="st">"Rolling Stones"</span>, <span class="st">"Kinks"</span>),</span>
@@ -385,7 +389,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3   Queen A Night at the Opera</code></pre>
 </div>
 </div>
-<p><code>bands</code> and <code>albums</code> share <code>"Beatles"</code> and <code>"Kinks"</code>; <code>"Rolling Stones"</code> exists only in <code>bands</code>, and <code>"Queen"</code> only in <code>albums</code>. The four join types differ only in which of those non-matching rows they keep.</p>
+<p>I will be honest. An AI designed these two data frames. Here we have <code>bands</code> and <code>albums</code> as the data sets, sharing <code>"Beatles"</code> and <code>"Kinks"</code>. The <code>"Rolling Stones"</code> exist only in <code>bands</code>, but <code>"Queen"</code> exists only in <code>albums</code>. The four join types differ only in which of those non-matching rows they keep. This is perfectly fine as a toy example but – for reasons I should not need to explain – I am deeply personally offended by the decision to list <em>Arthur</em> rather than <em>Lola Versus Powerman</em>, and this is merely the beginning of my long list of concerns.</p>
 </section>
 <section id="inner-join-only-rows-matching-in-both" class="level2">
 <h2 class="anchored" data-anchor-id="inner-join-only-rows-matching-in-both">Inner join: only rows matching in both</h2>

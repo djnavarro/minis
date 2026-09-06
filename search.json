@@ -81,7 +81,14 @@
     "href": "minifilter/index.html#functions",
     "title": "minifilter",
     "section": "Functions",
-    "text": "Functions\n\nmfilter_filter(.data, ...) – keep rows of .data where every condition in ... evaluates to TRUE. Conditions are evaluated in the scope of .data, so columns can be referred to by bare name.\n\nminifilter has one internal helper, .mfilter_dotdotdot(), which captures the unevaluated ... conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.\n\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+    "text": "Functions\nThere is a single core function to this mini:\n\nmfilter_filter(.data, ...) – keep rows of .data where every condition in ... evaluates to TRUE. Conditions are evaluated in the scope of .data, so columns can be referred to by bare name.\n\nThere is also one internal helper:\n\n.mfilter_dotdotdot() captures the unevaluated ... conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment."
+  },
+  {
+    "objectID": "minifilter/index.html#a-minimal-data-set",
+    "href": "minifilter/index.html#a-minimal-data-set",
+    "title": "minifilter",
+    "section": "A minimal data set",
+    "text": "A minimal data set\n\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
   },
   {
     "objectID": "minifilter/index.html#a-single-condition",
@@ -172,7 +179,7 @@
     "href": "index.html",
     "title": "minis",
     "section": "",
-    "text": "A collection of small, standalone, zero-runtime-dependency R components (“minis”), each shipped as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, grab the relevant mini and copy it straight into R/.\nSee the repository README for the full philosophy and usage instructions. This site collects worked-example vignettes for minis that have one; minis without a vignette yet are still listed below, linking straight to their GitHub README.\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nVignette\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nVignette\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nVignette"
+    "text": "A problem I encounter frequently when writing R packages is that I’ll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does.\nThe “minis” repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components (“minis”), each witten as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, I can grab the relevant mini and copy it straight into my package without reimplementing the solution over and over again. Admittedly, it is rarely a pure “drop-in” situation: every package has its own need, so I almost always end up adapting the mini to suit the context, but even so I find it helps me enormously.\nSo I’ve started trying to collect these little snippets into a single place, making it easy for me to find them again rather than hunt around trying to remember where I solved this problem last time. The repository README outlines the full philosophy and usage instructions, if by some chance anyone else should care to reuse these solutions. Meanwhile, because each mini has its own worked vignette, this site exists to collect all these together (or alternatively, the README if a vignette doesn’t exist).\nThese are the minis that currently exist:\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminifilter\nMinimal dplyr-style filter().\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nVignette\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nVignette\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nVignette"
   },
   {
     "objectID": "minicase/index.html",
@@ -186,14 +193,21 @@
     "href": "minicase/index.html#functions",
     "title": "minicase",
     "section": "Functions",
-    "text": "Functions\n\nmcase_case_when(...) – given a sequence of condition ~ value formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is TRUE at each position, and NA wherever no condition matched.\n\nminicase has five internal helpers (.mcase_validate_length(), .mcase_replace_with(), .mcase_check_length(), .mcase_check_type(), .mcase_check_class()), all supporting mcase_case_when()’s recycling and type-consistency checks – there’s no need to call any of them directly.\n\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+    "text": "Functions\nThere is one core function:\n\nmcase_case_when(...) – given a sequence of condition ~ value formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is TRUE at each position, and NA wherever no condition matched.\n\nIt is supported by five internal helpers, all supporting mcase_case_when()’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:\n\n.mcase_validate_length()\n.mcase_replace_with()\n.mcase_check_length()\n.mcase_check_type()\n.mcase_check_class()"
   },
   {
-    "objectID": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
-    "href": "minicase/index.html#no-data-masking-reference-columns-with-or-wrap-in-with",
+    "objectID": "minicase/index.html#a-minimal-data-set",
+    "href": "minicase/index.html#a-minimal-data-set",
     "title": "minicase",
-    "section": "No data-masking: reference columns with $, or wrap in with()",
-    "text": "No data-masking: reference columns with $, or wrap in with()\nUnlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that, mirrored here from base R, is to wrap the whole call in with(data, ...), which temporarily makes the data frame’s columns available as bare names for the duration of the call:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nReferring to columns via fruits$price directly, without with(), works exactly the same way – with() is a convenience, not a requirement:\n\nidentical(\n  with(fruits, mcase_case_when(price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")),\n  mcase_case_when(fruits$price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")\n)\n\n[1] TRUE"
+    "section": "A minimal data set",
+    "text": "A minimal data set\n\nfruits &lt;- data.frame(\n  name     = c(\"apple\", \"banana\", \"cherry\", \"date\", \"elderberry\"),\n  price    = c(1.20, 0.50, 3.00, NA, 4.50),\n  in_stock = c(TRUE, TRUE, FALSE, TRUE, TRUE)\n)\nfruits\n\n        name price in_stock\n1      apple   1.2     TRUE\n2     banana   0.5     TRUE\n3     cherry   3.0    FALSE\n4       date    NA     TRUE\n5 elderberry   4.5     TRUE"
+  },
+  {
+    "objectID": "minicase/index.html#no-data-masking",
+    "href": "minicase/index.html#no-data-masking",
+    "title": "minicase",
+    "section": "No data-masking",
+    "text": "No data-masking\nThere is no data-masking in this mini: you must reference columns with $, or wrap in with(). Unlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in with(data, ...) which temporarily makes the data frame’s columns available as bare names for the duration of the call:\n\nwith(fruits, mcase_case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nReferring to columns via fruits$price directly, without with(), works exactly the same way – with() is a convenience, not a requirement:\n\nidentical(\n  with(fruits, mcase_case_when(price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")),\n  mcase_case_when(fruits$price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")\n)\n\n[1] TRUE"
   },
   {
     "objectID": "minicase/index.html#first-match-wins",
@@ -214,21 +228,21 @@
     "href": "minicase/index.html#scope-no-.default.ptype.size",
     "title": "minicase",
     "section": "Scope: no .default/.ptype/.size",
-    "text": "Scope: no .default/.ptype/.size\nThat trailing TRUE ~ \"unknown\" formula is the idiomatic way to get a default in both dplyr::case_when() and mcase_case_when() – minicase just doesn’t implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing, nor .ptype/ .size for controlling the output type/length explicitly. If your use case needs those, a plain TRUE ~ value formula covers .default, and the output length/type simply follow from whatever the conditions and values recycle to, the same way base R vector recycling works elsewhere."
+    "text": "Scope: no .default/.ptype/.size\nThe mini does not implement any of these arguments. The trailing TRUE ~ \"unknown\" formula in the previous example is the idiomatic way to get a default value (and indeed is very often used in when writing code with the real dplyr::case_when() function). I simply decided there was no need for this mini to implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing, nor did I think there was much to be gained by adding .ptype/ .size to control the output type/length explicitly. If your use case needs those, a plain TRUE ~ value formula covers .default, and the output length/type simply follow from whatever the conditions. If that still isn’t sufficient, then it’s likely you need the real version not the mini."
   },
   {
     "objectID": "minicondition/index.html",
     "href": "minicondition/index.html",
     "title": "minicondition",
     "section": "",
-    "text": "minicondition provides mcond_abort()/_warn()/_inform() – thin wrappers around base R’s own condition system that signal a classed condition, catchable specifically by that class – plus mcond_assert() built on top of mcond_abort(). See the README for the rlang-parity notes; this page focuses on the catch-by-class behaviour, since that’s the main reason to reach for minicondition over plain stop()/warning()/message(), and finishes with mcond_assert()’s handling of NA."
+    "text": "minicondition provides thin wrappers around base R’s own condition system that signal a classed condition, catchable specifically by that class. See the README for the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for minicondition over plain stop()/warning()/message()."
   },
   {
     "objectID": "minicondition/index.html#functions",
     "href": "minicondition/index.html#functions",
     "title": "minicondition",
     "section": "Functions",
-    "text": "Functions\n\nmcond_abort(message, class = NULL) – signal a classed error.\nmcond_warn(message, class = NULL) – signal a classed warning.\nmcond_inform(message, class = NULL) – signal a classed message.\nmcond_assert(expr, message, class = NULL) – call mcond_abort() if expr isn’t entirely TRUE; NA counts as a failure.\n\nminicondition has one internal helper, .mcond_condition(), which builds the classed condition object that mcond_abort()/_warn()/ _inform() each hand off to base stop()/warning()/message()."
+    "text": "Functions\nThese are the core functions:\n\nmcond_abort(message, class = NULL) – signal a classed error.\nmcond_warn(message, class = NULL) – signal a classed warning.\nmcond_inform(message, class = NULL) – signal a classed message.\nmcond_assert(expr, message, class = NULL) – call mcond_abort() if expr isn’t entirely TRUE; NA counts as a failure.\n\nminicondition also has one internal helper:\n\n.mcond_condition() builds the classed condition object that mcond_abort()/ _warn()/ _inform() each hand off to base stop()/warning()/message()."
   },
   {
     "objectID": "minicondition/index.html#why-classes-matter",
@@ -270,14 +284,21 @@
     "href": "minijoin/index.html",
     "title": "minijoin",
     "section": "",
-    "text": "minijoin provides four mutating joins – mjoin_inner_join()/_left_join()/_right_join()/_full_join() – built on base merge(). See the README for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the by argument in more detail."
+    "text": "The minijoin mini provides a tiny slice of dplyr-like syntax for mutating joins, all built atop base merge(). See the README for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the by argument in more detail."
   },
   {
     "objectID": "minijoin/index.html#functions",
     "href": "minijoin/index.html#functions",
     "title": "minijoin",
     "section": "Functions",
-    "text": "Functions\n\nmjoin_inner_join(x, y, by, ...) – keep only rows with a match in both x and y.\nmjoin_left_join(x, y, by, ...) – keep all rows of x, filling in NA for y’s columns where there’s no match.\nmjoin_right_join(x, y, by, ...) – keep all rows of y, filling in NA for x’s columns where there’s no match.\nmjoin_full_join(x, y, by, ...) – keep all rows of both x and y, filling in NA on whichever side has no match.\n\nminijoin has one internal helper, .mjoin_worker(), which all four join functions delegate to after fixing the right combination of merge()’s all.x/all.y arguments; it also restores x’s original row order, which merge() doesn’t guarantee on its own.\n\nbands &lt;- data.frame(\n  band = c(\"Beatles\", \"Rolling Stones\", \"Kinks\"),\n  founded = c(1960, 1962, 1963)\n)\nalbums &lt;- data.frame(\n  band = c(\"Beatles\", \"Kinks\", \"Queen\"),\n  album = c(\"Abbey Road\", \"Arthur\", \"A Night at the Opera\")\n)\nbands\n\n            band founded\n1        Beatles    1960\n2 Rolling Stones    1962\n3          Kinks    1963\n\nalbums\n\n     band                album\n1 Beatles           Abbey Road\n2   Kinks               Arthur\n3   Queen A Night at the Opera\n\n\nbands and albums share \"Beatles\" and \"Kinks\"; \"Rolling Stones\" exists only in bands, and \"Queen\" only in albums. The four join types differ only in which of those non-matching rows they keep."
+    "text": "Functions\nThe core functions are these:\n\nmjoin_inner_join(x, y, by, ...) – keep only rows with a match in both x and y.\nmjoin_left_join(x, y, by, ...) – keep all rows of x, filling in NA for y’s columns where there’s no match.\nmjoin_right_join(x, y, by, ...) – keep all rows of y, filling in NA for x’s columns where there’s no match.\nmjoin_full_join(x, y, by, ...) – keep all rows of both x and y, filling in NA on whichever side has no match.\n\nAdditionally, minijoin has one internal helper, .mjoin_worker(), which all four join functions delegate to after fixing the right combination of merge()’s all.x/all.y arguments; it also restores x’s original row order, which merge() doesn’t guarantee on its own."
+  },
+  {
+    "objectID": "minijoin/index.html#minimal-data-frames",
+    "href": "minijoin/index.html#minimal-data-frames",
+    "title": "minijoin",
+    "section": "Minimal data frames",
+    "text": "Minimal data frames\n\nbands &lt;- data.frame(\n  band = c(\"Beatles\", \"Rolling Stones\", \"Kinks\"),\n  founded = c(1960, 1962, 1963)\n)\nalbums &lt;- data.frame(\n  band = c(\"Beatles\", \"Kinks\", \"Queen\"),\n  album = c(\"Abbey Road\", \"Arthur\", \"A Night at the Opera\")\n)\nbands\n\n            band founded\n1        Beatles    1960\n2 Rolling Stones    1962\n3          Kinks    1963\n\nalbums\n\n     band                album\n1 Beatles           Abbey Road\n2   Kinks               Arthur\n3   Queen A Night at the Opera\n\n\nI will be honest. An AI designed these two data frames. Here we have bands and albums as the data sets, sharing \"Beatles\" and \"Kinks\". The \"Rolling Stones\" exist only in bands, but \"Queen\" exists only in albums. The four join types differ only in which of those non-matching rows they keep. This is perfectly fine as a toy example but – for reasons I should not need to explain – I am deeply personally offended by the decision to list Arthur rather than Lola Versus Powerman, and this is merely the beginning of my long list of concerns."
   },
   {
     "objectID": "minijoin/index.html#inner-join-only-rows-matching-in-both",
@@ -319,21 +340,21 @@
     "href": "minitable/index.html",
     "title": "minitable",
     "section": "",
-    "text": "minitable provides a few tibble-style construction/coercion helpers – mtable_tibble(), mtable_as_tibble(), mtable_rownames_to_column(), mtable_add_row() – built entirely on data.frame()/as.data.frame(). Results are plain data frames, not tibbles. See the README for the full scope notes; this page walks through each function, including the cross-column-reference behaviour that’s the trickiest part of the mini to get right."
+    "text": "The goal with minitable is to provide a few tibble-like construction/coercion helpers built entirely on data frames. Results are plain data frames, not actual tibbles. See the README for the full scope notes; this page walks through each function, including the cross-column-reference behaviour that’s the trickiest part of the mini to get right."
   },
   {
     "objectID": "minitable/index.html#functions",
     "href": "minitable/index.html#functions",
     "title": "minitable",
     "section": "Functions",
-    "text": "Functions\n\nmtable_tibble(...) – build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.\nmtable_as_tibble(x, ...) – coerce x to a plain data frame via as.data.frame(), preserving literal (non-syntactic) column names.\nmtable_rownames_to_column(.data, var) – move .data’s row names into an explicit column named var; a no-op if the row names are just the default sequential ones.\nmtable_add_row(.data, ...) – append a single row to .data, with the same cross-column-reference support as mtable_tibble().\n\nminitable has one internal helper, .mtable_drop_dup_list(), which mtable_tibble() and mtable_add_row() both use to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below)."
+    "text": "Functions\nThere are currently four core functions:\n\nmtable_tibble(...) – build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.\nmtable_as_tibble(x, ...) – coerce x to a plain data frame via as.data.frame(), preserving literal (non-syntactic) column names.\nmtable_rownames_to_column(.data, var) – move .data’s row names into an explicit column named var; a no-op if the row names are just the default sequential ones.\nmtable_add_row(.data, ...) – append a single row to .data, with the same cross-column-reference support as mtable_tibble().\n\nAdditionally minitable has one internal helper:\n\n.mtable_drop_dup_list() is used by both mtable_tibble() and mtable_add_row() to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below)."
   },
   {
-    "objectID": "minitable/index.html#mtable_tibble-sequential-cross-referencing-construction",
-    "href": "minitable/index.html#mtable_tibble-sequential-cross-referencing-construction",
+    "objectID": "minitable/index.html#sequential-cross-referencing-construction",
+    "href": "minitable/index.html#sequential-cross-referencing-construction",
     "title": "minitable",
-    "section": "mtable_tibble(): sequential, cross-referencing construction",
-    "text": "mtable_tibble(): sequential, cross-referencing construction\nBuilding a data frame with data.frame() directly requires every column to already exist as a complete vector before the call – you can’t refer to a column you’re building in the same call. Like tibble::tibble(), mtable_tibble() lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:\n\nmtable_tibble(a = 1:3, b = a * 2, c = a + b)\n\n  a b c\n1 1 2 3\n2 2 4 6\n3 3 6 9\n\n\nHere b refers to a, and c refers to both a and b – neither would resolve to anything if evaluated outside the call, since a, b, and c don’t otherwise exist in this session. Getting this right took real care in the implementation: the sequential-evaluation logic lives directly inside mtable_tibble() itself, rather than in a shared helper that ... gets forwarded through. Forwarding ... to a separate function turns each argument into an opaque ..1/..2 pronoun that resolves free variables against the caller’s environment instead of the column-by-column environment being built up – which would silently break exactly this feature, evaluating b and c against whatever (unrelated) a/b might exist in the calling code, or erroring if there simply isn’t one."
+    "section": "Sequential, cross-referencing construction",
+    "text": "Sequential, cross-referencing construction\nBuilding a data frame with data.frame() directly requires every column to already exist as a complete vector before the call – you can’t refer to a column you’re building in the same call. Like tibble::tibble(), mtable_tibble() lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:\n\nmtable_tibble(a = 1:3, b = a * 2, c = a + b)\n\n  a b c\n1 1 2 3\n2 2 4 6\n3 3 6 9\n\n\nHere b refers to a, and c refers to both a and b – neither would resolve to anything if evaluated outside the call, since a, b, and c don’t otherwise exist in this session. Getting this right took real care in the implementation, but you can take a look at the code if you’re interested."
   },
   {
     "objectID": "minitable/index.html#unnamed-arguments-are-named-after-their-deparsed-expression",
@@ -343,24 +364,31 @@
     "text": "Unnamed arguments are named after their deparsed expression\nJust as in tibble::tibble(), an argument with no name = is named after its own source expression, converted to a string:\n\nmtable_tibble(1:3, sqrt(1:3))\n\n  1:3 sqrt(1:3)\n1   1  1.000000\n2   2  1.414214\n3   3  1.732051\n\n\nThis is mostly useful for quick, throwaway construction; naming columns explicitly (mtable_tibble(x = 1:3, y = sqrt(1:3))) is more readable for anything that will be used again later."
   },
   {
-    "objectID": "minitable/index.html#mtable_as_tibble-coercion-only",
-    "href": "minitable/index.html#mtable_as_tibble-coercion-only",
+    "objectID": "minitable/index.html#minimalist-coercion",
+    "href": "minitable/index.html#minimalist-coercion",
     "title": "minitable",
-    "section": "mtable_as_tibble(): coercion only",
-    "text": "mtable_as_tibble(): coercion only\nThere’s no tibble class or special printing here – it’s just as.data.frame() with check.names = FALSE, so a literal, non-syntactic column name (like \"1:3\" from the previous section) survives unchanged instead of being sanitised by make.names():\n\nmtable_as_tibble(list(a = 1:2, b = c(\"x\", \"y\")))\n\n  a b\n1 1 x\n2 2 y\n\n\nThe difference from calling as.data.frame() directly shows up with a name that isn’t a syntactically valid R identifier, like the \"1:3\" name mtable_tibble() generated automatically two sections ago:\n\nnames(mtable_as_tibble(list(`1:3` = 1:3)))\n\n[1] \"1:3\"\n\nnames(as.data.frame(list(`1:3` = 1:3)))\n\n[1] \"X1.3\"\n\n\nas.data.frame()’s default check.names = TRUE rewrites \"1:3\" into the syntactically valid \"X1.3\"; mtable_as_tibble() passes check.names = FALSE through instead, so the literal name survives."
+    "section": "Minimalist coercion",
+    "text": "Minimalist coercion\nThere’s no tibble class or special printing here – it’s just as.data.frame() with check.names = FALSE, so a literal, non-syntactic column name (like \"1:3\" from the previous section) survives unchanged instead of being sanitised by make.names():\n\nmtable_as_tibble(list(a = 1:2, b = c(\"x\", \"y\")))\n\n  a b\n1 1 x\n2 2 y\n\n\nThe difference from calling as.data.frame() directly shows up with a name that isn’t a syntactically valid R identifier, like the \"1:3\" name mtable_tibble() generated automatically two sections ago:\n\nnames(mtable_as_tibble(list(`1:3` = 1:3)))\n\n[1] \"1:3\"\n\nnames(as.data.frame(list(`1:3` = 1:3)))\n\n[1] \"X1.3\"\n\n\nas.data.frame()’s default check.names = TRUE rewrites \"1:3\" into the syntactically valid \"X1.3\"; mtable_as_tibble() passes check.names = FALSE through instead, so the literal name survives."
   },
   {
-    "objectID": "minitable/index.html#mtable_rownames_to_column-no-op-on-default-row-names",
-    "href": "minitable/index.html#mtable_rownames_to_column-no-op-on-default-row-names",
+    "objectID": "minitable/index.html#rowname-to-column-conversion",
+    "href": "minitable/index.html#rowname-to-column-conversion",
     "title": "minitable",
-    "section": "mtable_rownames_to_column(): no-op on default row names",
-    "text": "mtable_rownames_to_column(): no-op on default row names\nA data frame with only the default sequential row names (\"1\", \"2\", …) is returned unchanged – there’s nothing meaningful to move into a column:\n\nidentical(\n  mtable_rownames_to_column(data.frame(x = 1:3), var = \"id\"),\n  data.frame(x = 1:3)\n)\n\n[1] TRUE\n\n\nReal (non-default) row names do get moved into a new column, placed first:\n\nmtable_rownames_to_column(head(mtcars, 3), var = \"model\")\n\n          model  mpg cyl disp  hp drat    wt  qsec vs am gear carb\n1     Mazda RX4 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4\n2 Mazda RX4 Wag 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4\n3    Datsun 710 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1"
+    "section": "Rowname to column conversion",
+    "text": "Rowname to column conversion\nA data frame with only the default sequential row names (\"1\", \"2\", …) is returned unchanged – there’s nothing meaningful to move into a column:\n\nidentical(\n  mtable_rownames_to_column(data.frame(x = 1:3), var = \"id\"),\n  data.frame(x = 1:3)\n)\n\n[1] TRUE\n\n\nReal (non-default) row names do get moved into a new column, placed first:\n\nmtable_rownames_to_column(head(mtcars, 3), var = \"model\")\n\n          model  mpg cyl disp  hp drat    wt  qsec vs am gear carb\n1     Mazda RX4 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4\n2 Mazda RX4 Wag 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4\n3    Datsun 710 22.8   4  108  93 3.85 2.320 18.61  1  1    4    1"
   },
   {
-    "objectID": "minitable/index.html#mtable_add_row-the-same-cross-referencing-support",
-    "href": "minitable/index.html#mtable_add_row-the-same-cross-referencing-support",
+    "objectID": "minitable/index.html#adding-rows",
+    "href": "minitable/index.html#adding-rows",
     "title": "minitable",
-    "section": "mtable_add_row(): the same cross-referencing support",
-    "text": "mtable_add_row(): the same cross-referencing support\nAppending a row supports the same sequential evaluation as mtable_tibble(), so a later value in the new row can refer to an earlier one – either a column already in .data, or one being added in the same call:\n\ndf &lt;- mtable_tibble(a = 1:2, b = a * 10)\ndf\n\n  a  b\n1 1 10\n2 2 20\n\nmtable_add_row(df, a = 3, b = a * 10)\n\n  a  b\n1 1 10\n2 2 20\n3 3 30\n\n\nHere a * 10 in the new row refers to the a = 3 just supplied in that same call, not to the existing column a in df – the most recently constructed value for a given name always wins, which is what .mtable_drop_dup_list() is for internally."
+    "section": "Adding rows",
+    "text": "Adding rows\nAppending a row with mtable_add_row() supports the same sequential evaluation as mtable_tibble(), so a later value in the new row can refer to an earlier one: either a column already in .data, or one that is added in the same call.\n\ndf &lt;- mtable_tibble(a = 1:2, b = a * 10)\ndf\n\n  a  b\n1 1 10\n2 2 20\n\nmtable_add_row(df, a = 3, b = a * 10)\n\n  a  b\n1 1 10\n2 2 20\n3 3 30\n\n\nHere a * 10 in the new row refers to the a = 3 just supplied in that same call, not to the existing column a in df – the most recently constructed value for a given name always wins, which is what .mtable_drop_dup_list() is for internally."
+  },
+  {
+    "objectID": "minitable/index.html#scope-data-frame-dropping-still-exists",
+    "href": "minitable/index.html#scope-data-frame-dropping-still-exists",
+    "title": "minitable",
+    "section": "Scope: data frame dropping still exists",
+    "text": "Scope: data frame dropping still exists\nNothing in this mini changes the fact that the return objects are genuine data frames, which means that [ still behaves exactly the same as usual for a data frame, and subsetting is therefore subject to the data frame dropping rule. It is possible that a future extension could layer a very thin S3 class that addresses this, but I am cautious about this: the risk of introducing unexpected behaviour if a “quasi-tibble” classed object escapes into the wild seems too much to countenance in a mini."
   }
 ]

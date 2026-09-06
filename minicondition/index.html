@@ -351,16 +351,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicondition</code> provides <code>mcond_abort()</code>/<code>_warn()</code>/<code>_inform()</code> – thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class – plus <code>mcond_assert()</code> built on top of <code>mcond_abort()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> for the rlang-parity notes; this page focuses on the catch-by-class behaviour, since that’s the main reason to reach for <code>minicondition</code> over plain <code>stop()</code>/<code>warning()</code>/<code>message()</code>, and finishes with <code>mcond_assert()</code>’s handling of <code>NA</code>.</p>
+<p><code>minicondition</code> provides thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class. See the <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> for the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for <code>minicondition</code> over plain <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>These are the core functions:</p>
 <ul>
 <li><code>mcond_abort(message, class = NULL)</code> – signal a classed error.</li>
 <li><code>mcond_warn(message, class = NULL)</code> – signal a classed warning.</li>
 <li><code>mcond_inform(message, class = NULL)</code> – signal a classed message.</li>
 <li><code>mcond_assert(expr, message, class = NULL)</code> – call <code>mcond_abort()</code> if <code>expr</code> isn’t entirely <code>TRUE</code>; <code>NA</code> counts as a failure.</li>
 </ul>
-<p><code>minicondition</code> has one internal helper, <code>.mcond_condition()</code>, which builds the classed condition object that <code>mcond_abort()</code>/<code>_warn()</code>/ <code>_inform()</code> each hand off to base <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</p>
+<p><code>minicondition</code> also has one internal helper:</p>
+<ul>
+<li><code>.mcond_condition()</code> builds the classed condition object that <code>mcond_abort()</code>/ <code>_warn()</code>/ <code>_inform()</code> each hand off to base <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</li>
+</ul>
 </section>
 <section id="why-classes-matter" class="level2">
 <h2 class="anchored" data-anchor-id="why-classes-matter">Why classes matter</h2>

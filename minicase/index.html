@@ -354,10 +354,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>minicase</code> provides a single function, <code>mcase_case_when()</code>, a minimal reimplementation of <code>dplyr::case_when()</code>: vectorised if/else across a sequence of <code>condition ~ value</code> formulas, first match wins. See the <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> for scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/">minifilter vignette</a>, building up to how missing values and default values interact.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>There is one core function:</p>
 <ul>
 <li><code>mcase_case_when(...)</code> – given a sequence of <code>condition ~ value</code> formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is <code>TRUE</code> at each position, and <code>NA</code> wherever no condition matched.</li>
 </ul>
-<p><code>minicase</code> has five internal helpers (<code>.mcase_validate_length()</code>, <code>.mcase_replace_with()</code>, <code>.mcase_check_length()</code>, <code>.mcase_check_type()</code>, <code>.mcase_check_class()</code>), all supporting <code>mcase_case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly.</p>
+<p>It is supported by five internal helpers, all supporting <code>mcase_case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:</p>
+<ul>
+<li><code>.mcase_validate_length()</code></li>
+<li><code>.mcase_replace_with()</code></li>
+<li><code>.mcase_check_length()</code></li>
+<li><code>.mcase_check_type()</code></li>
+<li><code>.mcase_check_class()</code></li>
+</ul>
+</section>
+<section id="a-minimal-data-set" class="level2">
+<h2 class="anchored" data-anchor-id="a-minimal-data-set">A minimal data set</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fruits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name     =</span> <span class="fu">c</span>(<span class="st">"apple"</span>, <span class="st">"banana"</span>, <span class="st">"cherry"</span>, <span class="st">"date"</span>, <span class="st">"elderberry"</span>),</span>
@@ -375,9 +386,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="no-data-masking-reference-columns-with-or-wrap-in-with" class="level2">
-<h2 class="anchored" data-anchor-id="no-data-masking-reference-columns-with-or-wrap-in-with">No data-masking: reference columns with <code>$</code>, or wrap in <code>with()</code></h2>
-<p>Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that, mirrored here from base R, is to wrap the whole call in <code>with(data, ...)</code>, which temporarily makes the data frame’s columns available as bare names for the duration of the call:</p>
+<section id="no-data-masking" class="level2">
+<h2 class="anchored" data-anchor-id="no-data-masking">No data-masking</h2>
+<p>There is no data-masking in this mini: you must reference columns with <code>$</code>, or wrap in <code>with()</code>. Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in <code>with(data, ...)</code> which temporarily makes the data frame’s columns available as bare names for the duration of the call:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
@@ -444,7 +455,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="scope-no-.default.ptype.size" class="level2">
 <h2 class="anchored" data-anchor-id="scope-no-.default.ptype.size">Scope: no <code>.default</code>/<code>.ptype</code>/<code>.size</code></h2>
-<p>That trailing <code>TRUE ~ "unknown"</code> formula <em>is</em> the idiomatic way to get a default in both <code>dplyr::case_when()</code> and <code>mcase_case_when()</code> – <code>minicase</code> just doesn’t implement dplyr’s newer, separate <code>.default</code> argument as an alternative spelling of the same thing, nor <code>.ptype</code>/ <code>.size</code> for controlling the output type/length explicitly. If your use case needs those, a plain <code>TRUE ~ value</code> formula covers <code>.default</code>, and the output length/type simply follow from whatever the conditions and values recycle to, the same way base R vector recycling works elsewhere.</p>
+<p>The mini does not implement any of these arguments. The trailing <code>TRUE ~ "unknown"</code> formula in the previous example <em>is</em> the idiomatic way to get a default value (and indeed is very often used in when writing code with the real <code>dplyr::case_when()</code> function). I simply decided there was no need for this mini to implement dplyr’s newer, separate <code>.default</code> argument as an alternative spelling of the same thing, nor did I think there was much to be gained by adding <code>.ptype</code>/ <code>.size</code> to control the output type/length explicitly. If your use case needs those, a plain <code>TRUE ~ value</code> formula covers <code>.default</code>, and the output length/type simply follow from whatever the conditions. If that still isn’t sufficient, then it’s likely you need the real version not the mini.</p>
 
 
 </section>

@@ -354,10 +354,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><code>minifilter</code> provides a single function, <code>mfilter_filter()</code>, a minimal reimplementation of <code>dplyr::filter()</code>: it keeps rows of a data frame where all of a set of unquoted conditions are <code>TRUE</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a> for scope notes; this page walks through its behaviour on a small toy data frame, including two behaviours worth knowing about before you rely on it: how missing values are handled, and what happens with no conditions at all.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>There is a single core function to this mini:</p>
 <ul>
 <li><code>mfilter_filter(.data, ...)</code> – keep rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
 </ul>
-<p><code>minifilter</code> has one internal helper, <code>.mfilter_dotdotdot()</code>, which captures the unevaluated <code>...</code> conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.</p>
+<p>There is also one internal helper:</p>
+<ul>
+<li><code>.mfilter_dotdotdot()</code> captures the unevaluated <code>...</code> conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.</li>
+</ul>
+</section>
+<section id="a-minimal-data-set" class="level2">
+<h2 class="anchored" data-anchor-id="a-minimal-data-set">A minimal data set</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fruits <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name     =</span> <span class="fu">c</span>(<span class="st">"apple"</span>, <span class="st">"banana"</span>, <span class="st">"cherry"</span>, <span class="st">"date"</span>, <span class="st">"elderberry"</span>),</span>
