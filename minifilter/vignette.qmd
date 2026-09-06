@@ -18,14 +18,17 @@ conditions at all.
 
 ## Functions
 
+There is a single core function to this mini:
+
 - `mfilter_filter(.data, ...)` -- keep rows of `.data` where every
   condition in `...` evaluates to `TRUE`. Conditions are evaluated in
   the scope of `.data`, so columns can be referred to by bare name.
 
-`minifilter` has one internal helper, `.mfilter_dotdotdot()`, which
-captures the unevaluated `...` conditions so each one can be evaluated
-against the data frame individually, rather than evaluated eagerly
-against the caller's environment.
+There is also one internal helper:
+
+-  `.mfilter_dotdotdot()` captures the unevaluated `...` conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller's environment.
+
+## A minimal data set
 
 ```{r}
 fruits <- data.frame(

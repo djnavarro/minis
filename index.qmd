@@ -2,18 +2,17 @@
 title: "minis"
 ---
 
-A collection of small, standalone, zero-runtime-dependency R
-components ("minis"), each shipped as a single `.R` file with its own
-drop-in test suite. When a package needs a little bit of `cli`-style
-formatting, or a little bit of `purrr`-style mapping, or some other
-small convenience, but taking on the full dependency isn't worth it,
-grab the relevant mini and copy it straight into `R/`.
+A problem I encounter frequently when writing R packages is that I'll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does. 
 
-See the [repository README](https://github.com/djnavarro/minis) for
-the full philosophy and usage instructions. This site collects
-worked-example **vignettes** for minis that have one; minis without a
-vignette yet are still listed below, linking straight to their GitHub
-README.
+The "minis" repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components ("minis"), each witten as a single `.R` file with its own drop-in test suite. When a package needs a little bit of `cli`-style
+formatting, or a little bit of `purrr`-style mapping, or some other
+small convenience, but taking on the full dependency isn't worth it, I can
+grab the relevant mini and copy it straight into my package without reimplementing the solution over and over again. Admittedly, it is rarely a pure "drop-in" situation: every package has its own need, so I almost always end up adapting the mini to suit the context, but even so I find it helps me enormously. 
+
+So I've started trying to collect these little snippets into a single place, making it easy for me to find them again rather than hunt around trying to remember where I solved this problem last time. The [repository README](https://github.com/djnavarro/minis) outlines the full philosophy and usage instructions, if by some chance anyone else should care to reuse these solutions. Meanwhile, because each mini has its own worked vignette, this site exists to collect all these together (or alternatively, the README if a vignette doesn't exist). 
+
+These are the minis that currently exist:
+
 
 | Mini | Purpose | Docs |
 |---|---|---|
