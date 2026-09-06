@@ -15,12 +15,32 @@ website:
     Small, standalone, zero-runtime-dependency R components, each
     shipped as a single copy-and-paste .R file.
   navbar:
-    left:
-      - href: index.qmd
-        text: Home
     right:
       - icon: github
         href: https://github.com/djnavarro/minis
+  sidebar:
+    style: docked
+    contents:
+      - href: index.qmd
+        text: Home
+      - section: "Minis"
+        contents:
+          - href: minicli/vignette.qmd
+            text: minicli
+          - href: minimap/vignette.qmd
+            text: minimap
+          - href: minitrap/vignette.qmd
+            text: minitrap
+          - href: minifilter/vignette.qmd
+            text: minifilter
+          - href: minicase/vignette.qmd
+            text: minicase
+          - href: minijoin/vignette.qmd
+            text: minijoin
+          - href: minitable/vignette.qmd
+            text: minitable
+          - href: minicondition/vignette.qmd
+            text: minicondition
 
 format:
   html:
@@ -29,5 +49,5 @@ format:
     theme:
       light: paleblue.scss
       dark: blackpink.scss
-    toc: false
+    toc: true
     output-file: index
