@@ -7,73 +7,35 @@ title: "minicli"
 source(file.path("minicli", "minicli.R"))
 ```
 
-`minicli` is a minimal stand-in for the small slice of `cli` most
-packages actually use: coloured alert messages, unicode symbols with
-an ascii fallback, a rule, and a bullet list. See the
-[README](https://github.com/djnavarro/minis/tree/main/minicli) for the
-full API reference and capability-detection details; this page walks
-through each piece and builds up to how they combine.
+The purpose of **minicli** is to provide a zero-dependency stand-in for the small slice of [**cli**](https://cli.r-lib.org/) that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and bulleted list. The [README](https://github.com/djnavarro/minis/tree/main/minicli) provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.
 
 ## Functions
 
-### Core functions
+The [**minicli.R**](https://github.com/djnavarro/minis/blob/main/minicli/minicli.R) script supplies the following as its core functions: 
 
-- `.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` -- print a
-  `message()` with a coloured symbol prefix; extra `...` arguments are
-  passed through `sprintf()`.
-- `.cli_symbol(name)` -- look up a single symbol by name, returning its
-  unicode glyph or an ascii fallback depending on what's safe to print.
-- `.cli_rule(title = NULL)` -- print a horizontal divider spanning the
-  console width, optionally with a centred title.
-- `.cli_bullets(items)` -- print a simple bulleted list, one entry per
-  line.
+- `.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` are used to print a message with a coloured symbol prefix.
+- `.cli_symbol(name)` looks up a single symbol by name, returning its unicode glyph or an ascii fallback depending on what's safe to print.
+- `.cli_rule(title = NULL)`  prints a horizontal divider spanning the console width, optionally with a centred title.
+- `.cli_bullets(items)` prints a simple bulleted list, one entry per line.
 - `.cli_col_black()`/`_red()`/`_green()`/`_yellow()`/`_blue()`/
-  `_magenta()`/`_cyan()`/`_white()`/`_grey()` -- wrap a string in an
-  ANSI colour code.
-- `.cli_style_bold()`/`_dim()`/`_italic()`/`_underline()` -- wrap a
-  string in an ANSI style code.
+  `_magenta()`/`_cyan()`/`_white()`/`_grey()` are used to generate output in the particular colour, which they achieve by wrapping a string in an ANSI colour code.
+- `.cli_style_bold()`/`_dim()`/`_italic()`/`_underline()` are used to generat outout in a particular style, which they achieve by wrapping a string in an ANSI style code.
 
-### Internal helpers
+There are also a collection of internal helper functions:
 
-- `.cli_ansi_enabled()` -- decide whether it's currently safe to emit
-  ANSI escape codes (checks `cli.num_colors`, `NO_COLOR`, whether
-  knitr/Quarto is rendering, whether output is being captured, whether
-  it's running in Positron's or RStudio's Console pane, and whether
-  stdout is a real terminal).
-- `.cli_positron_console_with_color()`/
-  `.cli_rstudio_console_with_color()` -- recognise Positron's and
-  RStudio's Console panes explicitly, since neither is a real tty but
-  both do support ANSI colour.
-- `.cli_unicode_enabled()` -- decide whether it's currently safe to
-  print unicode symbols (checks `cli.unicode`, then the session's
-  locale).
-- `.cli_ansi_style(code)` -- factory that builds one of the
-  `.cli_col_*()`/`.cli_style_*()` functions from a raw SGR code.
-- `.cli_alert(symbol_name, color_fn, text, ...)` -- shared
-  implementation behind the four `.cli_alert_*()` functions.
+- `.cli_ansi_enabled()` is used to decide whether it's currently safe to emit ANSI escape codes, which it does by checking `cli.num_colors`, `NO_COLOR`, whether knitr/Quarto is rendering, whether output is being captured, whether it's running in Positron's or RStudio's Console pane, and whether stdout is a real terminal.
+- `.cli_positron_console_with_color()`/ `.cli_rstudio_console_with_color()` are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.
+- `.cli_unicode_enabled()` is used to decide whether it's currently safe to print unicode symbols, by checking `cli.unicode` and then the session locale.
+- `.cli_ansi_style(code)` is a function factory that builds one of the `.cli_col_*()`/`.cli_style_*()` functions from a raw SGR code.
+- `.cli_alert(symbol_name, color_fn, text, ...)` is the shared implementation behind the four `.cli_alert_*()` functions.
 
 ## Capability detection
 
-Every colour/symbol decision in `minicli` runs through
-`.cli_ansi_enabled()` and `.cli_unicode_enabled()`, so the same code
-looks right whether it's running in an interactive terminal that
-supports unicode and colour, Positron's or RStudio's Console pane
-(neither of which is a real tty, but both of which do support ANSI
-colour), a plain terminal that supports neither, or -- as on this page
--- a Quarto render. Quarto/knitr renders are detected as a non-terminal
-(`getOption("knitr.in.progress")`), so ANSI colour is disabled
-automatically here. That means the alerts below print in plain text
-with their symbol prefix, exactly as they would in a captured log or a
-non-interactive session, rather than showing colour codes as literal
-text on the page.
+Every colour/symbol decision in `minicli` runs through `.cli_ansi_enabled()` and `.cli_unicode_enabled()`, so the same code looks right whether it's running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling `getOption("knitr.in.progress")`. As a consequence, ANSI colour is automatically disabled automatically on this. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.
 
 ## Alerts
 
-`.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` are the
-functions you'll reach for most often: thin `message()` wrappers with a
-symbol prefix, meant for the kind of status line a script prints while
-it works. Extra `...` arguments are passed through `sprintf()`, so the
-first argument can be a format string:
+The `.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` functions are the ones you are likely to reach for most often in a package: each one is a thin wrapper around `message()` with a symbol prefix, meant for the kind of status line a script prints while it works. Extra `...` arguments are passed through `sprintf()`, so the first argument can be a format string:
 
 ```{r}
 .cli_alert_success("Wrote %d files to %s", 3, "output/")
@@ -91,8 +53,7 @@ first argument can be a format string:
 .cli_alert_info("Using default configuration")
 ```
 
-If there's no `...` to format with, the text is used as-is -- no
-`sprintf()` call, so a literal `%` in the message is safe:
+If no arguments are passed through `...` to format with, the text is used as-is. That is, no `sprintf()` call is made, so a literal `%` in the message is safe:
 
 ```{r}
 .cli_alert_info("Discount: 10% off")
@@ -100,11 +61,7 @@ If there's no `...` to format with, the text is used as-is -- no
 
 ## Symbols
 
-Each alert's prefix comes from `.cli_symbol()`, which looks up a named
-symbol and returns either its unicode glyph or an ascii fallback,
-depending on `.cli_unicode_enabled()`. It's also useful on its own,
-for building custom messages that follow the same convention as the
-built-in alerts:
+Each alert's prefix comes from `.cli_symbol()`, which looks up a named symbol and returns either its unicode glyph or an ASCII fallback, depending on `.cli_unicode_enabled()`. It's also useful on its own, for building custom messages that follow the same convention as the built-in alerts:
 
 ```{r}
 .cli_symbol("tick")
@@ -121,15 +78,13 @@ An unrecognised name is an error rather than a silent `NA`:
 
 ## Rule
 
-`.cli_rule()` prints a horizontal divider, useful for separating
-sections of console output. Called with no arguments, it spans the
-full console width:
+The `.cli_rule()` function prints a horizontal divider, useful for separating sections of console output. When called with no arguments, it spans the full console width:
 
 ```{r}
 .cli_rule()
 ```
 
-Pass a `title` and it's centred within the rule instead:
+If a `title` is passed, the text appears centred within the rule instead:
 
 ```{r}
 .cli_rule("Summary")
@@ -137,9 +92,7 @@ Pass a `title` and it's centred within the rule instead:
 
 ## Bullets
 
-`.cli_bullets()` prints a simple bulleted list, one entry per line --
-handy for summarising a small set of results without reaching for a
-full table:
+The `.cli_bullets()` function prints a simple bulleted list, one entry per line, which is handy for summarising a small set of results:
 
 ```{r}
 .cli_bullets(c("one", "two", "three"))
@@ -147,27 +100,17 @@ full table:
 
 ## Colours and styles
 
-Under the hood, each alert calls one of the `.cli_col_*()` functions to
-colour its symbol. Those functions -- along with the `.cli_style_*()`
-family -- are also exported directly, for colouring or styling
-arbitrary text of your own. Both wrap their input in an ANSI escape
-code and its matching reset code, and both are no-ops (returning the
-text unchanged) whenever `.cli_ansi_enabled()` is `FALSE` -- which, per
-the capability-detection note above, is always true on this page:
+Under the hood, each alert calls one of the `.cli_col_*()` functions to colour its symbol. Those functions, along with the `.cli_style_*()` family, are also exported directly in case you would like to apply colouring or styling to arbitrary text. Both wrap their input in an ANSI escape code and its matching reset code, and both return the text unchanged whenever `.cli_ansi_enabled()` is `FALSE`, as is the case for this page.
 
 ```{r}
 identical(.cli_col_red("danger"), "danger")
 identical(.cli_style_bold("emphasis"), "emphasis")
 ```
 
-Colours and styles nest freely, since each wrapper's reset code is
-emitted immediately after its own content rather than at the very end
-of the whole string:
+Colours and styles nest freely, since each wrapper's reset code is emitted immediately after its own content rather than at the very end of the whole string:
 
 ```{r}
 .cli_style_bold(.cli_col_red("bold and red"))
 ```
 
-Outside of a Quarto render -- in an interactive terminal session, say
--- that same call would print bold red text rather than the plain
-string shown here.
+Outside of a Quarto render -- in an interactive terminal session, for instance -- that same call would print bold red text rather than the plain string shown here.
