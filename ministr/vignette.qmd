@@ -16,9 +16,8 @@ provides scope notes; this page walks through each function on a small
 set of toy strings, including two behaviours worth knowing about
 before you rely on it: how `NA` is propagated through concatenation,
 and how title case is found without a Unicode-aware word-break
-algorithm. (Pattern-matching functions like `str_detect()`/
-`str_replace()` are out of scope here -- they belong to a separate,
-companion mini.)
+algorithm. (For pattern-matching functions like `str_detect()`/
+`str_replace()`, see the companion [**minirx**](../minirx/) vignette.)
 
 ## Functions
 

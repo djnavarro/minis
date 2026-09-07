@@ -45,6 +45,8 @@ website:
             text: minipivot
           - href: ministr/vignette.qmd
             text: ministr
+          - href: minirx/vignette.qmd
+            text: minirx
 
 format:
   html:

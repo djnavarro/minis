@@ -26,5 +26,6 @@ These are the minis that currently exist:
 | `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [Vignette](minicondition/) |
 | `minipivot` | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`. | [Vignette](minipivot/) |
 | `ministr` | Minimal `stringr`-style basic string manipulation (padding/trimming/case conversion/etc). | [Vignette](ministr/) |
+| `minirx` | Minimal `stringr`-style regex pattern matching (detect/extract/match/replace/split/count/locate). | [Vignette](minirx/) |
 
 : {tbl-colwidths="[15,65,20]"}

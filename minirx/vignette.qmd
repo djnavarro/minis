@@ -1,0 +1,177 @@
+---
+title: "minirx"
+---
+
+```{r}
+#| include: false
+source(file.path("minirx", "minirx.R"))
+```
+
+The purpose of **minirx** is to provide a zero-dependency
+reimplementation of stringr's regex-based pattern-matching verbs from
+the [**stringr**](https://stringr.tidyverse.org/) package: detect,
+extract, match, replace, remove, split, count, and locate. Every
+function takes a single PCRE pattern, applied via base R's own
+`perl = TRUE` regex engine rather than stringr/stringi's ICU engine.
+The [README](https://github.com/djnavarro/minis/tree/main/minirx)
+provides scope notes; this page walks through each function on a
+small set of toy strings, including two base-R quirks this mini
+deliberately works around: `grepl()` silently turning a missing string
+into `FALSE` instead of `NA`, and `regmatches()` silently dropping
+non-matching elements instead of leaving a hole. (For non-regex string
+manipulation like padding/trimming/case conversion, see the companion
+[**ministr**](../ministr/) vignette.)
+
+## Functions
+
+The [**minirx.R**](https://github.com/djnavarro/minis/blob/main/minirx/minirx.R)
+script supplies eleven core functions:
+
+- `.rx_detect(string, pattern, negate)` is used to detect whether a
+  pattern matches.
+- `.rx_starts(string, pattern, negate)` and
+  `.rx_ends(string, pattern, negate)` are used to detect whether a
+  string starts/ends with a pattern.
+- `.rx_extract(string, pattern)` is used to extract the first match.
+- `.rx_extract_all(string, pattern)` is used to extract every match.
+- `.rx_match(string, pattern)` is used to extract the first match plus
+  its capture groups, as a matrix.
+- `.rx_match_all(string, pattern)` is used to extract every match plus
+  its capture groups, as a list of matrices.
+- `.rx_replace(string, pattern, replacement)` and
+  `.rx_replace_all(string, pattern, replacement)` are used to replace
+  the first/every match.
+- `.rx_remove(string, pattern)` and `.rx_remove_all(string, pattern)`
+  are used to remove the first/every match.
+- `.rx_split(string, pattern)` is used to split a string on every
+  match.
+- `.rx_count(string, pattern)` is used to count non-overlapping
+  matches.
+- `.rx_locate(string, pattern)` and `.rx_locate_all(string, pattern)`
+  are used to locate the position(s) of the first/every match.
+
+It contains no internal helpers.
+
+## Detecting matches
+
+The `.rx_detect()` function reports whether a pattern matches anywhere
+in each string. A missing string reports `NA` rather than `FALSE`,
+unlike calling base `grepl()` directly:
+
+```{r}
+orders <- c("order-123", "ORDER-456", "no id here", NA)
+.rx_detect(orders, "[0-9]+")
+grepl("[0-9]+", orders)
+```
+
+The `negate` argument flips the result (still leaving `NA` alone), and
+`.rx_starts()`/`.rx_ends()` anchor the same check to the start or end
+of the string:
+
+```{r}
+.rx_detect(orders, "[0-9]+", negate = TRUE)
+.rx_starts(orders, "order", negate = FALSE)
+.rx_ends(orders, "[0-9]+")
+```
+
+Note that `.rx_starts()` treats case literally, the same way
+`stringr::str_starts()` does -- `"ORDER-456"` doesn't start with
+`"order"` above. Passing `(?i)` at the front of the pattern, PCRE's
+inline case-insensitivity flag, switches that off:
+
+```{r}
+.rx_starts(orders, "(?i)order")
+```
+
+## Extracting matches
+
+The `.rx_extract()` function extracts the first match from each
+string, filling in `NA` where there's no match rather than shortening
+the result -- a fix relative to calling
+`regmatches(string, regexpr(pattern, string, perl = TRUE))` directly,
+which drops non-matching strings from the output entirely:
+
+```{r}
+.rx_extract(orders, "[0-9]+")
+```
+
+The `.rx_extract_all()` function returns every match per string, as a
+list:
+
+```{r}
+.rx_extract_all(c("a1 b2 c3", "no digits", NA), "[0-9]")
+```
+
+## Matching with capture groups
+
+The `.rx_match()` function is like `.rx_extract()`, but also splits
+out each capture group into its own column:
+
+```{r}
+.rx_match(orders, "([a-zA-Z]+)-([0-9]+)")
+```
+
+The `.rx_match_all()` function does the same for every match in a
+string, returning one matrix per input:
+
+```{r}
+.rx_match_all(c("a1 b2", "none", NA), "([a-z])([0-9])")
+```
+
+## Replacing and removing matches
+
+The `.rx_replace()`/`.rx_replace_all()` functions replace the
+first/every match, and `replacement` can refer to capture groups with
+`\1`, `\2`, and so on:
+
+```{r}
+.rx_replace_all("2024-01-02", "(\\d+)-(\\d+)-(\\d+)", "\\3/\\2/\\1")
+```
+
+The `.rx_remove()`/`.rx_remove_all()` functions are shorthand for
+replacing with `""`:
+
+```{r}
+.rx_remove_all("order-123", "[0-9]")
+```
+
+## Splitting
+
+The `.rx_split()` function splits each string on every match of the
+pattern, keeping empty pieces rather than dropping them:
+
+```{r}
+.rx_split("a,b,,c", ",")
+```
+
+## Counting matches
+
+The `.rx_count()` function counts non-overlapping matches per string.
+This one needs a real fix, not just a wrapper: base `gregexpr()`
+signals "no match" with a single `-1`, which -- read naively as a
+length -- looks like *one* match rather than zero:
+
+```{r}
+.rx_count(c("banana", "kiwi", "", NA), "an")
+```
+
+## Locating matches
+
+The `.rx_locate()`/`.rx_locate_all()` functions report the character
+positions (inclusive `start`/`end`) of the first/every match:
+
+```{r}
+.rx_locate(orders, "[0-9]+")
+.rx_locate_all("a1a2a3", "a")
+```
+
+## Scope: a single, PCRE-only pattern
+
+Every function here takes exactly one pattern string, applied with
+`perl = TRUE`. There's no support for stringr's `fixed()`/`coll()`/
+`boundary()` pattern-type wrappers, and no locale-aware collation --
+if a pattern needs to match a literal string that happens to contain
+regex metacharacters, escape it yourself (e.g. with
+`.rx_replace_all(x, "\\.", "_")` for a literal dot). If you need
+genuinely locale-sensitive matching, this mini isn't a substitute for
+`stringr` itself.

@@ -59,6 +59,7 @@ minis/
 | `minicondition` | `.cond_` | `emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` (from `rlang`) | Classed errors/warnings/messages, plus `.cond_assert()`, via base R's condition system |
 | `minipivot` | none (bare `.pivot_longer`/`.pivot_wider`) | `tidyr`'s `pivot_longer()`/`pivot_wider()` (own reimplementation) | Reshape a data frame between long and wide layouts |
 | `ministr` | `.str_` | `stringr`'s basic manipulation functions (own reimplementation, no regex/ICU) | `.str_pad`/`.str_trim`/`.str_squish`/`.str_sub`/`.str_length`/`.str_to_upper`/`.str_to_lower`/`.str_to_title`/`.str_to_sentence`/`.str_dup`/`.str_c`/`.str_wrap` |
+| `minirx` | `.rx_` | `stringr`'s regex pattern-matching functions (own reimplementation, base R PCRE via `perl=TRUE`, no ICU) | `.rx_detect`/`.rx_starts`/`.rx_ends`/`.rx_extract`/`.rx_extract_all`/`.rx_match`/`.rx_match_all`/`.rx_replace`/`.rx_replace_all`/`.rx_remove`/`.rx_remove_all`/`.rx_split`/`.rx_count`/`.rx_locate`/`.rx_locate_all` |
 
 ### Design philosophy
 
