@@ -27,7 +27,7 @@
 ## Usage:
 ##   source("minitrap.R")
 ##   safe_log <- .trap_safely(log)
-##   safe_log(-1)   # $result NULL,     $error <simpleError in log(-1): ...>
+##   safe_log("a")  # $result NULL,     $error <simpleError in .f(...): non-numeric argument to mathematical function>
 ##   safe_log(10)   # $result 2.302585, $error NULL
 ##
 ##   quiet_fn <- .trap_quietly(function() { message("hi"); warning("careful"); 42 })
