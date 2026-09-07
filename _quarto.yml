@@ -41,6 +41,8 @@ website:
             text: minitable
           - href: minicondition/vignette.qmd
             text: minicondition
+          - href: minipivot/vignette.qmd
+            text: minipivot
 
 format:
   html:

@@ -1,0 +1,121 @@
+---
+title: "minipivot"
+---
+
+```{r}
+#| include: false
+source(file.path("minipivot", "minipivot.R"))
+```
+
+`minipivot` provides two functions, `.pivot_longer()` and
+`.pivot_wider()`, minimal reimplementations of `tidyr::pivot_longer()`
+and `tidyr::pivot_wider()`: reshaping a data frame between "long" and
+"wide" layouts. See the
+[README](https://github.com/djnavarro/minis/tree/main/minipivot) for
+scope notes; this page walks through both functions on a small toy
+data frame, including the column-selection styles `.pivot_longer()`
+supports and what happens when `.pivot_wider()` is asked to spread
+duplicate rows into one cell.
+
+## Functions
+
+- `.pivot_longer(.data, cols, names_to = "name", values_to = "value")`
+  -- melt `cols` into two new columns holding the pivoted column names
+  and their values.
+- `.pivot_wider(.data, names_from, values_from, values_fill = NULL)`
+  -- spread the unique values of `names_from` into new columns, filled
+  from `values_from`.
+
+## A minimal data set
+
+```{r}
+fish <- data.frame(
+  location = c("lake", "lake", "sea", "sea"),
+  species  = c("trout", "bass", "trout", "bass"),
+  count    = c(5, 3, 7, 2)
+)
+fish
+```
+
+## Wide to long
+
+`.pivot_longer()` needs to know which columns to pivot. Here, `count`
+is the only column with values to melt, and `location`/`species`
+along for the ride as id columns:
+
+```{r}
+.pivot_longer(fish, count, names_to = "metric", values_to = "n")
+```
+
+## Long to wide
+
+`.pivot_wider()` spreads `species`'s unique values (`trout`/`bass`)
+into new columns, filled from `count`. There's no `id_cols` argument
+to set -- every column other than `names_from`/`values_from`
+(`location`, here) is treated as an id column automatically:
+
+```{r}
+wide <- .pivot_wider(fish, names_from = "species", values_from = "count")
+wide
+```
+
+## Round-tripping
+
+Pivoting the wide result back out reproduces the original long data
+(row order aside, since `.pivot_wider()` reorders rows by id column):
+
+```{r}
+.pivot_longer(wide, c(trout, bass), names_to = "species", values_to = "count")
+```
+
+## Selecting `cols` a few different ways
+
+`.pivot_longer()`'s `cols` accepts more than just a single bare name.
+Bare names combined with `c(...)`, a plain character vector, and a
+negated `-c(...)` ("every column except these") all agree, since
+`trout`/`bass` are the only two columns not already used as an id
+column above:
+
+```{r}
+identical(
+  .pivot_longer(wide, c(trout, bass)),
+  .pivot_longer(wide, c("trout", "bass"))
+)
+identical(
+  .pivot_longer(wide, c(trout, bass)),
+  .pivot_longer(wide, -location)
+)
+```
+
+There is no tidyselect-style `starts_with()`/`everything()` support --
+just bare names, `c(...)`, character/numeric vectors, and unary `-`
+negation.
+
+## Missing combinations: `values_fill`
+
+Dropping a row before widening leaves a combination unrepresented --
+`sea`/`bass` is missing below, so it comes back as `NA` by default:
+
+```{r}
+.pivot_wider(fish[-4, ], names_from = "species", values_from = "count")
+```
+
+`values_fill` supplies a value to use instead:
+
+```{r}
+.pivot_wider(fish[-4, ], names_from = "species", values_from = "count", values_fill = 0)
+```
+
+## Duplicate combinations are an error, not a list-column
+
+Real `tidyr::pivot_wider()` handles a duplicate `names_from`/id
+combination by warning and packing the extra values into a
+list-column. `minipivot` has no list-column support (matching
+[`minitable`](../minitable/)'s scope), so the same situation is a hard
+error instead:
+
+```{r}
+#| error: true
+dup <- rbind(fish, data.frame(location = "lake", species = "trout", count = 99))
+.pivot_wider(dup, names_from = "species", values_from = "count")
+```
