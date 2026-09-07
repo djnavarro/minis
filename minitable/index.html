@@ -432,6 +432,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#minimalist-coercion" id="toc-minimalist-coercion" class="nav-link" data-scroll-target="#minimalist-coercion">Minimalist coercion</a></li>
   <li><a href="#rowname-to-column-conversion" id="toc-rowname-to-column-conversion" class="nav-link" data-scroll-target="#rowname-to-column-conversion">Rowname to column conversion</a></li>
   <li><a href="#adding-rows" id="toc-adding-rows" class="nav-link" data-scroll-target="#adding-rows">Adding rows</a></li>
+  <li><a href="#adding-rows-column-names-and-types-must-match" id="toc-adding-rows-column-names-and-types-must-match" class="nav-link" data-scroll-target="#adding-rows-column-names-and-types-must-match">Adding rows: column names and types must match</a></li>
   <li><a href="#scope-data-frame-dropping-still-exists" id="toc-scope-data-frame-dropping-still-exists" class="nav-link" data-scroll-target="#scope-data-frame-dropping-still-exists">Scope: data frame dropping still exists</a></li>
   </ul>
 </nav>
@@ -569,6 +570,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Here <code>a * 10</code> in the new row refers to the <code>a = 3</code> just supplied in that same call, not to the existing column <code>a</code> in <code>df</code> – the most recently constructed value for a given name always wins, which is what <code>.table_drop_dup_list()</code> is for internally.</p>
+</section>
+<section id="adding-rows-column-names-and-types-must-match" class="level2">
+<h2 class="anchored" data-anchor-id="adding-rows-column-names-and-types-must-match">Adding rows: column names and types must match</h2>
+<p>The new row’s columns must exactly match <code>.data</code>’s – no more, no fewer – and a mismatch is reported by name rather than surfacing <code>rbind()</code>’s own low-level error:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_add_row</span>(df, <span class="at">a =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `.table_add_row()`:
+! .table_add_row(): new row's columns must exactly match `.data`'s. Missing: b. </code></pre>
+</div>
+</div>
+<p>Each value’s type must also match its column’s existing type (integer and double are treated as interchangeable, since mixing those two is unremarkable). Without this check, <code>rbind()</code> would silently coerce an entire existing column to a broader type just to accommodate one new, differently-typed value – e.g.&nbsp;one character value turning a whole numeric column into character – which is exactly the kind of silent surprise this mini avoids elsewhere too:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_add_row</span>(df, <span class="at">a =</span> <span class="st">"not a number"</span>, <span class="at">b =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `.table_add_row()`:
+! .table_add_row(): column `a` is `integer` in `.data` but `character` in the new row; rbind() would silently coerce the whole column to accommodate it. Convert the new value to `integer` first if this is intentional.</code></pre>
+</div>
+</div>
 </section>
 <section id="scope-data-frame-dropping-still-exists" class="level2">
 <h2 class="anchored" data-anchor-id="scope-data-frame-dropping-still-exists">Scope: data frame dropping still exists</h2>

@@ -431,6 +431,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#no-data-masking" id="toc-no-data-masking" class="nav-link" data-scroll-target="#no-data-masking">No data-masking</a></li>
   <li><a href="#first-match-wins" id="toc-first-match-wins" class="nav-link" data-scroll-target="#first-match-wins">First match wins</a></li>
   <li><a href="#unmatched-positions-are-na" id="toc-unmatched-positions-are-na" class="nav-link" data-scroll-target="#unmatched-positions-are-na">Unmatched positions are <code>NA</code></a></li>
+  <li><a href="#factors-must-share-the-same-levels-not-just-the-same-class" id="toc-factors-must-share-the-same-levels-not-just-the-same-class" class="nav-link" data-scroll-target="#factors-must-share-the-same-levels-not-just-the-same-class">Factors must share the same levels, not just the same class</a></li>
   <li><a href="#scope-no-.default.ptype.size" id="toc-scope-no-.default.ptype.size" class="nav-link" data-scroll-target="#scope-no-.default.ptype.size">Scope: no <code>.default</code>/<code>.ptype</code>/<code>.size</code></a></li>
   </ul>
 </nav>
@@ -557,6 +558,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "mid"     "cheap"   "pricey"  "unknown" "pricey" </code></pre>
+</div>
+</div>
+</section>
+<section id="factors-must-share-the-same-levels-not-just-the-same-class" class="level2">
+<h2 class="anchored" data-anchor-id="factors-must-share-the-same-levels-not-just-the-same-class">Factors must share the same levels, not just the same class</h2>
+<p>Values across formulas are also checked for type/class consistency. For factors specifically, sharing class <code>"factor"</code> isn’t enough – the levels must match too, since assigning a factor label that isn’t among an existing factor’s levels would otherwise silently produce <code>NA</code> rather than raising a visible error:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.case_when</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>) <span class="sc">~</span> f1, <span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>) <span class="sc">~</span> f2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in `.case_check_class()`:
+! Factor levels must match across `.case_when()` values: expected levels `a`, `b`, got `x`, `y`.</code></pre>
+</div>
+</div>
+<p>Two factors with the same levels (in the same order) combine without any trouble:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>f4 <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"b"</span>, <span class="st">"a"</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"b"</span>))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.case_when</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>) <span class="sc">~</span> f3, <span class="fu">c</span>(<span class="cn">FALSE</span>, <span class="cn">TRUE</span>) <span class="sc">~</span> f4)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] a a
+Levels: a b</code></pre>
 </div>
 </div>
 </section>

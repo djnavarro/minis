@@ -81,7 +81,7 @@
     "href": "miniverb/index.html#summarise",
     "title": "miniverb",
     "section": "summarise()",
-    "text": "summarise()\n\nOne row overall\nWith no .by, .verb_summarise() collapses fruits down to a single row, computing each named expression once over every row:\n\n.verb_summarise(fruits, average_price = round(mean(price, na.rm = TRUE), 2), n = length(name))\n\n  average_price n\n1           2.3 5\n\n\n\n\nOne row per group with .by\nWith .by, one summary row is produced per group instead, and the grouping columns appear first in the result:\n\n.verb_summarise(\n  fruits,\n  average_price = round(mean(price, na.rm = TRUE), 2),\n  n = length(name),\n  .by = \"in_stock\"\n)\n\n  in_stock average_price n\n1    FALSE          3.00 1\n2     TRUE          2.07 4",
+    "text": "summarise()\n\nOne row overall\nWith no .by, .verb_summarise() collapses fruits down to a single row, computing each named expression once over every row:\n\n.verb_summarise(fruits, average_price = round(mean(price, na.rm = TRUE), 2), n = length(name))\n\n  average_price n\n1           2.3 5\n\n\n\n\nOne row per group with .by\nWith .by, one summary row is produced per group instead, and the grouping columns appear first in the result:\n\n.verb_summarise(\n  fruits,\n  average_price = round(mean(price, na.rm = TRUE), 2),\n  n = length(name),\n  .by = \"in_stock\"\n)\n\n  in_stock average_price n\n1     TRUE          2.07 4\n2    FALSE          3.00 1",
     "crumbs": [
       "Minis",
       "miniverb"
@@ -165,6 +165,17 @@
     ]
   },
   {
+    "objectID": "minitable/index.html#adding-rows-column-names-and-types-must-match",
+    "href": "minitable/index.html#adding-rows-column-names-and-types-must-match",
+    "title": "minitable",
+    "section": "Adding rows: column names and types must match",
+    "text": "Adding rows: column names and types must match\nThe new row’s columns must exactly match .data’s – no more, no fewer – and a mismatch is reported by name rather than surfacing rbind()’s own low-level error:\n\n.table_add_row(df, a = 3)\n\nError in `.table_add_row()`:\n! .table_add_row(): new row's columns must exactly match `.data`'s. Missing: b. \n\n\nEach value’s type must also match its column’s existing type (integer and double are treated as interchangeable, since mixing those two is unremarkable). Without this check, rbind() would silently coerce an entire existing column to a broader type just to accommodate one new, differently-typed value – e.g. one character value turning a whole numeric column into character – which is exactly the kind of silent surprise this mini avoids elsewhere too:\n\n.table_add_row(df, a = \"not a number\", b = 999)\n\nError in `.table_add_row()`:\n! .table_add_row(): column `a` is `integer` in `.data` but `character` in the new row; rbind() would silently coerce the whole column to accommodate it. Convert the new value to `integer` first if this is intentional.",
+    "crumbs": [
+      "Minis",
+      "minitable"
+    ]
+  },
+  {
     "objectID": "minitable/index.html#scope-data-frame-dropping-still-exists",
     "href": "minitable/index.html#scope-data-frame-dropping-still-exists",
     "title": "minitable",
@@ -191,7 +202,7 @@
     "href": "minirx/index.html#functions",
     "title": "minirx",
     "section": "Functions",
-    "text": "Functions\nThe minirx.R script supplies eleven core functions:\n\n.rx_detect(string, pattern, negate) is used to detect whether a pattern matches.\n.rx_starts(string, pattern, negate) and .rx_ends(string, pattern, negate) are used to detect whether a string starts/ends with a pattern.\n.rx_extract(string, pattern) is used to extract the first match.\n.rx_extract_all(string, pattern) is used to extract every match.\n.rx_match(string, pattern) is used to extract the first match plus its capture groups, as a matrix.\n.rx_match_all(string, pattern) is used to extract every match plus its capture groups, as a list of matrices.\n.rx_replace(string, pattern, replacement) and .rx_replace_all(string, pattern, replacement) are used to replace the first/every match.\n.rx_remove(string, pattern) and .rx_remove_all(string, pattern) are used to remove the first/every match.\n.rx_split(string, pattern) is used to split a string on every match.\n.rx_count(string, pattern) is used to count non-overlapping matches.\n.rx_locate(string, pattern) and .rx_locate_all(string, pattern) are used to locate the position(s) of the first/every match.\n\nIt contains no internal helpers.",
+    "text": "Functions\nThe minirx.R script supplies fifteen core functions (grouped into eleven bullets below, since a few come in matched pairs):\n\n.rx_detect(string, pattern, negate) is used to detect whether a pattern matches.\n.rx_starts(string, pattern, negate) and .rx_ends(string, pattern, negate) are used to detect whether a string starts/ends with a pattern.\n.rx_extract(string, pattern) is used to extract the first match.\n.rx_extract_all(string, pattern) is used to extract every match.\n.rx_match(string, pattern) is used to extract the first match plus its capture groups, as a matrix.\n.rx_match_all(string, pattern) is used to extract every match plus its capture groups, as a list of matrices.\n.rx_replace(string, pattern, replacement) and .rx_replace_all(string, pattern, replacement) are used to replace the first/every match.\n.rx_remove(string, pattern) and .rx_remove_all(string, pattern) are used to remove the first/every match.\n.rx_split(string, pattern) is used to split a string on every match.\n.rx_count(string, pattern) is used to count non-overlapping matches.\n.rx_locate(string, pattern) and .rx_locate_all(string, pattern) are used to locate the position(s) of the first/every match.\n\nIt contains no internal helpers.",
     "crumbs": [
       "Minis",
       "minirx"
@@ -489,6 +500,17 @@
     "title": "minicase",
     "section": "Unmatched positions are NA",
     "text": "Unmatched positions are NA\nThe date row has a missing price, so every condition involving price evaluates to NA for that row – neither TRUE nor FALSE – and date itself gets NA in the result, since there’s no condition it definitively satisfies:\n\nwith(fruits, .case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nAdd a TRUE ~ ... formula at the end as a catch-all default, the same way you would in dplyr, and every remaining position – including ones where every prior condition was NA rather than FALSE – picks up that value instead:\n\nwith(fruits, .case_when(\n  price &lt; 1  ~ \"cheap\",\n  price &lt; 3  ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\"",
+    "crumbs": [
+      "Minis",
+      "minicase"
+    ]
+  },
+  {
+    "objectID": "minicase/index.html#factors-must-share-the-same-levels-not-just-the-same-class",
+    "href": "minicase/index.html#factors-must-share-the-same-levels-not-just-the-same-class",
+    "title": "minicase",
+    "section": "Factors must share the same levels, not just the same class",
+    "text": "Factors must share the same levels, not just the same class\nValues across formulas are also checked for type/class consistency. For factors specifically, sharing class \"factor\" isn’t enough – the levels must match too, since assigning a factor label that isn’t among an existing factor’s levels would otherwise silently produce NA rather than raising a visible error:\n\nf1 &lt;- factor(c(\"a\", \"b\"), levels = c(\"a\", \"b\"))\nf2 &lt;- factor(c(\"x\", \"y\"), levels = c(\"x\", \"y\"))\n.case_when(c(TRUE, FALSE) ~ f1, c(FALSE, TRUE) ~ f2)\n\nError in `.case_check_class()`:\n! Factor levels must match across `.case_when()` values: expected levels `a`, `b`, got `x`, `y`.\n\n\nTwo factors with the same levels (in the same order) combine without any trouble:\n\nf3 &lt;- factor(c(\"a\", \"b\"), levels = c(\"a\", \"b\"))\nf4 &lt;- factor(c(\"b\", \"a\"), levels = c(\"a\", \"b\"))\n.case_when(c(TRUE, FALSE) ~ f3, c(FALSE, TRUE) ~ f4)\n\n[1] a a\nLevels: a b",
     "crumbs": [
       "Minis",
       "minicase"
@@ -806,7 +828,7 @@
     "href": "ministr/index.html#functions",
     "title": "ministr",
     "section": "Functions",
-    "text": "Functions\nThe ministr.R script supplies eleven core functions:\n\n.str_pad(string, width, side, pad) is used to pad a string to a fixed width.\n.str_trim(string, side) is used to trim leading/trailing whitespace.\n.str_squish(string) is used to trim and collapse internal whitespace runs to a single space.\n.str_sub(string, start, end) is used to extract a substring by (possibly negative) character position.\n.str_length(string) is used to count the characters in a string.\n.str_to_upper(string) and .str_to_lower(string) convert case.\n.str_to_title(string) converts to title case.\n.str_to_sentence(string) converts to sentence case.\n.str_dup(string, times) is used to repeat a string.\n.str_c(..., sep, collapse) is used to concatenate strings, propagating NA.\n.str_wrap(string, width, indent, exdent) is used to wrap a string to a target line width.\n\nIt contains no internal helpers.",
+    "text": "Functions\nThe ministr.R script supplies twelve core functions (grouped into eleven bullets below, since .str_to_upper()/.str_to_lower() share one):\n\n.str_pad(string, width, side, pad) is used to pad a string to a fixed width.\n.str_trim(string, side) is used to trim leading/trailing whitespace.\n.str_squish(string) is used to trim and collapse internal whitespace runs to a single space.\n.str_sub(string, start, end) is used to extract a substring by (possibly negative) character position.\n.str_length(string) is used to count the characters in a string.\n.str_to_upper(string) and .str_to_lower(string) convert case.\n.str_to_title(string) converts to title case.\n.str_to_sentence(string) converts to sentence case.\n.str_dup(string, times) is used to repeat a string.\n.str_c(..., sep, collapse) is used to concatenate strings, propagating NA.\n.str_wrap(string, width, indent, exdent) is used to wrap a string to a target line width.\n\nIt contains no internal helpers.",
     "crumbs": [
       "Minis",
       "ministr"

@@ -465,7 +465,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The purpose of <strong>ministr</strong> is to provide a zero-dependency reimplementation of stringr’s basic string manipulation verbs from the <a href="https://stringr.tidyverse.org/"><strong>stringr</strong></a> package: padding, trimming, whitespace squishing, substrings, length, case conversion, duplication, concatenation, and wrapping. The <a href="https://github.com/djnavarro/minis/tree/main/ministr">README</a> provides scope notes; this page walks through each function on a small set of toy strings, including two behaviours worth knowing about before you rely on it: how <code>NA</code> is propagated through concatenation, and how title case is found without a Unicode-aware word-break algorithm. (For pattern-matching functions like <code>str_detect()</code>/ <code>str_replace()</code>, see the companion <a href="../minirx/"><strong>minirx</strong></a> vignette.)</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>The <a href="https://github.com/djnavarro/minis/blob/main/ministr/ministr.R"><strong>ministr.R</strong></a> script supplies eleven core functions:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/ministr/ministr.R"><strong>ministr.R</strong></a> script supplies twelve core functions (grouped into eleven bullets below, since <code>.str_to_upper()</code>/<code>.str_to_lower()</code> share one):</p>
 <ul>
 <li><code>.str_pad(string, width, side, pad)</code> is used to pad a string to a fixed width.</li>
 <li><code>.str_trim(string, side)</code> is used to trim leading/trailing whitespace.</li>
