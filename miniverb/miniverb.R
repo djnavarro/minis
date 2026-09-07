@@ -69,8 +69,10 @@
 #' @param by `NULL`, or a character vector of column names in `.data` to
 #'   group by.
 #' @return A list of integer vectors of row indices, one per group, in
-#'   ascending order of the grouping columns. With `by = NULL`, a
-#'   single-element list holding all row indices in original order.
+#'   the order each distinct combination of `by` columns is first seen
+#'   in `.data` -- matching dplyr's `.by`/`group_by()` semantics, not
+#'   sorted key order. With `by = NULL`, a single-element list holding
+#'   all row indices in original order.
 #' @noRd
 .verb_split_by <- function(.data, by = NULL) {
   n <- nrow(.data)
@@ -84,10 +86,14 @@
     )
   }
   keys <- .data[by]
-  ord <- do.call(order, as.list(keys))
-  key_str <- do.call(paste, c(as.list(keys[ord, , drop = FALSE]), sep = "\r"))
-  grp <- cumsum(c(TRUE, key_str[-1] != key_str[-length(key_str)]))
-  unname(split(ord, grp))
+  key_str <- do.call(paste, c(as.list(keys), sep = "\r"))
+  # match() assigns each distinct key its first-seen rank (1 for whichever
+  # combination appears first, 2 for the next new one, ...), and split()
+  # on a small-integer, non-factor vector sorts numerically by that rank
+  # -- so groups come back in first-appearance order without needing a
+  # separate sort step.
+  grp <- match(key_str, unique(key_str))
+  unname(split(seq_len(n), grp))
 }
 
 #' Filter rows of a data frame by unquoted conditions
@@ -261,6 +267,14 @@
   }
   if (is.null(nms) || any(!nzchar(nms))) {
     stop(".verb_summarise: all arguments must be named", call. = FALSE)
+  }
+  if (!is.null(.by) && any(nms %in% .by)) {
+    stop(
+      ".verb_summarise: name(s) `", paste(intersect(nms, .by), collapse = "`, `"),
+      "` collide with a `.by` grouping column; summary outputs can't reuse ",
+      "a grouping column's name",
+      call. = FALSE
+    )
   }
   frame <- parent.frame()
   groups <- .verb_split_by(.data, .by)

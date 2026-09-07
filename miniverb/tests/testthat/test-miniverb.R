@@ -149,6 +149,22 @@ test_that(".verb_summarise() with `.by` returns one row per group", {
   expect_equal(out$mean_x, c(1.5, 3.5))
 })
 
+test_that(".verb_summarise()/.verb_mutate()'s `.by` groups rows in first-appearance order, not sorted key order", {
+  gdf <- data.frame(g = c("b", "a", "b", "a"), x = c(1, 2, 3, 4))
+  out_s <- .verb_summarise(gdf, s = sum(x), .by = "g")
+  expect_equal(out_s$g, c("b", "a"))
+  expect_equal(out_s$s, c(4, 6))
+
+  out_m <- .verb_mutate(gdf, centered = x - mean(x), .by = "g")
+  expect_equal(out_m$g, gdf$g)
+  expect_equal(out_m$centered, c(-1, -1, 1, 1))
+})
+
+test_that(".verb_summarise() errors when a summary name collides with a `.by` grouping column", {
+  gdf <- data.frame(g = c("a", "a", "b", "b"), x = c(1, 2, 3, 4))
+  expect_error(.verb_summarise(gdf, g = sum(x), .by = "g"), "collide")
+})
+
 test_that(".verb_summarise() requires named arguments", {
   expect_error(.verb_summarise(sdf, sum(a)), "must be named")
 })
