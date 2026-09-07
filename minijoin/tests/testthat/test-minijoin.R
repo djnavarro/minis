@@ -45,6 +45,20 @@ test_that("joins support a named `by` for differently-named join columns", {
 test_that("keep = TRUE preserves both join columns, suffixed", {
   out <- .join_left_join(bands, albums, by = "band", keep = TRUE)
   expect_true(all(c("band.x", "band.y") %in% names(out)))
+  # No redundant, unsuffixed third copy of the join column left behind.
+  expect_false("band" %in% names(out))
+})
+
+test_that("keep = TRUE's y-side column is NA for rows with no actual match in y, not a copy of x's value", {
+  out <- .join_left_join(bands, albums, by = "band", keep = TRUE)
+  expect_true(is.na(out$band.y[out$band.x == "Who"]))
+  expect_equal(out$band.y[out$band.x == "Beatles"], "Beatles")
+})
+
+test_that("keep = TRUE's x-side column is NA for a right-join row with no match in x", {
+  out <- .join_right_join(bands, albums, by = "band", keep = TRUE)
+  expect_true(is.na(out$band.x[out$band.y == "Pink Floyd"]))
+  expect_equal(out$band.x[out$band.y == "Beatles"], "Beatles")
 })
 
 test_that("keep = TRUE works with a renamed `by` instead of crashing", {

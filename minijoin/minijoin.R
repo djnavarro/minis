@@ -37,7 +37,22 @@
 .join_worker <- function(x, y, by, suffix, keep, na_matches, ...) {
   na_matches <- match.arg(arg = na_matches, choices = c("na", "never"), several.ok = FALSE)
   incomparables <- if (na_matches == "never") NA else NULL
+  by_x <- if (is.null(names(by))) by else names(by)
+  by_y <- if (is.null(names(by))) by else unname(by)
+
   x[, ".join_id"] <- seq_len(nrow(x))
+  if (isTRUE(keep)) {
+    # Carry each side's *original* by-column values through under temporary
+    # names, as ordinary (non-`by`) columns, so merge() fills them in with
+    # real NAs on the side that didn't match -- rather than reconstructing
+    # a "y-side" column after the fact by copying the single, already-
+    # collapsed by-column merge() produces for actual join keys, which
+    # mirrors x's value even for rows with no match in y at all.
+    keep_x_nm <- paste0(".join_keep_x_", seq_along(by_x))
+    keep_y_nm <- paste0(".join_keep_y_", seq_along(by_y))
+    x[, keep_x_nm] <- x[, by_x, drop = FALSE]
+    y[, keep_y_nm] <- y[, by_y, drop = FALSE]
+  }
   merged <- if (is.null(names(by))) {
     merge(x = x, y = y, by = by, suffixes = suffix, incomparables = incomparables, ...)
   } else {
@@ -45,17 +60,15 @@
   }
   merged <- merged[order(merged[, ".join_id"]), colnames(merged) != ".join_id", drop = FALSE]
   if (isTRUE(keep)) {
-    # When `by` is named (differently-named join columns), merge()'s output
-    # collapses the joined column to *x*'s name (names(by)), not by's value
-    # (y's name) -- so looking columns up by `by` itself, as this used to
-    # do, never matches anything once `by` is named, and crashes below with
-    # "undefined columns selected". Both suffixed copies are derived from
-    # the x-side name either way, same as the already-same-named case.
-    by_x <- if (is.null(names(by))) by else names(by)
-    keep_pos <- match(by_x, names(merged))
-    x_by <- paste0(by_x, suffix[1L])
-    colnames(merged)[keep_pos] <- x_by
-    merged[, paste0(by_x, suffix[2L])] <- merged[, x_by]
+    # Both suffixed copies are named after `by`'s x-side name, even when
+    # `by` renames the join column (see README) -- e.g. `by = c("band" =
+    # "artist")` produces `band.x`/`band.y`, not `band`/`artist`. The
+    # original, single collapsed by-column merge() produces (still named
+    # `by_x`) is dropped in favour of these two, rather than left behind
+    # as a redundant third copy.
+    names(merged)[match(keep_x_nm, names(merged))] <- paste0(by_x, suffix[1L])
+    names(merged)[match(keep_y_nm, names(merged))] <- paste0(by_x, suffix[2L])
+    merged <- merged[, !(names(merged) %in% by_x), drop = FALSE]
   }
   rownames(merged) <- NULL
   merged
