@@ -7,59 +7,34 @@ title: "minitrap"
 source(file.path("minitrap", "minitrap.R"))
 ```
 
-`minitrap` provides two `purrr`-style function adverbs, `.trap_safely()`
-and `.trap_quietly()`. A function adverb takes a function and returns a
-*new* function with modified behaviour -- here, one that traps errors
-or console output instead of letting them propagate or print. See the
-[README](https://github.com/djnavarro/minis/tree/main/minitrap) for the
-full API reference and scope notes; this page walks through both in
-action, and how they compose together.
+The purpose of  **minitrap** is to provide zero-dependency versions of two [**purrr**](https://purrr.tidyverse.org/) adverbs that are used to "trap" one or more aspects of the output of another function. Like all adverb functions they take one function as input, and return a modified function as the output. The [README](https://github.com/djnavarro/minis/tree/main/minitrap) provides the full API reference and scope notes; this page provides a short tutorial that shows how to use the functions, and how they compose together.
 
 ## Functions
 
-- `.trap_safely(.f)` -- wrap `.f` so that a call which would normally
-  throw an error instead returns `list(result = ..., error = ...)`,
-  with exactly one of the two `NULL`.
-- `.trap_quietly(.f)` -- wrap `.f` so that printed output, warnings,
-  and messages are captured instead of shown, returning
-  `list(result = ..., output = ..., warnings = ..., messages = ...)`.
+The [**minitrap.R**](https://github.com/djnavarro/minis/blob/main/minitrap/minitrap.R) script supplies two functions:
 
-`minitrap` has no internal helpers -- both functions are short enough
-to be self-contained.
+- `.trap_safely(.f)`: This function wraps `.f` so that a call which would normally produce an error will instead return a list containing two elements named `result` and `error`. Exactly one of these two elements will be `NULL`, depending on whether the unmodified function would error when called the same way.
+- `.trap_quietly(.f)`: This function wraps `.f` so that printed all output, warnings, and messages are silently captured instead of shown. The modified function returns a four element named list, with components for `result`, `output`, `warnings`, and `messages`.  
+
+It contains no internal helpers.
 
 ## `.trap_safely()`
 
-Ordinarily, a function that errors stops execution and requires you to
-wrap every call site in `tryCatch()` if you want to keep going.
-`.trap_safely()` inverts that: it takes a function and returns a new
-one that never throws, instead capturing the error as data. Calling
-`.trap_safely(log)` on a non-numeric input, for example, doesn't let
-the resulting error reach the console -- it comes back as a list with
-`result = NULL` and `error` set to the condition object that would have
-been signalled:
+Ordinarily, a function that errors stops execution and requires you to wrap the call in `tryCatch()` if you want to capture the error and take some other action instead of stopping the execution. The goal of `.trap_safely()` is to invert this: it takes a function and returns a new one that never throws an error, instead capturing the error as data. Calling `.trap_safely(log)` on a non-numeric input, for example, doesn't let the resulting error reach the console: instead, it returns a list with `result = NULL` and `error` set to the error condition object that would have been signalled:
 
 ```{r}
 safe_log <- .trap_safely(log)
 safe_log("a")
 ```
 
-A successful call returns the result with `error` set to `NULL`
-instead, so the two fields are always mutually exclusive -- checking
-`is.null(out$error)` tells you unambiguously whether the call
-succeeded:
+A successful call returns a list with the same two elements, with `error` set to `NULL`
+instead, and `result` set to the calculated logarithm. 
 
 ```{r}
 safe_log(10)
 ```
 
-This is particularly useful when mapping a function over many inputs
-and some of them are expected to fail -- rather than the whole
-iteration aborting on the first error, each element's outcome (success
-or failure) is captured individually. Combining `.trap_safely()` with
-[`minimap`](../minimap/)'s `.iter_map()` gives exactly that pattern
-(this page sources `minimap.R` too, purely to demonstrate the two
-minis working together -- `minitrap` itself has no dependency on
-`minimap`):
+This is particularly useful when mapping a function over many inputs and some of them are expected to fail -- rather than the whole iteration aborting on the first error, each element's outcome (success or failure) is captured individually. Combining `.trap_safely()` with [**`minimap`**](../minimap/)'s `.iter_map()` is a convenient way to illustrate exactly that pattern. 
 
 ```{r}
 #| include: false
@@ -67,17 +42,17 @@ source(file.path("minimap", "minimap.R"))
 ```
 
 ```{r}
-results <- .iter_map(list(4, "a", 9), .trap_safely(sqrt))
-.iter_map_lgl(results, function(r) is.null(r$error))
+mixed_list <- list(4, "a", 9) 
+mixed_list |> 
+  .iter_map(.trap_safely(sqrt)) |>
+  .iter_map_lgl(\(r) is.null(r$error))
 ```
+
+As one would expect, this output shows that `sqrt(4)` succeeds, `sqrt("a")` errors, and `sqrt(9)` succeeds. The error that would normally be produced at the second step does not stop execution, and instead is captured and recorded. (Note that **minitrap** does not itself depend on **minimap**: this page sources that script to show the two minis operating together)
 
 ## `.trap_quietly()`
 
-Where `.trap_safely()` is about errors, `.trap_quietly()` is about
-everything a function might print along the way: `cat()`/`print()`
-output, `warning()`s, and `message()`s. Rather than letting any of that
-reach the console, `.trap_quietly()` collects it all and hands it back
-as part of the return value:
+Where `.trap_safely()` is about errors, `.trap_quietly()` is about outputs: printed output, return values, warnings, and messages. Rather than letting any of that reach the console, `.trap_quietly()` collects it all and hands it back as part of the return value:
 
 ```{r}
 quiet_fn <- .trap_quietly(function() {
@@ -88,41 +63,25 @@ quiet_fn <- .trap_quietly(function() {
 quiet_fn()
 ```
 
-Note the shape of the result: `result` holds the ordinary return value
-(`42`), `warnings` and `messages` are character vectors with one entry
-per condition raised (in the order they occurred), and `output` is
-whatever was printed via `cat()`/`print()`, collapsed into a single
-string -- empty here, since this function didn't print anything
-directly:
-
-```{r}
-loud_fn <- .trap_quietly(function() {
-  cat("computing...\n")
-  99
-})
-loud_fn()
-```
+Note the shape of the result: `result` holds the ordinary return value (i.e. `42`), `warnings` and `messages` are character vectors with one entry per condition raised (in the order they occurred), and `output` is whatever was printed via `cat()`/`print()`, collapsed into a single string -- empty here, since the original function would not have printed anything directly. 
 
 Crucially, `.trap_quietly()` does *not* catch errors -- a function that
-errors still aborts the call, same as if it were called directly.
-Compose it with `.trap_safely()` when you want both output-trapping and
-error-trapping at once:
+errors still aborts the call, same as if it were called directly. 
 
 ```{r}
 #| error: true
 .trap_quietly(function() stop("boom"))()
 ```
 
+
+## Composition
+
+As you can see, the two functions serve complementary purposes: `.trap_safely()` catches errors but not outputs, whereas `.trap_quietly()` catches outputs but not errors. Should you need output-trapping and error-trapping together, you can compose the two functions:
+
 ```{r}
 robust_fn <- .trap_safely(.trap_quietly(function() stop("boom")))
 robust_fn()
 ```
 
-Note the order of composition: `.trap_quietly()` wraps the original
-function first, and `.trap_safely()` wraps the result, so that the
-error thrown *inside* the quietly-wrapped call is the thing
-`.trap_safely()` catches. Composing the other way around --
-`.trap_quietly(.trap_safely(.f))` -- would instead capture a function
-that never errors in the first place (since `.trap_safely()` already
-turned errors into ordinary return values), so there would be nothing
-left for the outer `.trap_quietly()` to trap on that front.
+Pay attention to the order of composition: silence the function first, then make it safe. In the example above `.trap_quietly()` wraps the original function first, and `.trap_safely()` wraps the result, so that the error thrown *inside* the quietly-wrapped call becomes the thing that `.trap_safely()` catches. Composing in the opposite order does not produce the behaviour you most likely want.
+
