@@ -69,24 +69,12 @@ minis/
 - **Copy, don't install.** Minis are vendored into a consuming
   package's `R/` directory, never added to `Imports`/`Depends`.
 - **Namespaced defensively, uniformly dot-prefixed.** Every function in
-  a mini — whether the mini itself would call it "core" or "internal" —
-  is dot-prefixed with the same short, mini-specific tag (see table
-  above), e.g. `.table_tibble()` and `.table_drop_dup_list()`. There is
-  no separate naming convention for exported vs. internal functions,
-  since once a mini is copied into a consuming package, everything in
-  it is an internal implementation detail regardless of how the mini
-  itself scopes "core" vs. "helper". A mini whose entire API is one
-  function named after the mini itself skips the tag on that one
-  function to avoid stutter (`minifilter` exports bare `.filter()`, not
-  `.filter_filter()`; `minicase` exports bare `.case_when()`, not
-  `.case_case_when()`) — the tag is still used on those two minis'
-  internal helpers, since generic helper names are the ones actually at
-  collision risk. `minimap`'s tag is `.iter_` rather than `.map_`,
-  since the mini bundles both a map-family and a walk-family (`walk()`
-  calls `map()` internally, so they stay in one mini per the
-  shared-implementation precedent below), and a tag literally named
-  "map" would misleadingly imply `.iter_walk()` is a kind of mapping
-  operation.
+  a mini is dot-prefixed with the same short, mini-specific tag (see
+  table above) -- there is no separate naming convention for exported
+  vs. internal functions. See the `writing-minis` skill for the naming
+  decision tree (bare exports for single-function minis, family-neutral
+  tags for minis bundling related verb families) and the rationale
+  behind each existing mini's tag.
 - **Tested, but tests don't ship.** `tests/testthat/` lives in this
   repo for development only; `testthat`/`withr` are dev dependencies of
   the repo, never of a mini itself.
@@ -161,27 +149,13 @@ published to GitHub Pages by `.github/workflows/site.yaml`.
 
 ### Adding a new mini
 
-1. Create `<name>/<name>.R`, `<name>/README.md`,
-   `<name>/tests/testthat/test-<name>.R`, following the layout above.
-2. Pick a short, concrete name evoking what the mini *does*, not the
-   grammatical/abstract category it belongs to -- see the `minitrap`
-   naming discussion in `.agents/HISTORY.md` for why `miniadverbs` was
-   rejected.
-3. Dot-prefix every function (both what the mini itself would call
-   "core" and what it would call "internal") with the same short,
-   mini-specific tag, e.g. `.table_tibble()` and
-   `.table_drop_dup_list()`. If the mini's entire API is one function
-   named after the mini itself, skip the tag on that one function to
-   avoid stutter (bare `.filter()`, not `.filter_filter()`) but keep
-   the tag on its internal helpers. Choose the tag word for what reads
-   well given the mini's actual set of functions -- it need not
-   mechanically match the folder name (see `minimap`'s `.iter_` tag).
-4. Header-comment the source file with: what it reimplements, what's
-   deliberately excluded, and any deliberate fixes relative to the
-   package/snippet it was adapted from.
-5. Add a row to the table in the root `README.md` and to the table
-   above, in this file.
-6. Run `Rscript run_tests.R` before committing.
+Follow the `writing-minis` skill for the full step-by-step workflow
+(naming the mini and its functions, file layout, header-comment
+requirements, README/vignette templates, and where to register the new
+mini). In short: create `<name>/<name>.R`, `<name>/README.md`, and
+`<name>/tests/testthat/test-<name>.R`; add a row to the table in the
+root `README.md` and to the table above; run `Rscript run_tests.R`
+before committing.
 
 ### Commit conventions
 
