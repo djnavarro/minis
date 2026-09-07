@@ -58,6 +58,7 @@ minis/
 | `minitable` | `.table_` | `emaxnls`'s `.tibble()` family (from `tibble`) | `.table_tibble`/`.table_as_tibble`/`.table_rownames_to_column`/`.table_add_row` |
 | `minicondition` | `.cond_` | `emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` (from `rlang`) | Classed errors/warnings/messages, plus `.cond_assert()`, via base R's condition system |
 | `minipivot` | none (bare `.pivot_longer`/`.pivot_wider`) | `tidyr`'s `pivot_longer()`/`pivot_wider()` (own reimplementation) | Reshape a data frame between long and wide layouts |
+| `ministr` | `.str_` | `stringr`'s basic manipulation functions (own reimplementation, no regex/ICU) | `.str_pad`/`.str_trim`/`.str_squish`/`.str_sub`/`.str_length`/`.str_to_upper`/`.str_to_lower`/`.str_to_title`/`.str_to_sentence`/`.str_dup`/`.str_c`/`.str_wrap` |
 
 ### Design philosophy
 

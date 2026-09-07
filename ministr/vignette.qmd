@@ -1,0 +1,210 @@
+---
+title: "ministr"
+---
+
+```{r}
+#| include: false
+source(file.path("ministr", "ministr.R"))
+```
+
+The purpose of **ministr** is to provide a zero-dependency
+reimplementation of stringr's basic string manipulation verbs from the
+[**stringr**](https://stringr.tidyverse.org/) package: padding,
+trimming, whitespace squishing, substrings, length, case conversion,
+duplication, concatenation, and wrapping. The [README](https://github.com/djnavarro/minis/tree/main/ministr)
+provides scope notes; this page walks through each function on a small
+set of toy strings, including two behaviours worth knowing about
+before you rely on it: how `NA` is propagated through concatenation,
+and how title case is found without a Unicode-aware word-break
+algorithm. (Pattern-matching functions like `str_detect()`/
+`str_replace()` are out of scope here -- they belong to a separate,
+companion mini.)
+
+## Functions
+
+The [**ministr.R**](https://github.com/djnavarro/minis/blob/main/ministr/ministr.R)
+script supplies eleven core functions:
+
+- `.str_pad(string, width, side, pad)` is used to pad a string to a
+  fixed width.
+- `.str_trim(string, side)` is used to trim leading/trailing
+  whitespace.
+- `.str_squish(string)` is used to trim and collapse internal
+  whitespace runs to a single space.
+- `.str_sub(string, start, end)` is used to extract a substring by
+  (possibly negative) character position.
+- `.str_length(string)` is used to count the characters in a string.
+- `.str_to_upper(string)` and `.str_to_lower(string)` convert case.
+- `.str_to_title(string)` converts to title case.
+- `.str_to_sentence(string)` converts to sentence case.
+- `.str_dup(string, times)` is used to repeat a string.
+- `.str_c(..., sep, collapse)` is used to concatenate strings,
+  propagating `NA`.
+- `.str_wrap(string, width, indent, exdent)` is used to wrap a string
+  to a target line width.
+
+It contains no internal helpers.
+
+## Padding
+
+The `.str_pad()` function pads to a fixed width, left by default:
+
+```{r}
+.str_pad(c("7", "70", "700"), width = 4, pad = "0")
+```
+
+Padding can go on the right, or on both sides at once (with any leftover
+padding placed on the right when the total isn't evenly split):
+
+```{r}
+.str_pad("hi", width = 6, side = "right", pad = "-")
+.str_pad("hi", width = 7, side = "both", pad = "-")
+```
+
+A string already at least as wide as `width` is returned unchanged, and
+an `NA` input stays `NA` rather than being padded. The rest of this
+page reuses this small toy vector, mixing untrimmed and inconsistently
+cased strings with a missing value:
+
+```{r}
+names <- c("  bilbo baggins", "FRODO", NA)
+.str_pad(names, width = 20)
+```
+
+## Trimming and squishing whitespace
+
+The `.str_trim()` function trims both sides by default, or a single
+side on request:
+
+```{r}
+.str_trim(names[1])
+.str_trim(names[1], side = "left")
+```
+
+The `.str_squish()` function goes further, also collapsing any run of
+internal whitespace down to a single space:
+
+```{r}
+.str_squish("  too   much   space  ")
+```
+
+## Substrings
+
+The `.str_sub()` function extracts by character position, and accepts
+negative positions counting back from the end of the string, the same
+way `stringr::str_sub()` does:
+
+```{r}
+.str_sub("hello world", 1, 5)
+.str_sub("hello world", -5, -1)
+```
+
+Positions past either end of the string are clamped rather than
+erroring, and a start after the end just gives an empty string:
+
+```{r}
+.str_sub("hi", 1, 10)
+.str_sub("hello", 4, 2)
+```
+
+## Length
+
+The `.str_length()` function counts characters, and an `NA` input
+gives an `NA` count rather than treating it as the two-character
+string `"NA"`:
+
+```{r}
+.str_length(names)
+```
+
+## Case conversion
+
+The `.str_to_upper()`/`.str_to_lower()` functions are plain
+upper/lower casing:
+
+```{r}
+.str_to_upper("Bilbo")
+.str_to_lower("Bilbo")
+```
+
+The `.str_to_title()` function lower-cases the whole string first, then
+upper-cases the first letter of each word:
+
+```{r}
+.str_to_title("  bilbo baggins")
+```
+
+The `.str_to_sentence()` function is similar, but only upper-cases the
+very first letter of the string -- the rest is lower-cased regardless
+of word boundaries, since the whole input is treated as a single
+sentence rather than split on `.`/`!`/`?`:
+
+```{r}
+.str_to_sentence("BILBO BAGGINS the hobbit")
+```
+
+Word starts for `.str_to_title()` are found with the ASCII regex `\\b`,
+not a Unicode-aware word-break algorithm. That's a fine approximation
+for whitespace-delimited Latin text, but it isn't a substitute for
+stringi's locale-aware title casing if your strings involve other
+scripts.
+
+## Duplication
+
+The `.str_dup()` function repeats each string, recycling `times`
+against `string`:
+
+```{r}
+.str_dup("ab", 3)
+.str_dup(c("x", "y"), c(2, 4))
+```
+
+## Concatenation and `NA` propagation
+
+The `.str_c()` function behaves like `paste0()` with a separator, but
+an `NA` anywhere in the inputs to a given position makes that
+position's result `NA`:
+
+```{r}
+.str_c("Mr. ", names, sep = "")
+```
+
+Compare that with what base `paste0()` does with the same input --
+it coerces the missing name to the literal string `"NA"` instead of
+propagating the missing value:
+
+```{r}
+paste0("Mr. ", names)
+```
+
+Supplying `collapse` joins everything into one string, and an `NA`
+anywhere in the collapsed inputs makes the whole collapsed result
+`NA`:
+
+```{r}
+.str_c(c("bilbo", "frodo"), collapse = ", ")
+.str_c(c("bilbo", NA), collapse = ", ")
+```
+
+## Wrapping
+
+The `.str_wrap()` function rewraps a string to a target line width,
+returning a single string per input with lines joined by `"\n"`:
+
+```{r}
+wrapped <- .str_wrap(
+  "Bilbo Baggins was a very well-to-do hobbit who lived in a hole in the ground.",
+  width = 20
+)
+cat(wrapped)
+```
+
+## Scope: no locale awareness
+
+None of these functions are locale-aware, unlike their `stringr`
+counterparts (which delegate to stringi/ICU under the hood). That's
+a deliberate trade-off: it keeps this mini free of a regex-engine or
+ICU dependency, at the cost of correctness on non-Latin scripts and
+locale-specific casing rules (Turkish dotless *i*, for example). If
+your strings need that, this mini isn't a substitute for `stringr`
+itself.

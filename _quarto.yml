@@ -43,6 +43,8 @@ website:
             text: minicondition
           - href: minipivot/vignette.qmd
             text: minipivot
+          - href: ministr/vignette.qmd
+            text: ministr
 
 format:
   html:

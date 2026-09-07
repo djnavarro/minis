@@ -25,5 +25,6 @@ These are the minis that currently exist:
 | `minitable` | Minimal `tibble`-style construction/coercion helpers. | [Vignette](minitable/) |
 | `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [Vignette](minicondition/) |
 | `minipivot` | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`. | [Vignette](minipivot/) |
+| `ministr` | Minimal `stringr`-style basic string manipulation (padding/trimming/case conversion/etc). | [Vignette](ministr/) |
 
 : {tbl-colwidths="[15,65,20]"}

@@ -25,7 +25,7 @@ relevant mini and copy it straight into `R/`.
   own code. Keep the license header comment intact.
 - **Namespaced defensively, with a dot-prefix.** Every function in a
   mini is dot-prefixed with a short, mini-specific tag (`.cli_*`,
-  `.iter_*`, `.trap_*`, `.join_*`, `.table_*`, `.cond_*`), whether the
+  `.iter_*`, `.trap_*`, `.join_*`, `.table_*`, `.cond_*`, `.str_*`), whether the
   mini itself thinks of it as a "core" function or an internal helper —
   once copied into a consuming package, everything from a mini is
   internal to that package anyway, so there's no reason to distinguish
@@ -56,6 +56,7 @@ relevant mini and copy it straight into `R/`.
 | [`minitable`](minitable/) | Minimal `tibble`-style construction/coercion helpers (`tibble()`/`as_tibble()`/`rownames_to_column()`/`add_row()`), returning plain data frames. |
 | [`minicondition`](minicondition/) | Minimal `rlang`-style `abort()`/`warn()`/`inform()` classed conditions, plus `assert()`, built on base R's own condition system. |
 | [`minipivot`](minipivot/) | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`, reshaping a data frame between long and wide layouts. |
+| [`ministr`](ministr/) | Minimal `stringr`-style basic string manipulation (`str_pad`/`str_trim`/`str_squish`/`str_sub`/`str_length`/case conversion/`str_dup`/`str_c`/`str_wrap`), built on base R string primitives. |
 
 ## Using a mini
 
