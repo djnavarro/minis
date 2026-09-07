@@ -90,10 +90,8 @@ sanitised.
 
 **Keep it a little informal, not dry reference prose** — this is a
 tutorial page, not the README. Contractions ("it's", "doesn't") and a
-conversational aside here and there are fine; a personal joke or rant
-is not (one vignette had an AI-generated-dataset joke trimmed down to
-a plain factual sentence during review — keep asides about the
-*mini's behaviour*, not about how the example data came to exist).
+conversational aside here and there are fine; but keep asides brief
+and focused on the mini's behaviour, not on ancillary details.
 
 ## Final step: cross-vignette consistency check
 
