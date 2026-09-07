@@ -117,6 +117,11 @@ duplicate): the README is the terse reference, the vignette is the
 narrative walkthrough whose code is guaranteed to still be true because
 it actually runs. Never required to add a mini.
 
+This section covers file mechanics only. For how the vignette's prose
+should actually read (opening framing, bold/link conventions, the
+Functions section format, sentence-level style rules), see the
+writing-vignettes skill.
+
 - Source the mini the same way tests do, relative to repo root:
   `source(file.path("<mini>", "<mini>.R"))` (works because
   `execute-dir: project` is set in `_quarto.yml`).
