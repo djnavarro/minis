@@ -25,7 +25,7 @@ manipulation like padding/trimming/case conversion, see the companion
 ## Functions
 
 The [**minirx.R**](https://github.com/djnavarro/minis/blob/main/minirx/minirx.R)
-script supplies eleven core functions:
+script supplies fifteen core functions (grouped into eleven bullets below, since a few come in matched pairs):
 
 - `.rx_detect(string, pattern, negate)` is used to detect whether a
   pattern matches.

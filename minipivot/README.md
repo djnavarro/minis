@@ -67,6 +67,19 @@ Deliberately excluded, relative to real tidyr:
   is a hard error instead. A single scalar `values_fill` **is**
   supported for combinations that are simply absent (not duplicated).
 
+## Other edge cases in `.pivot_wider()`
+
+- A `NA` value in `names_from` becomes a new column literally named
+  `"NA"` (the string), rather than crashing or being silently dropped.
+- If a `names_from` value is identical to the name of an existing id
+  column, that's an error -- not a silent overwrite of the id column's
+  original data.
+- If `values_fill` is a different type than `values_from` (e.g. a
+  character fill for a numeric column), a warning is raised before the
+  affected column(s) are coerced, since only the previously-missing
+  cells strictly need `values_fill`'s type -- the rest of the column
+  is real data.
+
 ## Tests
 
 See [`tests/testthat/test-minipivot.R`](tests/testthat/test-minipivot.R).

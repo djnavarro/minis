@@ -85,6 +85,11 @@
     lapply(seq_len(n_rows), function(r) unlist(selected[r, ], use.names = FALSE)),
     use.names = FALSE
   )
+  # unlist() of an empty list is NULL, not a zero-length vector -- guard
+  # against that so a zero-row `.data` still produces a `values_to` column
+  # (empty, but present) instead of silently losing it via `out[[values_to]]
+  # <- NULL`, which removes/never-creates a data frame column.
+  if (is.null(value_part)) value_part <- logical(0)
   name_part <- rep(nm[idx], times = n_rows)
 
   out <- if (length(id_idx)) {
@@ -109,9 +114,14 @@
 #'   scalars): `names_from`'s unique values become new column names,
 #'   filled from `values_from`.
 #' @param values_fill A single value to use for id/`names_from`
-#'   combinations that don't appear in `.data` (default `NA`).
+#'   combinations that don't appear in `.data` (default `NA`). A
+#'   `values_fill` of a different type than `values_from` triggers a
+#'   warning, since filling then coerces the affected column(s).
 #' @return A data frame with one row per unique combination of the id
-#'   columns.
+#'   columns. A `NA` value in `names_from` becomes a column literally
+#'   named `"NA"` (a string), rather than crashing or being dropped. A
+#'   `names_from` value identical to an existing id column's name is an
+#'   error, not a silent overwrite of that id column.
 #' @export
 .pivot_wider <- function(.data, names_from, values_from, values_fill = NULL) {
   nm <- names(.data)
@@ -129,6 +139,12 @@
     rep("", nrow(.data))
   }
   name_val <- as.character(.data[[names_from]])
+  # A `NA` in `names_from` would otherwise silently survive as a literal NA
+  # element of `new_col_names`, and `col_out[match(key[sel], unique_keys)] <-
+  # ...` with an NA-valued `sel` selector crashes with "NAs are not allowed
+  # in subscripted assignments". Coercing to the string "NA" gives a
+  # deterministic (if unusual-looking) column name instead.
+  name_val[is.na(name_val)] <- "NA"
   combo <- paste(key, name_val, sep = "\r")
   if (anyDuplicated(combo) != 0L) {
     stop(
@@ -140,6 +156,19 @@
 
   unique_keys <- unique(key)
   new_col_names <- unique(name_val)
+
+  # A `names_from` value identical to an existing id column's name would
+  # otherwise silently overwrite that id column below (`out[[cn]] <-
+  # col_out`), destroying its original data with no error or warning.
+  collisions <- intersect(new_col_names, id_cols)
+  if (length(collisions)) {
+    stop(
+      ".pivot_wider(): value(s) of `names_from` (",
+      paste(collisions, collapse = ", "),
+      ") collide with existing id column name(s); rename the id column(s) first."
+    )
+  }
+
   first_row <- match(unique_keys, key)
 
   out <- if (length(id_cols)) {
@@ -147,13 +176,29 @@
   } else {
     as.data.frame(matrix(nrow = length(unique_keys), ncol = 0))
   }
-  na_val <- .data[[values_from]][NA_integer_]
-  fill_val <- if (is.null(values_fill)) na_val else values_fill
+
+  values_col <- .data[[values_from]]
+  if (!is.null(values_fill) &&
+      !identical(typeof(values_fill), typeof(values_col)) &&
+      !(is.numeric(values_fill) && is.numeric(values_col))) {
+    warning(
+      ".pivot_wider(): `values_fill` (", typeof(values_fill), ") is a ",
+      "different type than `", values_from, "` (", typeof(values_col),
+      "); the affected column(s) will be coerced.",
+      call. = FALSE
+    )
+  }
 
   for (cn in new_col_names) {
     sel <- name_val == cn
-    col_out <- rep(fill_val, length(unique_keys))
-    col_out[match(key[sel], unique_keys)] <- .data[[values_from]][sel]
+    matched <- unique_keys %in% key[sel]
+    # Seed with an NA vector of `values_from`'s own type/class (works for
+    # factors, Dates, etc., not just atomic vectors) so that real,
+    # successfully-matched values are never forced through `values_fill`'s
+    # type before being assigned -- only genuinely-missing combinations are.
+    col_out <- values_col[rep(NA_integer_, length(unique_keys))]
+    col_out[match(key[sel], unique_keys)] <- values_col[sel]
+    if (!is.null(values_fill)) col_out[!matched] <- values_fill
     out[[cn]] <- col_out
   }
   rownames(out) <- NULL

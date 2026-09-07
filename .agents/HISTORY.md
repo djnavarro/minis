@@ -310,3 +310,135 @@ exported functions collide with the tag word or span a semantically
 split family. Applied across all eight minis' source files, tests,
 READMEs, and vignettes; `Rscript run_tests.R` confirmed all suites
 still pass after the rename.
+
+## Repo-wide stress test: real bugs found only by executing edge cases
+
+With all eleven minis and their vignettes in place, ran a deliberate
+stress-testing pass rather than waiting for bugs to surface
+incidentally: one subagent per mini, each instructed to read the
+mini's source/README/vignette/tests, cross-check every documented
+claim by executing it, and then actively try to break the mini with
+edge cases the existing tests didn't cover (empty/zero-length input,
+`NA` in unusual positions, type mismatches, duplicate names). A
+separate pass checked the repo-level docs (root `README.md`,
+`AGENTS.md`, `index.qmd`, `_quarto.yml`) for staleness. This surfaced
+far more than the incidental bug-finding of previous work: most of the
+mismatches were real, previously-unexercised bugs, not just doc drift,
+reinforcing the existing "verify by executing" practice rather than
+supplanting it -- reading the code alone had already missed all of
+these.
+
+Fixed one mini at a time on a dedicated branch, each with regression
+tests, updated docs, and a full `Rscript run_tests.R` pass before
+moving on. The fixes worth remembering for their own sake, beyond
+routine doc corrections (a dead `minifilter` reference in the root
+README's Philosophy section, left over from that mini's rename to
+`miniverb`; function-count typos in the `minirx`/`ministr` vignettes;
+a copy-paste typo in `minimap`'s header comment; and `minitrap`'s
+worked example calling `log(-1)`, which only warns and never actually
+raises the error the doc claimed):
+
+- **`minicli`**: `.cli_ansi_enabled()` returned `NA` instead of
+  `TRUE`/`FALSE` whenever `cli.num_colors` was set to `NA` (`opt > 1`
+  on `NA` is `NA`, not caught before being returned), crashing any
+  styling call. Fixed by coercing defensively and falling through to
+  the other detection checks on a non-numeric option value -- which
+  also fixed a related latent bug where a numeric-looking *string*
+  option (`cli.num_colors = "8"`) only "worked" by accident via
+  lexicographic string comparison. Also fixed: `.cli_symbol()` crashed
+  with an opaque base-R error on a vector `name` instead of its own
+  "Unknown symbol" message, and `.cli_alert_*()` ran a vectorised
+  `text` argument's entries together with no line separator.
+- **`minicondition`**: `.cond_inform()` stored `paste0(message, "\n")`
+  in the condition object itself (to get `message()`-style trailing-
+  newline console output when handing a pre-built condition straight
+  to `message()`), so `conditionMessage()` on a caught `.cond_inform()`
+  condition returned `"hi there\n"`, unlike the exact-text
+  `.cond_abort()`/`.cond_warn()`. Fixed by manually replicating
+  `message()`'s own signal/restart/print mechanics
+  (`signalCondition()` + `withRestarts(muffleMessage = )` + a final
+  `cat()`), so the newline is added only at print time, never stored.
+  While regression-testing this, discovered that a test which left
+  `cli.num_colors = NA` set for an entire `test_that()` block (to test
+  the `minicli` fix above) crashed testthat's own `cli`-based
+  "summary" reporter, since it reads that same session-wide option to
+  colourise its own pass/fail dots -- a reminder that a test's
+  `withr::local_options()` scope can leak into unrelated framework
+  internals, not just the code under test; rescoped with
+  `withr::with_options()` tightly around just the call being tested.
+- **`minipivot`**: four separate `.pivot_wider()`/`.pivot_longer()`
+  bugs, all in previously-untested territory -- a `names_from` value
+  identical to an existing id column's name silently overwrote that id
+  column (`out[[cn]] <- col_out` with no collision check); a
+  `values_fill` of a different type than `values_from` coerced the
+  *entire* output column, including cells with real, already-matched
+  data, because `col_out` was seeded via `rep(fill_val, n)` before any
+  real values were assigned into it; `NA` in `names_from` crashed with
+  "NAs are not allowed in subscripted assignments"; and a zero-row
+  `.data` silently dropped `.pivot_longer()`'s `values_to` column
+  entirely, since `unlist(list())` is `NULL` and `out[[col]] <- NULL`
+  removes/never-creates a data frame column. Fixed by seeding
+  `.pivot_wider()`'s output column from `values_col`'s own type (an NA
+  vector of the correct type/class) rather than from `values_fill`,
+  coercing an `NA` `names_from` value to the literal string `"NA"`
+  up front, and guarding the zero-row `NULL`-vs-empty-vector case in
+  `.pivot_longer()`.
+- **`minicase`**: `.case_check_class()` compared `class(x)` vs
+  `class(y)` only, so two factors both satisfied it (both class
+  `"factor"`) regardless of whether they shared the same *levels*.
+  Assigning between them (`x[i] <- val`) then triggered
+  `[<-.factor`'s label-based lookup, silently turning any label absent
+  from the target's levels into `NA` -- a real, silent data-loss bug,
+  with only a base R warning, not an error. Fixed by additionally
+  comparing `levels()` when both sides are factors.
+- **`minijoin`**: two bugs found together in `keep = TRUE` handling.
+  First, `.join_worker()` looked up the joined column in `merge()`'s
+  output using `by`'s own *value*, which only works when `by` is
+  unnamed -- `merge()` with differing `by.x`/`by.y` always collapses
+  the joined column to `by.x`'s *name*, so a named `by` (renamed join
+  columns) crashed with "undefined columns selected". While fixing
+  that, found a second, independent, pre-existing bug: the "kept"
+  column for whichever side didn't already have the collapsed by-
+  column was built by copying that already-merged column, so it
+  silently mirrored the *other* side's value even on rows with no
+  actual match -- exactly the information `keep = TRUE` exists to
+  preserve. Fixed by carrying each side's own by-column value through
+  `merge()` under a temporary, non-`by` column name so `merge()`'s own
+  `all.x`/`all.y` `NA`-filling applies to it like any other real
+  column, then dropping the now-redundant single collapsed by-column
+  afterward.
+- **`minitable`**: `.table_add_row()` hands its new row straight to
+  `rbind()` with no validation, which had two consequences: a
+  missing/extra/misspelled column name surfaced `rbind()`'s own
+  low-level "numbers of columns of arguments do not match" instead of
+  naming the problem column, and a new value of a different type than
+  its existing column (e.g. a character value for a numeric column)
+  let `rbind()` silently upcast the *entire* column -- including
+  already-correct existing values -- with no warning. Fixed with
+  explicit pre-`rbind()` checks for both, naming the offending
+  column(s)/type(s) in the error (integer/double are treated as
+  interchangeable, since mixing those two is unremarkable).
+- **`miniverb`**: `.verb_split_by()` ordered groups by sorted key
+  value (`order()`), but dplyr's actual `.by`/`group_by()` semantics
+  return/process groups in *first-appearance* order -- confirmed by
+  running `dplyr::summarise(.by = )` side by side, and the divergence
+  was already silently visible in this mini's own vignette (the
+  fruits/`in_stock` example showed `FALSE` before `TRUE`, since
+  `FALSE` sorts first, even though `TRUE` is the value actually seen
+  first in the data). Fixed by ranking each distinct key by first
+  appearance (`match(key, unique(key))`) instead of sorting --
+  `split()` on that small-integer vector sorts numerically by rank,
+  so first-appearance order falls out without a separate sort step.
+  Also fixed: `.verb_summarise()` let a summary expression's name
+  collide with a `.by` grouping column's name, silently producing two
+  output columns both named the same via `cbind()`, since the
+  grouping columns are always prepended with no collision check.
+
+As with `minitable`'s cross-column-reference bug and `minicondition`'s
+rlang-independence finding earlier in this file, every one of these
+was confirmed by actually running the failing case, not inferred from
+reading the source -- reinforcing that reading a mini's code is not a
+substitute for exercising the edge cases its own tests don't cover,
+especially for logic (factor levels, `merge()`'s column-collapsing,
+`.by`'s group order) whose surprising behaviour lives in a dependency
+(base R's own semantics) rather than in the mini's own code.

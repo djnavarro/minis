@@ -46,6 +46,13 @@ test_that(".pivot_longer errors on an unmatched column name", {
   expect_error(.pivot_longer(wk, c("nope")))
 })
 
+test_that(".pivot_longer keeps the values_to column when .data has zero rows", {
+  df0 <- data.frame(id = integer(0), a = numeric(0), b = numeric(0))
+  out <- .pivot_longer(df0, c(a, b))
+  expect_equal(names(out), c("id", "name", "value"))
+  expect_equal(nrow(out), 0L)
+})
+
 test_that(".pivot_wider spreads names_from/values_from into new columns", {
   out <- .pivot_wider(fish, names_from = "species", values_from = "count")
   expect_equal(names(out), c("location", "trout", "bass"))
@@ -80,6 +87,28 @@ test_that(".pivot_wider works with zero id columns", {
 test_that(".pivot_wider errors when names_from/values_from aren't valid single column names", {
   expect_error(.pivot_wider(fish, names_from = c("species", "location"), values_from = "count"))
   expect_error(.pivot_wider(fish, names_from = "nope", values_from = "count"))
+})
+
+test_that(".pivot_wider errors instead of silently overwriting a colliding id column", {
+  df <- data.frame(loc = c("lake", "sea"), grp = c("loc", "other"), val = c(1, 2))
+  expect_error(.pivot_wider(df, names_from = "grp", values_from = "val"), "collide")
+})
+
+test_that(".pivot_wider turns a NA in names_from into a column literally named \"NA\"", {
+  df <- data.frame(id = c(1, 1, 2), key = c("a", NA, "a"), val = c(10, 20, 30))
+  out <- .pivot_wider(df, names_from = "key", values_from = "val")
+  expect_equal(names(out), c("id", "a", "NA"))
+  expect_equal(out[["NA"]], c(20, NA))
+})
+
+test_that(".pivot_wider preserves real values' type when values_fill's type differs", {
+  df <- data.frame(location = c("lake", "lake", "sea"), species = c("trout", "bass", "trout"), count = c(5, 3, 7))
+  out <- expect_warning(
+    .pivot_wider(df, names_from = "species", values_from = "count", values_fill = "missing"),
+    "different type"
+  )
+  expect_equal(out$trout, c("5", "7"))
+  expect_equal(out$bass, c("3", "missing"))
 })
 
 test_that("pivot_longer and pivot_wider round-trip", {

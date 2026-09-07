@@ -11,7 +11,7 @@ ANSI/unicode isn't safe."
 
 `cli` is excellent, but adding it as a dependency isn't always
 proportionate for a package that just wants a few coloured `message()`
-calls. `minicli.R` is ~180 lines of base R that replicates `cli`'s
+calls. `minicli.R` is ~210 lines of base R that replicates `cli`'s
 capability-detection logic (and even respects its `cli.num_colors` /
 `cli.unicode` options, so behaviour stays consistent if the calling
 session already has `cli` configured) without requiring it as an import.

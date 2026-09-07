@@ -37,6 +37,13 @@ with `df$col`, or wrap the call: `with(df, .case_when(...))`.
 Covers the plain "match conditions in order, first match wins" case
 only. Not included: dplyr's `.default`, `.ptype`, `.size` arguments.
 
+Values across formulas must share a type, and -- for factors
+specifically -- the same set of levels, not just the same class:
+combining two factors with different levels is a hard error rather
+than a silent `NA` (which is what plain `x[i] <- val` would otherwise
+produce for any label not present in the first formula's factor's
+levels).
+
 ## Tests
 
 See [`tests/testthat/test-minicase.R`](tests/testthat/test-minicase.R).

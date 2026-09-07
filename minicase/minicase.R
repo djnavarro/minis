@@ -128,6 +128,20 @@
   if (!is.object(x)) return(invisible(NULL))
   exp_classes <- class(y)
   out_classes <- class(x)
-  if (identical(out_classes, exp_classes)) return(invisible(NULL))
-  stop(arg_name, " must have class `", exp_classes, "`, not class `", out_classes, "`")
+  if (!identical(out_classes, exp_classes)) {
+    stop(arg_name, " must have class `", exp_classes, "`, not class `", out_classes, "`")
+  }
+  # Two factors can both have class "factor" while having different level
+  # sets. Assigning between them (`x[i] <- val`) then does a label-based
+  # lookup via `[<-.factor`, which silently turns any label absent from the
+  # target's levels into NA -- a real, silent data-loss bug, not merely a
+  # cosmetic difference -- rather than raising a visible error.
+  if (is.factor(x) && is.factor(y) && !identical(levels(x), levels(y))) {
+    stop(
+      "Factor levels must match across `.case_when()` values: expected levels `",
+      paste(levels(y), collapse = "`, `"), "`, got `",
+      paste(levels(x), collapse = "`, `"), "`."
+    )
+  }
+  invisible(NULL)
 }

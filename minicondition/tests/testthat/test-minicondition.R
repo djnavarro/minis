@@ -35,6 +35,18 @@ test_that(".cond_inform() raises a message with the given text", {
   expect_message(.cond_inform("hi there"), "hi there")
 })
 
+test_that(".cond_inform()'s conditionMessage() is clean, with no trailing newline", {
+  captured <- NULL
+  withCallingHandlers(
+    .cond_inform("hi there", class = "my_message"),
+    my_message = function(m) {
+      captured <<- conditionMessage(m)
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_identical(captured, "hi there")
+})
+
 test_that(".cond_inform() is catchable by a custom class", {
   out <- withCallingHandlers(
     {

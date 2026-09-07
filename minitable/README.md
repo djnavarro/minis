@@ -80,6 +80,16 @@ No list-columns. Recycling/type validation is whatever
 multiples of each other are recycled), not tibble's stricter
 length-1-or-error rules.
 
+`.table_add_row()`'s new row must supply exactly `.data`'s columns
+(no more, no fewer) -- a missing or unexpected name is an error naming
+the problem column(s), rather than `rbind()`'s low-level "numbers of
+columns of arguments do not match". Each column's new value must also
+share its existing column's type (integer/double are treated as
+interchangeable) -- otherwise `rbind()` would silently upcast the
+*entire* column to accommodate one new value (e.g. one character value
+turning a whole numeric column into character); this is an error
+instead, naming the column and both types involved.
+
 ## Tests
 
 See [`tests/testthat/test-minitable.R`](tests/testthat/test-minitable.R).

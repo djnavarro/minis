@@ -109,6 +109,30 @@ df
 
 Here `a * 10` in the new row refers to the `a = 3` just supplied in that same call, not to the existing column `a` in `df` -- the most recently constructed value for a given name always wins, which is what `.table_drop_dup_list()` is for internally.
 
+## Adding rows: column names and types must match
+
+The new row's columns must exactly match `.data`'s -- no more, no
+fewer -- and a mismatch is reported by name rather than surfacing
+`rbind()`'s own low-level error:
+
+```{r}
+#| error: true
+.table_add_row(df, a = 3)
+```
+
+Each value's type must also match its column's existing type
+(integer and double are treated as interchangeable, since mixing
+those two is unremarkable). Without this check, `rbind()` would
+silently coerce an entire existing column to a broader type just to
+accommodate one new, differently-typed value -- e.g. one character
+value turning a whole numeric column into character -- which is
+exactly the kind of silent surprise this mini avoids elsewhere too:
+
+```{r}
+#| error: true
+.table_add_row(df, a = "not a number", b = 999)
+```
+
 ## Scope: data frame dropping still exists
 
 Nothing in this mini changes the fact that the return objects are genuine data frames, which means that `[` still behaves exactly the same as usual for a data frame, and subsetting is therefore subject to the data frame dropping rule. A future extension could in principle layer a very thin S3 class to address this, but that step is deliberately avoided here: the risk of introducing unexpected behaviour if a "quasi-tibble" classed object escapes into the wild seems too much to countenance in a mini.

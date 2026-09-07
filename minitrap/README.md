@@ -30,9 +30,9 @@ switch to real purrr later with no changes beyond the function names.
 
 ```r
 safe_log <- .trap_safely(log)
-safe_log(-1)
+safe_log("a")
 #> $result: NULL
-#> $error:  <simpleError in log(-1): NaNs produced>
+#> $error:  <simpleError in .f(...): non-numeric argument to mathematical function>
 
 quiet_fn <- .trap_quietly(function() {
   message("starting")

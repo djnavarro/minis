@@ -44,6 +44,17 @@ unquoted/tidyselect-lite syntax. `.verb_arrange()` doesn't take `.by`:
 dplyr's own `arrange(.by_group = )` requires a persistent `group_by()`
 object, which doesn't exist here either.
 
+Groups are processed (and, for `.verb_summarise()`, returned) in the
+order each distinct combination of `.by` columns is first seen in
+`.data`, matching dplyr's own `.by`/`group_by()` semantics -- not
+sorted key order.
+
+A `.verb_summarise()` output name that collides with a `.by` grouping
+column's name is an error, since `.by`'s grouping columns are always
+included as the leading columns of the result -- reusing one of those
+names for a summary expression would otherwise produce two columns
+with the same name.
+
 ## Scope
 
 Deliberately excluded, across every verb:
