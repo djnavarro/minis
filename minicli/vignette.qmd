@@ -11,7 +11,7 @@ The purpose of **minicli** is to provide a zero-dependency stand-in for the smal
 
 ## Functions
 
-The [**minicli.R**](https://github.com/djnavarro/minis/blob/main/minicli/minicli.R) script supplies the following as its core functions: 
+The [**minicli.R**](https://github.com/djnavarro/minis/blob/main/minicli/minicli.R) script supplies the following as its core functions:
 
 - `.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` are used to print a message with a coloured symbol prefix.
 - `.cli_symbol(name)` looks up a single symbol by name, returning its unicode glyph or an ASCII fallback depending on what's safe to print.

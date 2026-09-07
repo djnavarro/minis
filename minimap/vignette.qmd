@@ -14,7 +14,7 @@ The purpose of **minimap** is to provide zero-dependency mapping functions analo
 The [**minimap.R**](https://github.com/djnavarro/minis/blob/main/minimap/minimap.R) script supplies the following functions:
 
 - `.iter_map(.x, .f)` is the backbone function in the script, built atop the base `lapply()` function. It applies the single-argument function `.f` to every element of `.x`, always returning a list, and preserving names if they are present.
-- `.iter_map_dbl(.x, .f)`, `.iter_map_lgl(.x, .f)`, and `.iter_map_chr(.x, .f)` are the typed variants, built atop the base `vapply()` function. They apply `.f` to every element of `.x` and return an atomic vector of the named type (double, logical, or character) instead of a list. 
+- `.iter_map_dbl(.x, .f)`, `.iter_map_lgl(.x, .f)`, and `.iter_map_chr(.x, .f)` are the typed variants, built atop the base `vapply()` function. They apply `.f` to every element of `.x` and return an atomic vector of the named type (double, logical, or character) instead of a list.
 - `.iter_map2(.x, .y, .f)` is the two-input variation, where the two inputs `.x` and `.y` are the same length, and `.f` is a function that takes two inputs. The output is a list that applies `.f` to each pair of input values.
 - `.iter_imap(.x, .f)` is the variation in which the user passes a named vector or list `.x`, and `.f` is a two-argument function that takes the value as its first argument and the name as the second argument, returning a list.
 - `.iter_walk(.x, .f)` behaves analogously to `.iter_map()` but is used only for the side effects of calling the function `.f`. It returns `.x` invisibly instead of the results.
@@ -97,7 +97,7 @@ Note that `.x` must actually be named for `.iter_imap()` to make sense, and that
 
 ## Iterating for the side-effects only
 
-The `.iter_map()` and `.iter_imap()` functions exist for the situation where you want the *results* of applying a function to every input. Sometimes, however, you're not actually interested in what `.f` returns, but are instead interested in what it *does* as a side effect (e.g., save a file). In this situation, you may prefer to use the `.iter_walk()` and `.iter_iwalk()` variations. These "walk" functions iterate over the inputs in the same way that that the analogous "map" functions do, producing side-effects as the mapping unfolds, but they don't capture the results. Instead, they always return the original `.x` input invisibly. 
+The `.iter_map()` and `.iter_imap()` functions exist for the situation where you want the *results* of applying a function to every input. Sometimes, however, you're not actually interested in what `.f` returns, but are instead interested in what it *does* as a side effect (e.g., save a file). In this situation, you may prefer to use the `.iter_walk()` and `.iter_iwalk()` variations. These "walk" functions iterate over the inputs in the same way that the analogous "map" functions do, producing side-effects as the mapping unfolds, but they don't capture the results. Instead, they always return the original `.x` input invisibly.
 
 ```{r}
 .iter_walk(1:3, function(x) cat("value:", x, "\n"))

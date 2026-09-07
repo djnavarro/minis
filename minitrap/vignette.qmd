@@ -28,7 +28,7 @@ safe_log("a")
 ```
 
 A successful call returns a list with the same two elements, with `error` set to `NULL`
-instead, and `result` set to the calculated logarithm. 
+instead, and `result` set to the calculated logarithm.
 
 ```{r}
 safe_log(10)
@@ -42,8 +42,8 @@ source(file.path("minimap", "minimap.R"))
 ```
 
 ```{r}
-mixed_list <- list(4, "a", 9) 
-mixed_list |> 
+mixed_list <- list(4, "a", 9)
+mixed_list |>
   .iter_map(.trap_safely(sqrt)) |>
   .iter_map_lgl(\(r) is.null(r$error))
 ```
@@ -63,10 +63,10 @@ quiet_fn <- .trap_quietly(function() {
 quiet_fn()
 ```
 
-Note the shape of the result: `result` holds the ordinary return value (i.e. `42`), `warnings` and `messages` are character vectors with one entry per condition raised (in the order they occurred), and `output` is whatever was printed via `cat()`/`print()`, collapsed into a single string -- empty here, since the original function would not have printed anything directly. 
+Note the shape of the result: `result` holds the ordinary return value (i.e. `42`), `warnings` and `messages` are character vectors with one entry per condition raised (in the order they occurred), and `output` is whatever was printed via `cat()`/`print()`, collapsed into a single string -- empty here, since the original function would not have printed anything directly.
 
 Crucially, `.trap_quietly()` does *not* catch errors -- a function that
-errors still aborts the call, same as if it were called directly. 
+errors still aborts the call, same as if it were called directly.
 
 ```{r}
 #| error: true
