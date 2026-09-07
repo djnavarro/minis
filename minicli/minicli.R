@@ -74,7 +74,14 @@
 #' @noRd
 .cli_ansi_enabled <- function() {
   opt <- getOption("cli.num_colors", NULL)
-  if (!is.null(opt)) return(opt > 1)
+  if (!is.null(opt)) {
+    # Coerce defensively (a numeric-looking string works the same as a
+    # number) and fall through to the other checks below if the option
+    # was set to something we can't interpret as a number (e.g. NA),
+    # rather than propagating a non-TRUE/FALSE value.
+    opt_n <- suppressWarnings(as.numeric(opt))
+    if (!is.na(opt_n)) return(opt_n > 1)
+  }
 
   # https://no-color.org
   if (nzchar(Sys.getenv("NO_COLOR", ""))) return(FALSE)
@@ -158,7 +165,9 @@
 #' @export
 .cli_symbol <- function(name) {
   set <- if (.cli_unicode_enabled()) .cli_symbols_unicode else .cli_symbols_ascii
-  if (!name %in% names(set)) stop("Unknown symbol: ", name, call. = FALSE)
+  if (length(name) != 1L || !(name %in% names(set))) {
+    stop("Unknown symbol: ", paste(name, collapse = ", "), call. = FALSE)
+  }
   unname(set[[name]])
 }
 
@@ -167,7 +176,7 @@
 #' @noRd
 .cli_alert <- function(symbol_name, color_fn, text, ...) {
   if (length(list(...))) text <- sprintf(text, ...)
-  message(paste0(color_fn(.cli_symbol(symbol_name)), " ", text))
+  message(paste0(color_fn(.cli_symbol(symbol_name)), " ", text, collapse = "\n"))
 }
 
 #' Success / info / warning / danger alerts

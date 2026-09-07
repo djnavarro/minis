@@ -78,6 +78,22 @@ test_that(".cli_symbol errors on an unknown name", {
   expect_error(.cli_symbol("nope"), "Unknown symbol")
 })
 
+test_that(".cli_symbol errors cleanly on a vector name instead of an opaque R error", {
+  expect_error(.cli_symbol(c("tick", "cross")), "Unknown symbol")
+})
+
+test_that("cli.num_colors = NA falls through to other detection instead of crashing", {
+  withr::local_options(cli.num_colors = NA, knitr.in.progress = TRUE)
+  expect_equal(.cli_col_red("x"), "x")
+})
+
+test_that("a numeric-looking string in cli.num_colors is compared numerically, not lexicographically", {
+  withr::local_options(cli.num_colors = "10")
+  expect_equal(.cli_col_red("x"), "\033[31mx\033[0m")
+  withr::local_options(cli.num_colors = "1")
+  expect_equal(.cli_col_red("x"), "x")
+})
+
 test_that("alert functions message the right text, with sprintf interpolation", {
   withr::local_options(cli.num_colors = 1, cli.unicode = FALSE)
   expect_message(.cli_alert_success("done"), "v done", fixed = TRUE)
@@ -96,4 +112,9 @@ test_that(".cli_rule produces a line of the configured width, with a centred tit
 test_that(".cli_bullets prefixes each item", {
   withr::local_options(cli.num_colors = 1, cli.unicode = FALSE)
   expect_message(.cli_bullets(c("a", "b")), "* a\n* b", fixed = TRUE)
+})
+
+test_that("alert functions separate a vectorised text argument onto its own lines", {
+  withr::local_options(cli.num_colors = 1, cli.unicode = FALSE)
+  expect_message(.cli_alert_success(c("a", "b")), "v a\nv b", fixed = TRUE)
 })
