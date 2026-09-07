@@ -7,25 +7,40 @@ title: "minicondition"
 source(file.path("minicondition", "minicondition.R"))
 ```
 
-`minicondition` provides thin wrappers around base R's own condition system that signal a *classed*
-condition, catchable specifically by that class. See the [README](https://github.com/djnavarro/minis/tree/main/minicondition) for the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that's the main reason to reach for `minicondition` over plain `stop()`/`warning()`/`message()`.
+The purpose of **minicondition** is to provide a zero-dependency
+reimplementation of a small slice of the
+[**rlang**](https://rlang.r-lib.org/) package: thin wrappers around
+base R's own condition system that signal a *classed* condition,
+catchable specifically by that class. The [README](https://github.com/djnavarro/minis/tree/main/minicondition)
+provides the **rlang**-parity notes; this page focuses mostly on the
+catch-by-class behaviour, since that's the main reason to reach for
+**minicondition** over plain `stop()`/`warning()`/`message()`.
 
 ## Functions
 
-These are the core functions:
+The [**minicondition.R**](https://github.com/djnavarro/minis/blob/main/minicondition/minicondition.R)
+script supplies four core functions:
 
-- `.cond_abort(message, class = NULL)` -- signal a classed error.
-- `.cond_warn(message, class = NULL)` -- signal a classed warning.
-- `.cond_inform(message, class = NULL)` -- signal a classed message.
-- `.cond_assert(expr, message, class = NULL)` -- call `.cond_abort()` if `expr` isn't entirely `TRUE`; `NA` counts as a failure.
+- `.cond_abort(message, class = NULL)` is used to signal a classed
+  error.
+- `.cond_warn(message, class = NULL)` is used to signal a classed
+  warning.
+- `.cond_inform(message, class = NULL)` is used to signal a classed
+  message.
+- `.cond_assert(expr, message, class = NULL)` is used to call
+  `.cond_abort()` if `expr` isn't entirely `TRUE`; `NA` counts as a
+  failure.
 
-`minicondition` also has one internal helper:
+There is also one internal helper:
 
-- `.cond_condition()` builds the classed condition object that `.cond_abort()`/ `_warn()`/ `_inform()` each hand off to base `stop()`/`warning()`/`message()`.
+- `.cond_condition()` builds the classed condition object that
+  `.cond_abort()`/`_warn()`/`_inform()` each hand off to base
+  `stop()`/`warning()`/`message()`.
 
 ## Why classes matter
 
-A plain `stop("bad input")` produces a condition of class `c("simpleError", "error", "condition")` -- generic, and indistinguishable from any other error at the point where it's caught. That's fine for a one-off script, but it's a problem inside a package: callers who want to react to *this specific kind* of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. `.cond_abort()` solves that by adding an extra class on top of `"error"`, so `tryCatch()` can dispatch on it directly:
+A plain `stop("bad input")` produces a condition of class `c("simpleError", "error", "condition")` -- generic, and indistinguishable from any other error at the point where it's caught. That's fine for a one-off script, but it's a problem inside a package: callers who want to react to *this specific kind* of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. The `.cond_abort()` function solves that by adding an extra class on
+top of `"error"`, so `tryCatch()` can dispatch on it directly:
 
 ```{r}
 tryCatch(
@@ -34,7 +49,9 @@ tryCatch(
 )
 ```
 
-Note that `.cond_abort()` uses base `stop()` internally, not `rlang::abort()` -- but the mechanics of catching by class are identical either way. `tryCatch()`/`withCallingHandlers()` dispatch on a condition object's `class` attribute, regardless of what function signalled it:
+Note that `.cond_abort()` uses base `stop()` internally, not `rlang::abort()` -- but the mechanics of catching by class are identical either way. The `tryCatch()`/`withCallingHandlers()` functions dispatch on a
+condition object's `class` attribute, regardless of what function
+signalled it:
 
 ```{r}
 e <- tryCatch(.cond_abort("x", class = "mypkg_invalid_input"), error = function(e) e)
@@ -57,7 +74,11 @@ This is the same layering `rlang` conditions use: a custom class sits *in additi
 
 ## Warnings and messages work the same way
 
-`.cond_warn()` signals a classed warning, catchable via `withCallingHandlers()` (warnings, unlike errors, don't unwind the call stack, so catching them with `tryCatch()` would abandon whatever code was about to run after the warning -- `withCallingHandlers()` lets the handler run and then hand control back):
+The `.cond_warn()` function signals a classed warning, catchable via
+`withCallingHandlers()` (warnings, unlike errors, don't unwind the
+call stack, so catching them with `tryCatch()` would abandon whatever
+code was about to run after the warning -- `withCallingHandlers()`
+lets the handler run and then hand control back):
 
 ```{r}
 withCallingHandlers(
@@ -71,7 +92,10 @@ withCallingHandlers(
 
 The `invokeRestart("muffleWarning")` call suppresses the warning from also being printed by R's default warning handler -- without it, the warning would print a second time after the custom handler runs.
 
-`.cond_inform()` signals a classed message -- uncaught, it just prints like an ordinary `message()` call, since messages are typically meant to be seen unless something specifically wants to intercept them:
+The `.cond_inform()` function signals a classed message -- uncaught,
+it just prints like an ordinary `message()` call, since messages are
+typically meant to be seen unless something specifically wants to
+intercept them:
 
 ```{r}
 .cond_inform("starting up", class = "mypkg_startup")
@@ -79,7 +103,11 @@ The `invokeRestart("muffleWarning")` call suppresses the warning from also being
 
 ## `.cond_assert()`: abort if a condition doesn't hold
 
-`.cond_assert()` is `.cond_abort()` plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn't entirely `TRUE`. A passing assertion is silent, so it's safe to sprinkle through code as a precondition check without cluttering normal output:
+The `.cond_assert()` function is `.cond_abort()` plus a check: pass it
+a logical expression, and it aborts (with the same classed-error
+mechanics as above) only if that expression isn't entirely `TRUE`. A
+passing assertion is silent, so it's safe to sprinkle through code as
+a precondition check without cluttering normal output:
 
 ```{r}
 x <- 5
@@ -97,7 +125,16 @@ tryCatch(
 
 ## `NA` counts as a failure, not a crash
 
-`.cond_assert()` accepts a vector, not just a single logical value, and checks that *every* element is `TRUE`. That raises a subtlety: what should happen if the vector contains `NA`? This is a deliberate fix relative to the source this was adapted from: a naive `if (any(expr == FALSE))` errors outright when `expr` contains `NA` ("missing value where TRUE/FALSE needed"), which would crash the assertion check itself rather than raising the intended, informative assertion error. `.cond_assert()` checks `anyNA(expr)` explicitly first, so a vector containing `NA` fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:
+The `.cond_assert()` function accepts a vector, not just a single
+logical value, and checks that *every* element is `TRUE`. That raises
+a subtlety: what should happen if the vector contains `NA`? This is a
+deliberate fix relative to the source this was adapted from: a naive
+`if (any(expr == FALSE))` errors outright when `expr` contains `NA`
+("missing value where TRUE/FALSE needed"), which would crash the
+assertion check itself rather than raising the intended, informative
+assertion error. It checks `anyNA(expr)` explicitly first instead, so
+a vector containing `NA` fails the assertion cleanly, with the message
+you asked for, instead of an unrelated low-level error:
 
 ```{r}
 #| error: true
