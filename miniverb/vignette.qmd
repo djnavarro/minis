@@ -39,9 +39,16 @@ script supplies:
 
 All five share a `.by` grouping convention (where applicable): a plain
 character vector of column names, not dplyr's unquoted/tidyselect-lite
-syntax. There is also one internal helper, `.verb_split_by()`, which
-splits row indices into groups and is shared by `.verb_filter()`,
-`.verb_mutate()`, and `.verb_summarise()`.
+syntax.
+
+There are also two internal helpers:
+
+- `.verb_dotdotdot()` captures the unevaluated `...` conditions passed
+  to `.verb_filter()`, so each one can be evaluated against the data
+  frame individually.
+- `.verb_split_by()` splits row indices into groups by `.by`'s column
+  names, shared by `.verb_filter()`, `.verb_mutate()`, and
+  `.verb_summarise()`.
 
 ## A minimal data set
 
@@ -54,7 +61,9 @@ fruits <- data.frame(
 fruits
 ```
 
-## A single condition
+## `filter()`
+
+### A single condition
 
 Columns are referred to by bare name, evaluated in the scope of the
 data frame -- there's no need to write `fruits$in_stock` or wrap the
@@ -65,7 +74,7 @@ call in `with()`, as you would for [**minicase**](../minicase/)'s
 .verb_filter(fruits, in_stock)
 ```
 
-## Multiple conditions combine with AND
+### Multiple conditions combine with AND
 
 Passing more than one condition is equivalent to combining them with
 `&`, so a row is kept only if every condition holds. This is often more
@@ -86,7 +95,7 @@ identical(
 )
 ```
 
-## `NA` conditions drop the row
+### `NA` conditions drop the row
 
 The `date` row has a missing `price`, so any condition involving
 `price` is `NA` for that row rather than `TRUE`/`FALSE`. The
@@ -107,7 +116,7 @@ where an `NA` index instead produces a row of `NA`s:
 fruits[fruits$price > 1, ]
 ```
 
-## No conditions returns the data frame unchanged
+### No conditions returns the data frame unchanged
 
 Calling `.verb_filter()` with no conditions at all is legitimate and
 simply leaves the data frame unchanged -- useful when conditions are
@@ -117,7 +126,7 @@ built up programmatically and might end up empty:
 identical(.verb_filter(fruits), fruits)
 ```
 
-## Grouped filtering with `.by`
+### Grouped conditions with `.by`
 
 The `.by` argument takes a character vector of column names and
 evaluates the conditions separately within each group -- useful when a
@@ -127,7 +136,9 @@ condition depends on a per-group quantity like a group mean:
 .verb_filter(fruits, price > mean(price, na.rm = TRUE), .by = "in_stock")
 ```
 
-## Keeping and renaming columns
+## `select()`
+
+### Keeping and renaming columns
 
 `.verb_select()` keeps columns in the order they're listed, and a
 `new = old` argument renames a column on the way through:
@@ -136,7 +147,7 @@ condition depends on a per-group quantity like a group mean:
 .verb_select(fruits, name, cost = price)
 ```
 
-## Dropping columns instead
+### Dropping columns instead
 
 A `-` in front of a column name drops it rather than keeping it, which
 reads more naturally than listing every column to keep when only one
@@ -147,13 +158,22 @@ the same call:
 .verb_select(fruits, -in_stock)
 ```
 
-## Adding columns with mutate
+## `mutate()`
+
+### Adding a new column
 
 `.verb_mutate()` takes named `name = expr` arguments and adds each one
-as a new column, evaluated in the scope of `fruits`. Later arguments
-can refer to columns added by earlier ones in the same call, so
-`savings` below is free to use `discounted` even though it doesn't
-exist in `fruits` yet:
+as a new column, evaluated in the scope of `fruits`:
+
+```{r}
+.verb_mutate(fruits, discounted = round(price * 0.9, 2))
+```
+
+### Later columns can use earlier ones
+
+Arguments are evaluated left to right, so an expression can refer to a
+column added by an earlier argument in the same call. Below, `savings`
+uses `discounted` even though it doesn't exist in `fruits` itself:
 
 ```{r}
 .verb_mutate(
@@ -163,7 +183,7 @@ exist in `fruits` yet:
 )
 ```
 
-## Grouped columns with `.by`
+### Grouped columns with `.by`
 
 Passing `.by` evaluates each expression separately within each group,
 then puts the results back in the original row order -- here, each
@@ -178,7 +198,9 @@ fruit's price is compared to the average price within its own
 )
 ```
 
-## Sorting rows with arrange
+## `arrange()`
+
+### Ascending by default, descending with `.verb_desc()`
 
 `.verb_arrange()` sorts ascending by default. Wrapping a column in
 `.verb_desc()` sorts it descending instead, and `NA`s sort last either
@@ -188,7 +210,7 @@ way, matching `dplyr::arrange()`:
 .verb_arrange(fruits, .verb_desc(price))
 ```
 
-## Breaking ties with a second column
+### Breaking ties with a second column
 
 Extra arguments break ties left over from earlier ones, the same way
 `order()` does. Sorting by `in_stock` first and price second groups the
@@ -199,16 +221,18 @@ descending price:
 .verb_arrange(fruits, in_stock, .verb_desc(price))
 ```
 
-## Summarising groups
+## `summarise()`
 
-`.verb_summarise()` collapses `fruits` down to a single row when no
-`.by` is supplied, computing each named expression once over every row:
+### One row overall
+
+With no `.by`, `.verb_summarise()` collapses `fruits` down to a single
+row, computing each named expression once over every row:
 
 ```{r}
 .verb_summarise(fruits, average_price = round(mean(price, na.rm = TRUE), 2), n = length(name))
 ```
 
-## Grouped summaries with `.by`
+### One row per group with `.by`
 
 With `.by`, one summary row is produced per group instead, and the
 grouping columns appear first in the result:
