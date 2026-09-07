@@ -7,19 +7,30 @@ title: "minicase"
 source(file.path("minicase", "minicase.R"))
 ```
 
-`minicase` provides a single function, `.case_when()`, a minimal reimplementation of `dplyr::case_when()`: vectorised if/else across a sequence of `condition ~ value` formulas, first match wins. See the [README](https://github.com/djnavarro/minis/tree/main/minicase) for scope notes; this page walks through it on the same toy fruits data frame used in the [minifilter vignette](../minifilter/), building up to how missing values and default values interact.
+The purpose of **minicase** is to provide a zero-dependency
+reimplementation of a single function from the
+[**dplyr**](https://dplyr.tidyverse.org/) package: `case_when()`. It
+performs a vectorised if/else across a sequence of `condition ~ value`
+formulas, where the first match wins. The [README](https://github.com/djnavarro/minis/tree/main/minicase)
+provides scope notes; this page walks through it on the same toy
+fruits data frame used in the [**minifilter**](../minifilter/)
+vignette, building up to how missing values and default values
+interact.
 
 ## Functions
 
-There is one core function:
+The [**minicase.R**](https://github.com/djnavarro/minis/blob/main/minicase/minicase.R)
+script supplies one core function:
 
-- `.case_when(...)` -- given a sequence of `condition ~ value`
-  formulas, return a vector the same length as the (recycled)
+- `.case_when(...)` is used to take a sequence of `condition ~ value`
+  formulas and return a vector the same length as the (recycled)
   conditions/values, taking the value from the first formula whose
   condition is `TRUE` at each position, and `NA` wherever no condition
   matched.
 
-It is supported by five internal helpers, all supporting `.case_when()`'s recycling and type-consistency checks -- there's no need to call any of them directly. The helpers are these:
+It is supported by five internal helpers, all of which support
+`.case_when()`'s recycling and type-consistency checks -- there's no
+need to call any of them directly. The helpers are these:
 
 - `.case_validate_length()`
 - `.case_replace_with()`
@@ -61,7 +72,9 @@ identical(
 
 ## First match wins
 
-Formulas are checked in order, and the first `TRUE` condition for each position determines its value, even if a later condition would also match. `cherry` (price 3.00) is a good illustration: it fails `price < 3`, but matches `price >= 3`, so it's classified as `"pricey"` above. Conditions can combine several tests with `&`, which is useful for layering more specific rules ahead of more general ones:
+Formulas are checked in order, and the first `TRUE` condition for each position determines its value, even if a later condition would also match. The `cherry` row (price 3.00) is a good illustration: it fails
+`price < 3`, but matches `price >= 3`, so it's classified as
+`"pricey"` above. Conditions can combine several tests with `&`, which is useful for layering more specific rules ahead of more general ones:
 
 ```{r}
 with(fruits, .case_when(
@@ -71,12 +84,19 @@ with(fruits, .case_when(
 ))
 ```
 
-`banana` matches both the first and second formula here (it's in stock *and* under $1), but because the first-match-wins rule checks formulas top to bottom, it's classified by the more specific `"cheap and in
-stock"` rule rather than the more general `"in stock"` one. Ordering formulas from most to least specific is exactly how you get that behaviour deliberately, rather than by accident.
+The `banana` row matches both the first and second formula here (it's
+in stock *and* under $1), but because the first-match-wins rule checks
+formulas top to bottom, it's classified by the more specific
+`"cheap and in stock"` rule rather than the more general `"in stock"`
+one. Ordering formulas from most to least specific is exactly how you
+get that behaviour deliberately, rather than by accident.
 
 ## Unmatched positions are `NA`
 
-`date` has a missing price, so every condition involving `price` evaluates to `NA` for that row -- neither `TRUE` nor `FALSE` -- and `date` itself gets `NA` in the result, since there's no condition it definitively satisfies:
+The `date` row has a missing price, so every condition involving
+`price` evaluates to `NA` for that row -- neither `TRUE` nor `FALSE`
+-- and `date` itself gets `NA` in the result, since there's no
+condition it definitively satisfies:
 
 ```{r}
 with(fruits, .case_when(
