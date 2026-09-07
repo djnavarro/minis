@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>minifilter – minis</title>
+<title>miniverb – minis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -321,7 +321,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../minifilter/index.html">minifilter</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../miniverb/index.html">miniverb</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -368,8 +368,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../minifilter/index.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">minifilter</span></a>
+  <a href="../miniverb/index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">miniverb</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -428,10 +428,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
   <li><a href="#a-minimal-data-set" id="toc-a-minimal-data-set" class="nav-link" data-scroll-target="#a-minimal-data-set">A minimal data set</a></li>
+  <li><a href="#filter" id="toc-filter" class="nav-link" data-scroll-target="#filter"><code>filter()</code></a>
+  <ul class="collapse">
   <li><a href="#a-single-condition" id="toc-a-single-condition" class="nav-link" data-scroll-target="#a-single-condition">A single condition</a></li>
   <li><a href="#multiple-conditions-combine-with-and" id="toc-multiple-conditions-combine-with-and" class="nav-link" data-scroll-target="#multiple-conditions-combine-with-and">Multiple conditions combine with AND</a></li>
   <li><a href="#na-conditions-drop-the-row" id="toc-na-conditions-drop-the-row" class="nav-link" data-scroll-target="#na-conditions-drop-the-row"><code>NA</code> conditions drop the row</a></li>
   <li><a href="#no-conditions-returns-the-data-frame-unchanged" id="toc-no-conditions-returns-the-data-frame-unchanged" class="nav-link" data-scroll-target="#no-conditions-returns-the-data-frame-unchanged">No conditions returns the data frame unchanged</a></li>
+  <li><a href="#grouped-conditions-with-.by" id="toc-grouped-conditions-with-.by" class="nav-link" data-scroll-target="#grouped-conditions-with-.by">Grouped conditions with <code>.by</code></a></li>
+  </ul></li>
+  <li><a href="#select" id="toc-select" class="nav-link" data-scroll-target="#select"><code>select()</code></a>
+  <ul class="collapse">
+  <li><a href="#keeping-and-renaming-columns" id="toc-keeping-and-renaming-columns" class="nav-link" data-scroll-target="#keeping-and-renaming-columns">Keeping and renaming columns</a></li>
+  <li><a href="#dropping-columns-instead" id="toc-dropping-columns-instead" class="nav-link" data-scroll-target="#dropping-columns-instead">Dropping columns instead</a></li>
+  </ul></li>
+  <li><a href="#mutate" id="toc-mutate" class="nav-link" data-scroll-target="#mutate"><code>mutate()</code></a>
+  <ul class="collapse">
+  <li><a href="#adding-a-new-column" id="toc-adding-a-new-column" class="nav-link" data-scroll-target="#adding-a-new-column">Adding a new column</a></li>
+  <li><a href="#later-columns-can-use-earlier-ones" id="toc-later-columns-can-use-earlier-ones" class="nav-link" data-scroll-target="#later-columns-can-use-earlier-ones">Later columns can use earlier ones</a></li>
+  <li><a href="#grouped-columns-with-.by" id="toc-grouped-columns-with-.by" class="nav-link" data-scroll-target="#grouped-columns-with-.by">Grouped columns with <code>.by</code></a></li>
+  </ul></li>
+  <li><a href="#arrange" id="toc-arrange" class="nav-link" data-scroll-target="#arrange"><code>arrange()</code></a>
+  <ul class="collapse">
+  <li><a href="#ascending-by-default-descending-with-.verb_desc" id="toc-ascending-by-default-descending-with-.verb_desc" class="nav-link" data-scroll-target="#ascending-by-default-descending-with-.verb_desc">Ascending by default, descending with <code>.verb_desc()</code></a></li>
+  <li><a href="#breaking-ties-with-a-second-column" id="toc-breaking-ties-with-a-second-column" class="nav-link" data-scroll-target="#breaking-ties-with-a-second-column">Breaking ties with a second column</a></li>
+  </ul></li>
+  <li><a href="#summarise" id="toc-summarise" class="nav-link" data-scroll-target="#summarise"><code>summarise()</code></a>
+  <ul class="collapse">
+  <li><a href="#one-row-overall" id="toc-one-row-overall" class="nav-link" data-scroll-target="#one-row-overall">One row overall</a></li>
+  <li><a href="#one-row-per-group-with-.by" id="toc-one-row-per-group-with-.by" class="nav-link" data-scroll-target="#one-row-per-group-with-.by">One row per group with <code>.by</code></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -439,9 +464,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../minifilter/index.html">minifilter</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../miniverb/index.html">miniverb</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">minifilter</h1>
+<h1 class="title">miniverb</h1>
 </div>
 
 
@@ -458,16 +483,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The purpose of <strong>minifilter</strong> is to provide a zero-dependency reimplementation of a single function from the <a href="https://dplyr.tidyverse.org/"><strong>dplyr</strong></a> package: <code>filter()</code>. It keeps rows of a data frame where every one of a set of unquoted conditions is <code>TRUE</code>. The <a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a> provides scope notes; this page walks through its behaviour on a small toy data frame, including two things worth knowing about before you rely on it: how missing values are handled, and what happens when no conditions are supplied at all.</p>
+<p>The purpose of <strong>miniverb</strong> is to provide a zero-dependency reimplementation of five one-table verbs from the <a href="https://dplyr.tidyverse.org/"><strong>dplyr</strong></a> package: <code>filter()</code>, <code>select()</code>, <code>mutate()</code>, <code>arrange()</code>, and <code>summarise()</code>. The <a href="https://github.com/djnavarro/minis/tree/main/miniverb">README</a> provides full scope notes; this page walks through each verb in turn on a small toy data frame, including a few things worth knowing about before relying on them: how missing values are handled, what happens when no conditions are supplied at all, and how the shared <code>.by</code> argument groups rows for <code>filter()</code>, <code>mutate()</code>, and <code>summarise()</code>.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>The <a href="https://github.com/djnavarro/minis/blob/main/minifilter/minifilter.R"><strong>minifilter.R</strong></a> script supplies a single core function:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/miniverb/miniverb.R"><strong>miniverb.R</strong></a> script supplies:</p>
 <ul>
-<li><code>.filter(.data, ...)</code> is used to keep rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
+<li><code>.verb_filter(.data, ..., .by = NULL)</code> keeps rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
+<li><code>.verb_select(.data, ...)</code> keeps (and optionally renames) columns by bare name, integer position, or <code>-</code> exclusion.</li>
+<li><code>.verb_mutate(.data, ..., .by = NULL)</code> adds or overwrites columns via named <code>name = expr</code> arguments.</li>
+<li><code>.verb_arrange(.data, ...)</code> reorders rows by one or more columns.</li>
+<li><code>.verb_desc(x)</code> marks a column for descending order inside <code>.verb_arrange()</code>.</li>
+<li><code>.verb_summarise(.data, ..., .by = NULL)</code> collapses to one row per group (or one row overall) via named <code>name = expr</code> arguments.</li>
 </ul>
-<p>There is also one internal helper:</p>
+<p>All five share a <code>.by</code> grouping convention (where applicable): a plain character vector of column names, not dplyr’s unquoted/tidyselect-lite syntax.</p>
+<p>There are also two internal helpers:</p>
 <ul>
-<li><code>.filter_dotdotdot()</code> captures the unevaluated <code>...</code> conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.</li>
+<li><code>.verb_dotdotdot()</code> captures the unevaluated <code>...</code> conditions passed to <code>.verb_filter()</code>, so each one can be evaluated against the data frame individually.</li>
+<li><code>.verb_split_by()</code> splits row indices into groups by <code>.by</code>’s column names, shared by <code>.verb_filter()</code>, <code>.verb_mutate()</code>, and <code>.verb_summarise()</code>.</li>
 </ul>
 </section>
 <section id="a-minimal-data-set" class="level2">
@@ -489,11 +521,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="a-single-condition" class="level2">
-<h2 class="anchored" data-anchor-id="a-single-condition">A single condition</h2>
+<section id="filter" class="level2">
+<h2 class="anchored" data-anchor-id="filter"><code>filter()</code></h2>
+<section id="a-single-condition" class="level3">
+<h3 class="anchored" data-anchor-id="a-single-condition">A single condition</h3>
 <p>Columns are referred to by bare name, evaluated in the scope of the data frame – there’s no need to write <code>fruits$in_stock</code> or wrap the call in <code>with()</code>, as you would for <a href="../minicase/"><strong>minicase</strong></a>’s <code>.case_when()</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, in_stock)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_filter</span>(fruits, in_stock)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        name price in_stock
 1      apple   1.2     TRUE
@@ -503,11 +537,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="multiple-conditions-combine-with-and" class="level2">
-<h2 class="anchored" data-anchor-id="multiple-conditions-combine-with-and">Multiple conditions combine with AND</h2>
+<section id="multiple-conditions-combine-with-and" class="level3">
+<h3 class="anchored" data-anchor-id="multiple-conditions-combine-with-and">Multiple conditions combine with AND</h3>
 <p>Passing more than one condition is equivalent to combining them with <code>&amp;</code>, so a row is kept only if every condition holds. This is often more readable than a single expression joined with <code>&amp;&amp;</code>/<code>&amp;</code>, especially as the number of conditions grows:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    name price in_stock
 1  apple   1.2     TRUE
@@ -517,7 +551,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>That’s equivalent to writing the conditions out explicitly and combining them yourself:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.verb_filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>),</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  fruits[fruits<span class="sc">$</span>in_stock <span class="sc">&amp;</span> fruits<span class="sc">$</span>price <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(fruits<span class="sc">$</span>price), ]</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -525,11 +559,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="na-conditions-drop-the-row" class="level2">
-<h2 class="anchored" data-anchor-id="na-conditions-drop-the-row"><code>NA</code> conditions drop the row</h2>
-<p>The <code>date</code> row has a missing <code>price</code>, so any condition involving <code>price</code> is <code>NA</code> for that row rather than <code>TRUE</code>/<code>FALSE</code>. The <code>.filter()</code> function treats <code>NA</code> the same way <code>dplyr::filter()</code> does: as “not proven to be kept”, so the row is dropped rather than kept by default or causing an error:</p>
+<section id="na-conditions-drop-the-row" class="level3">
+<h3 class="anchored" data-anchor-id="na-conditions-drop-the-row"><code>NA</code> conditions drop the row</h3>
+<p>The <code>date</code> row has a missing <code>price</code>, so any condition involving <code>price</code> is <code>NA</code> for that row rather than <code>TRUE</code>/<code>FALSE</code>. The <code>.verb_filter()</code> function treats <code>NA</code> the same way <code>dplyr::filter()</code> does: as “not proven to be kept”, so the row is dropped rather than kept by default or causing an error:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, price <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_filter</span>(fruits, price <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        name price in_stock
 1      apple   1.2     TRUE
@@ -549,18 +583,182 @@ NA       &lt;NA&gt;    NA       NA
 </div>
 </div>
 </section>
-<section id="no-conditions-returns-the-data-frame-unchanged" class="level2">
-<h2 class="anchored" data-anchor-id="no-conditions-returns-the-data-frame-unchanged">No conditions returns the data frame unchanged</h2>
-<p>Calling <code>.filter()</code> with no conditions at all is legitimate and simply leaves the data frame unchanged – useful when conditions are built up programmatically and might end up empty:</p>
+<section id="no-conditions-returns-the-data-frame-unchanged" class="level3">
+<h3 class="anchored" data-anchor-id="no-conditions-returns-the-data-frame-unchanged">No conditions returns the data frame unchanged</h3>
+<p>Calling <code>.verb_filter()</code> with no conditions at all is legitimate and simply leaves the data frame unchanged – useful when conditions are built up programmatically and might end up empty:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">.filter</span>(fruits), fruits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">.verb_filter</span>(fruits), fruits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
 </div>
 </div>
-<p>This is a deliberate fix relative to the <a href="https://github.com/nathaneastwood/poorman"><strong>poorman</strong></a> logic <strong>minifilter</strong> was adapted from, which didn’t guard against empty <code>...</code> and would have silently dropped every row instead – see the <a href="https://github.com/djnavarro/minis/tree/main/minifilter#deliberate-fix-relative-to-the-source-this-was-adapted-from">README</a> for details.</p>
+</section>
+<section id="grouped-conditions-with-.by" class="level3">
+<h3 class="anchored" data-anchor-id="grouped-conditions-with-.by">Grouped conditions with <code>.by</code></h3>
+<p>The <code>.by</code> argument takes a character vector of column names and evaluates the conditions separately within each group – useful when a condition depends on a per-group quantity like a group mean:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_filter</span>(fruits, price <span class="sc">&gt;</span> <span class="fu">mean</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.by =</span> <span class="st">"in_stock"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price in_stock
+5 elderberry   4.5     TRUE</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="select" class="level2">
+<h2 class="anchored" data-anchor-id="select"><code>select()</code></h2>
+<section id="keeping-and-renaming-columns" class="level3">
+<h3 class="anchored" data-anchor-id="keeping-and-renaming-columns">Keeping and renaming columns</h3>
+<p><code>.verb_select()</code> keeps columns in the order they’re listed, and a <code>new = old</code> argument renames a column on the way through:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_select</span>(fruits, name, <span class="at">cost =</span> price)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name cost
+1      apple  1.2
+2     banana  0.5
+3     cherry  3.0
+4       date   NA
+5 elderberry  4.5</code></pre>
+</div>
+</div>
+</section>
+<section id="dropping-columns-instead" class="level3">
+<h3 class="anchored" data-anchor-id="dropping-columns-instead">Dropping columns instead</h3>
+<p>A <code>-</code> in front of a column name drops it rather than keeping it, which reads more naturally than listing every column to keep when only one or two need to go. Positive and negative selections can’t be mixed in the same call:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_select</span>(fruits, <span class="sc">-</span>in_stock)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price
+1      apple   1.2
+2     banana   0.5
+3     cherry   3.0
+4       date    NA
+5 elderberry   4.5</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="mutate" class="level2">
+<h2 class="anchored" data-anchor-id="mutate"><code>mutate()</code></h2>
+<section id="adding-a-new-column" class="level3">
+<h3 class="anchored" data-anchor-id="adding-a-new-column">Adding a new column</h3>
+<p><code>.verb_mutate()</code> takes named <code>name = expr</code> arguments and adds each one as a new column, evaluated in the scope of <code>fruits</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_mutate</span>(fruits, <span class="at">discounted =</span> <span class="fu">round</span>(price <span class="sc">*</span> <span class="fl">0.9</span>, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price in_stock discounted
+1      apple   1.2     TRUE       1.08
+2     banana   0.5     TRUE       0.45
+3     cherry   3.0    FALSE       2.70
+4       date    NA     TRUE         NA
+5 elderberry   4.5     TRUE       4.05</code></pre>
+</div>
+</div>
+</section>
+<section id="later-columns-can-use-earlier-ones" class="level3">
+<h3 class="anchored" data-anchor-id="later-columns-can-use-earlier-ones">Later columns can use earlier ones</h3>
+<p>Arguments are evaluated left to right, so an expression can refer to a column added by an earlier argument in the same call. Below, <code>savings</code> uses <code>discounted</code> even though it doesn’t exist in <code>fruits</code> itself:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_mutate</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  fruits,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">discounted =</span> <span class="fu">round</span>(price <span class="sc">*</span> <span class="fl">0.9</span>, <span class="dv">2</span>),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">savings =</span> <span class="fu">round</span>(price <span class="sc">-</span> discounted, <span class="dv">2</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price in_stock discounted savings
+1      apple   1.2     TRUE       1.08    0.12
+2     banana   0.5     TRUE       0.45    0.05
+3     cherry   3.0    FALSE       2.70    0.30
+4       date    NA     TRUE         NA      NA
+5 elderberry   4.5     TRUE       4.05    0.45</code></pre>
+</div>
+</div>
+</section>
+<section id="grouped-columns-with-.by" class="level3">
+<h3 class="anchored" data-anchor-id="grouped-columns-with-.by">Grouped columns with <code>.by</code></h3>
+<p>Passing <code>.by</code> evaluates each expression separately within each group, then puts the results back in the original row order – here, each fruit’s price is compared to the average price within its own <code>in_stock</code> group rather than the average across all five fruits:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_mutate</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  fruits,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">price_vs_group =</span> <span class="fu">round</span>(price <span class="sc">-</span> <span class="fu">mean</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">.by =</span> <span class="st">"in_stock"</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price in_stock price_vs_group
+1      apple   1.2     TRUE          -0.87
+2     banana   0.5     TRUE          -1.57
+3     cherry   3.0    FALSE           0.00
+4       date    NA     TRUE             NA
+5 elderberry   4.5     TRUE           2.43</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="arrange" class="level2">
+<h2 class="anchored" data-anchor-id="arrange"><code>arrange()</code></h2>
+<section id="ascending-by-default-descending-with-.verb_desc" class="level3">
+<h3 class="anchored" data-anchor-id="ascending-by-default-descending-with-.verb_desc">Ascending by default, descending with <code>.verb_desc()</code></h3>
+<p><code>.verb_arrange()</code> sorts ascending by default. Wrapping a column in <code>.verb_desc()</code> sorts it descending instead, and <code>NA</code>s sort last either way, matching <code>dplyr::arrange()</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_arrange</span>(fruits, <span class="fu">.verb_desc</span>(price))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price in_stock
+5 elderberry   4.5     TRUE
+3     cherry   3.0    FALSE
+1      apple   1.2     TRUE
+2     banana   0.5     TRUE
+4       date    NA     TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="breaking-ties-with-a-second-column" class="level3">
+<h3 class="anchored" data-anchor-id="breaking-ties-with-a-second-column">Breaking ties with a second column</h3>
+<p>Extra arguments break ties left over from earlier ones, the same way <code>order()</code> does. Sorting by <code>in_stock</code> first and price second groups the out-of-stock <code>cherry</code> row on its own, then orders the remaining rows by descending price:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_arrange</span>(fruits, in_stock, <span class="fu">.verb_desc</span>(price))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        name price in_stock
+3     cherry   3.0    FALSE
+5 elderberry   4.5     TRUE
+1      apple   1.2     TRUE
+2     banana   0.5     TRUE
+4       date    NA     TRUE</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="summarise" class="level2">
+<h2 class="anchored" data-anchor-id="summarise"><code>summarise()</code></h2>
+<section id="one-row-overall" class="level3">
+<h3 class="anchored" data-anchor-id="one-row-overall">One row overall</h3>
+<p>With no <code>.by</code>, <code>.verb_summarise()</code> collapses <code>fruits</code> down to a single row, computing each named expression once over every row:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_summarise</span>(fruits, <span class="at">average_price =</span> <span class="fu">round</span>(<span class="fu">mean</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>), <span class="at">n =</span> <span class="fu">length</span>(name))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  average_price n
+1           2.3 5</code></pre>
+</div>
+</div>
+</section>
+<section id="one-row-per-group-with-.by" class="level3">
+<h3 class="anchored" data-anchor-id="one-row-per-group-with-.by">One row per group with <code>.by</code></h3>
+<p>With <code>.by</code>, one summary row is produced per group instead, and the grouping columns appear first in the result:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.verb_summarise</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  fruits,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">average_price =</span> <span class="fu">round</span>(<span class="fu">mean</span>(price, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">2</span>),</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">length</span>(name),</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">.by =</span> <span class="st">"in_stock"</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  in_stock average_price n
+1    FALSE          3.00 1
+2     TRUE          2.07 4</code></pre>
+</div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
