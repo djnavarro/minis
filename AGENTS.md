@@ -57,6 +57,7 @@ minis/
 | `minijoin` | `.join_` | poorman's `joins.R` (from `dplyr`) | `.join_inner_join`/`.join_left_join`/`.join_right_join`/`.join_full_join` via `merge()` |
 | `minitable` | `.table_` | `emaxnls`'s `.tibble()` family (from `tibble`) | `.table_tibble`/`.table_as_tibble`/`.table_rownames_to_column`/`.table_add_row` |
 | `minicondition` | `.cond_` | `emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` (from `rlang`) | Classed errors/warnings/messages, plus `.cond_assert()`, via base R's condition system |
+| `minipivot` | none (bare `.pivot_longer`/`.pivot_wider`) | `tidyr`'s `pivot_longer()`/`pivot_wider()` (own reimplementation) | Reshape a data frame between long and wide layouts |
 
 ### Design philosophy
 

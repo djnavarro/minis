@@ -55,6 +55,7 @@ relevant mini and copy it straight into `R/`.
 | [`minijoin`](minijoin/) | Minimal `dplyr`-style mutating joins (`inner_join()`/`left_join()`/`right_join()`/`full_join()`), built on `merge()`. |
 | [`minitable`](minitable/) | Minimal `tibble`-style construction/coercion helpers (`tibble()`/`as_tibble()`/`rownames_to_column()`/`add_row()`), returning plain data frames. |
 | [`minicondition`](minicondition/) | Minimal `rlang`-style `abort()`/`warn()`/`inform()` classed conditions, plus `assert()`, built on base R's own condition system. |
+| [`minipivot`](minipivot/) | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`, reshaping a data frame between long and wide layouts. |
 
 ## Using a mini
 

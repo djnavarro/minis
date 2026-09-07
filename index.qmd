@@ -24,5 +24,6 @@ These are the minis that currently exist:
 | `minijoin` | Minimal `dplyr`-style mutating joins, built on `merge()`. | [Vignette](minijoin/) |
 | `minitable` | Minimal `tibble`-style construction/coercion helpers. | [Vignette](minitable/) |
 | `minicondition` | Minimal `rlang`-style classed conditions, plus `assert()`. | [Vignette](minicondition/) |
+| `minipivot` | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`. | [Vignette](minipivot/) |
 
 : {tbl-colwidths="[15,65,20]"}
