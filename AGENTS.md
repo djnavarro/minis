@@ -52,7 +52,7 @@ minis/
 | `minicli` | `.cli_` | `cli`/`crayon` (own reimplementation) | Coloured alerts/symbols/rules with ANSI/unicode fallback |
 | `minimap` | `.iter_` | `emaxnls`'s `.map()` family (from `purrr`) | `.iter_map`/`.iter_map2`/`.iter_imap`/`.iter_walk`/`.iter_iwalk`/`.iter_map_dbl`/`.iter_map_lgl`/`.iter_map_chr` |
 | `minitrap` | `.trap_` | `emaxnls`'s `.safe_fn()`/`.quiet_fn()` (from `purrr`) | `.trap_safely()`/`.trap_quietly()`-style function adverbs |
-| `minifilter` | none (bare `.filter`) | poorman's `filter()` (from `dplyr`) | Row filtering by unquoted conditions |
+| `miniverb` | `.verb_` | poorman's `filter()` (from `dplyr`) for `.verb_filter()`; `.verb_select()`/`.verb_mutate()`/`.verb_arrange()`/`.verb_summarise()` are original | One-table verbs (`filter`/`select`/`mutate`/`arrange`/`summarise`) with a shared `.by` grouping argument |
 | `minicase` | none (bare `.case_when`) | poorman's `case_when()` (from `dplyr`) | Vectorised if/else via formulas |
 | `minijoin` | `.join_` | poorman's `joins.R` (from `dplyr`) | `.join_inner_join`/`.join_left_join`/`.join_right_join`/`.join_full_join` via `merge()` |
 | `minitable` | `.table_` | `emaxnls`'s `.tibble()` family (from `tibble`) | `.table_tibble`/`.table_as_tibble`/`.table_rownames_to_column`/`.table_add_row` |

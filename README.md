@@ -25,8 +25,8 @@ relevant mini and copy it straight into `R/`.
   own code. Keep the license header comment intact.
 - **Namespaced defensively, with a dot-prefix.** Every function in a
   mini is dot-prefixed with a short, mini-specific tag (`.cli_*`,
-  `.iter_*`, `.trap_*`, `.join_*`, `.table_*`, `.cond_*`, `.str_*`,
-  `.rx_*`), whether the
+  `.iter_*`, `.trap_*`, `.verb_*`, `.join_*`, `.table_*`, `.cond_*`,
+  `.str_*`, `.rx_*`), whether the
   mini itself thinks of it as a "core" function or an internal helper —
   once copied into a consuming package, everything from a mini is
   internal to that package anyway, so there's no reason to distinguish
@@ -51,7 +51,7 @@ relevant mini and copy it straight into `R/`.
 | [`minicli`](minicli/) | Minimal `cli`-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn't safe (e.g. knitr/Quarto renders, redirected output). |
 | [`minimap`](minimap/) | Minimal `purrr`-style `map()`/`map2()`/`imap()`/`walk()`/`iwalk()` and type-stable `map_dbl()`/`map_lgl()`/`map_chr()`, built on `lapply()`/`vapply()`. |
 | [`minitrap`](minitrap/) | Minimal `purrr`-style `safely()`/`quietly()` function adverbs: trap errors, or trap printed output/warnings/messages, instead of letting them hit the console. |
-| [`minifilter`](minifilter/) | Minimal `dplyr`-style `filter()`: subset rows of a data frame by unquoted conditions. |
+| [`miniverb`](miniverb/) | Minimal `dplyr`-style one-table verbs (`filter()`/`select()`/`mutate()`/`arrange()`/`summarise()`), with a shared `.by` grouping argument. |
 | [`minicase`](minicase/) | Minimal `dplyr`-style `case_when()`: vectorised if/else via a sequence of formulas. |
 | [`minijoin`](minijoin/) | Minimal `dplyr`-style mutating joins (`inner_join()`/`left_join()`/`right_join()`/`full_join()`), built on `merge()`. |
 | [`minitable`](minitable/) | Minimal `tibble`-style construction/coercion helpers (`tibble()`/`as_tibble()`/`rownames_to_column()`/`add_row()`), returning plain data frames. |

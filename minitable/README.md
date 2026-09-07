@@ -32,7 +32,7 @@ Copy [`minitable.R`](minitable.R) into your package's `R/` directory. No
 
 ## Why this one needed more rework than the others
 
-Unlike `minifilter`/`minicase`/`minijoin`, the internal helper this was
+Unlike `miniverb`/`minicase`/`minijoin`, the internal helper this was
 adapted from (`emaxnls`'s `.tibble()` family) was not actually
 zero-dependency: it used `rlang::enexprs()` for argument capture and
 `rlang::is_installed()` to opportunistically defer to real

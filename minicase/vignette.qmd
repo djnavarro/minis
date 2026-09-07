@@ -13,7 +13,7 @@ reimplementation of a single function from the
 performs a vectorised if/else across a sequence of `condition ~ value`
 formulas, where the first match wins. The [README](https://github.com/djnavarro/minis/tree/main/minicase)
 provides scope notes; this page walks through it on the same toy
-fruits data frame used in the [**minifilter**](../minifilter/)
+fruits data frame used in the [**miniverb**](../miniverb/)
 vignette, building up to how missing values and default values
 interact.
 

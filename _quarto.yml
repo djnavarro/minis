@@ -31,8 +31,8 @@ website:
             text: minimap
           - href: minitrap/vignette.qmd
             text: minitrap
-          - href: minifilter/vignette.qmd
-            text: minifilter
+          - href: miniverb/vignette.qmd
+            text: miniverb
           - href: minicase/vignette.qmd
             text: minicase
           - href: minijoin/vignette.qmd

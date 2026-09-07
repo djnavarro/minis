@@ -10,9 +10,9 @@
 ## - Both exported functions are bare dot-names, `.pivot_longer()` and
 ##   `.pivot_wider()` -- not additionally tagged, since this mini's
 ##   purpose already is "pivot" and a mechanical `.pivot_pivot_longer()`
-##   tag would stutter, the same reasoning `minifilter`/`minicase` used
-##   for their single exported function, extended here to two functions
-##   that both already start with the mini's own name.
+##   tag would stutter, the same reasoning `minicase` used for its
+##   single exported function, extended here to two functions that
+##   both already start with the mini's own name.
 ## - `.pivot_longer()`'s `cols` argument supports a minimal, non-tidyselect
 ##   NSE: a character vector of column names, a numeric vector of
 ##   positions, bare unquoted column names, `c(...)` of either, and
