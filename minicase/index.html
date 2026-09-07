@@ -446,14 +446,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicase</code> provides a single function, <code>.case_when()</code>, a minimal reimplementation of <code>dplyr::case_when()</code>: vectorised if/else across a sequence of <code>condition ~ value</code> formulas, first match wins. See the <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> for scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/">minifilter vignette</a>, building up to how missing values and default values interact.</p>
+<p>The purpose of <strong>minicase</strong> is to provide a zero-dependency reimplementation of a single function from the <a href="https://dplyr.tidyverse.org/"><strong>dplyr</strong></a> package: <code>case_when()</code>. It performs a vectorised if/else across a sequence of <code>condition ~ value</code> formulas, where the first match wins. The <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> provides scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/"><strong>minifilter</strong></a> vignette, building up to how missing values and default values interact.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>There is one core function:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minicase/minicase.R"><strong>minicase.R</strong></a> script supplies one core function:</p>
 <ul>
-<li><code>.case_when(...)</code> – given a sequence of <code>condition ~ value</code> formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is <code>TRUE</code> at each position, and <code>NA</code> wherever no condition matched.</li>
+<li><code>.case_when(...)</code> is used to take a sequence of <code>condition ~ value</code> formulas and return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is <code>TRUE</code> at each position, and <code>NA</code> wherever no condition matched.</li>
 </ul>
-<p>It is supported by five internal helpers, all supporting <code>.case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:</p>
+<p>It is supported by five internal helpers, all of which support <code>.case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:</p>
 <ul>
 <li><code>.case_validate_length()</code></li>
 <li><code>.case_replace_with()</code></li>
@@ -483,7 +483,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="no-data-masking" class="level2">
 <h2 class="anchored" data-anchor-id="no-data-masking">No data-masking</h2>
-<p>There is no data-masking in this mini: you must reference columns with <code>$</code>, or wrap in <code>with()</code>. Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in <code>with(data, ...)</code> which temporarily makes the data frame’s columns available as bare names for the duration of the call:</p>
+<p>There is no data-masking in this mini: you must reference columns with <code>$</code>, or wrap in <code>with()</code>. Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that, mirrored here from base R, is to wrap the whole call in <code>with(data, ...)</code>, which temporarily makes the data frame’s columns available as bare names for the duration of the call:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
@@ -507,7 +507,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="first-match-wins" class="level2">
 <h2 class="anchored" data-anchor-id="first-match-wins">First match wins</h2>
-<p>Formulas are checked in order, and the first <code>TRUE</code> condition for each position determines its value, even if a later condition would also match. <code>cherry</code> (price 3.00) is a good illustration: it fails <code>price &lt; 3</code>, but matches <code>price &gt;= 3</code>, so it’s classified as <code>"pricey"</code> above. Conditions can combine several tests with <code>&amp;</code>, which is useful for layering more specific rules ahead of more general ones:</p>
+<p>Formulas are checked in order, and the first <code>TRUE</code> condition for each position determines its value, even if a later condition would also match. The <code>cherry</code> row (price 3.00) is a good illustration: it fails <code>price &lt; 3</code>, but matches <code>price &gt;= 3</code>, so it’s classified as <code>"pricey"</code> above. Conditions can combine several tests with <code>&amp;</code>, which is useful for layering more specific rules ahead of more general ones:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  in_stock <span class="sc">&amp;</span> price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap and in stock"</span>,</span>
@@ -520,11 +520,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 [5] "in stock"                     </code></pre>
 </div>
 </div>
-<p><code>banana</code> matches both the first and second formula here (it’s in stock <em>and</em> under $1), but because the first-match-wins rule checks formulas top to bottom, it’s classified by the more specific <code>"cheap and in stock"</code> rule rather than the more general <code>"in stock"</code> one. Ordering formulas from most to least specific is exactly how you get that behaviour deliberately, rather than by accident.</p>
+<p>The <code>banana</code> row matches both the first and second formula here (it’s in stock <em>and</em> under $1), but because the first-match-wins rule checks formulas top to bottom, it’s classified by the more specific <code>"cheap and in stock"</code> rule rather than the more general <code>"in stock"</code> one. Ordering formulas from most to least specific is exactly how you get that behaviour deliberately, rather than by accident.</p>
 </section>
 <section id="unmatched-positions-are-na" class="level2">
 <h2 class="anchored" data-anchor-id="unmatched-positions-are-na">Unmatched positions are <code>NA</code></h2>
-<p><code>date</code> has a missing price, so every condition involving <code>price</code> evaluates to <code>NA</code> for that row – neither <code>TRUE</code> nor <code>FALSE</code> – and <code>date</code> itself gets <code>NA</code> in the result, since there’s no condition it definitively satisfies:</p>
+<p>The <code>date</code> row has a missing price, so every condition involving <code>price</code> evaluates to <code>NA</code> for that row – neither <code>TRUE</code> nor <code>FALSE</code> – and <code>date</code> itself gets <code>NA</code> in the result, since there’s no condition it definitively satisfies:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
@@ -550,7 +550,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="scope-no-.default.ptype.size" class="level2">
 <h2 class="anchored" data-anchor-id="scope-no-.default.ptype.size">Scope: no <code>.default</code>/<code>.ptype</code>/<code>.size</code></h2>
-<p>The mini does not implement any of these arguments. The trailing <code>TRUE ~ "unknown"</code> formula in the previous example <em>is</em> the idiomatic way to get a default value (and indeed is very often used in when writing code with the real <code>dplyr::case_when()</code> function). I simply decided there was no need for this mini to implement dplyr’s newer, separate <code>.default</code> argument as an alternative spelling of the same thing, nor did I think there was much to be gained by adding <code>.ptype</code>/ <code>.size</code> to control the output type/length explicitly. If your use case needs those, a plain <code>TRUE ~ value</code> formula covers <code>.default</code>, and the output length/type simply follow from whatever the conditions. If that still isn’t sufficient, then it’s likely you need the real version not the mini.</p>
+<p>The mini does not implement any of these arguments. The trailing <code>TRUE ~ "unknown"</code> formula in the previous example <em>is</em> the idiomatic way to get a default value, and is in fact very often used when writing code with the real <code>dplyr::case_when()</code> function. There was no need for this mini to implement dplyr’s newer, separate <code>.default</code> argument as an alternative spelling of the same thing, and little to be gained by adding <code>.ptype</code>/<code>.size</code> to control the output type/length explicitly. If your use case needs those, a plain <code>TRUE ~ value</code> formula covers <code>.default</code>, and the output length/type simply follow from the conditions. If that still isn’t sufficient, then it’s likely you need the real version, not the mini.</p>
 
 
 </section>

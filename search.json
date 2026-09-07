@@ -4,7 +4,7 @@
     "href": "minitrap/index.html",
     "title": "minitrap",
     "section": "",
-    "text": "minitrap provides two purrr-style function adverbs, .trap_safely() and .trap_quietly(). A function adverb takes a function and returns a new function with modified behaviour – here, one that traps errors or console output instead of letting them propagate or print. See the README for the full API reference and scope notes; this page walks through both in action, and how they compose together.",
+    "text": "The purpose of minitrap is to provide zero-dependency versions of two purrr adverbs that are used to “trap” one or more aspects of the output of another function. Like all adverb functions they take one function as input, and return a modified function as the output. The README provides the full API reference and scope notes; this page provides a short tutorial that shows how to use the functions, and how they compose together.",
     "crumbs": [
       "Minis",
       "minitrap"
@@ -15,7 +15,7 @@
     "href": "minitrap/index.html#functions",
     "title": "minitrap",
     "section": "Functions",
-    "text": "Functions\n\n.trap_safely(.f) – wrap .f so that a call which would normally throw an error instead returns list(result = ..., error = ...), with exactly one of the two NULL.\n.trap_quietly(.f) – wrap .f so that printed output, warnings, and messages are captured instead of shown, returning list(result = ..., output = ..., warnings = ..., messages = ...).\n\nminitrap has no internal helpers – both functions are short enough to be self-contained.",
+    "text": "Functions\nThe minitrap.R script supplies two functions:\n\n.trap_safely(.f) is used to wrap .f so that a call which would normally produce an error instead returns a list containing two elements named result and error, with exactly one of the two set to NULL depending on whether the unmodified function would have errored when called the same way.\n.trap_quietly(.f) is used to wrap .f so that all printed output, warnings, and messages are silently captured instead of shown, returning a four-element named list with components result, output, warnings, and messages.\n\nIt contains no internal helpers.",
     "crumbs": [
       "Minis",
       "minitrap"
@@ -26,7 +26,7 @@
     "href": "minitrap/index.html#trap_safely",
     "title": "minitrap",
     "section": ".trap_safely()",
-    "text": ".trap_safely()\nOrdinarily, a function that errors stops execution and requires you to wrap every call site in tryCatch() if you want to keep going. .trap_safely() inverts that: it takes a function and returns a new one that never throws, instead capturing the error as data. Calling .trap_safely(log) on a non-numeric input, for example, doesn’t let the resulting error reach the console – it comes back as a list with result = NULL and error set to the condition object that would have been signalled:\n\nsafe_log &lt;- .trap_safely(log)\nsafe_log(\"a\")\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): non-numeric argument to mathematical function&gt;\n\n\nA successful call returns the result with error set to NULL instead, so the two fields are always mutually exclusive – checking is.null(out$error) tells you unambiguously whether the call succeeded:\n\nsafe_log(10)\n\n$result\n[1] 2.302585\n\n$error\nNULL\n\n\nThis is particularly useful when mapping a function over many inputs and some of them are expected to fail – rather than the whole iteration aborting on the first error, each element’s outcome (success or failure) is captured individually. Combining .trap_safely() with minimap’s .iter_map() gives exactly that pattern (this page sources minimap.R too, purely to demonstrate the two minis working together – minitrap itself has no dependency on minimap):\n\nresults &lt;- .iter_map(list(4, \"a\", 9), .trap_safely(sqrt))\n.iter_map_lgl(results, function(r) is.null(r$error))\n\n[1]  TRUE FALSE  TRUE",
+    "text": ".trap_safely()\nOrdinarily, a function that errors stops execution and requires you to wrap the call in tryCatch() if you want to capture the error and take some other action instead of stopping the execution. The goal of .trap_safely() is to invert this: it takes a function and returns a new one that never throws an error, instead capturing the error as data. Calling .trap_safely(log) on a non-numeric input, for example, doesn’t let the resulting error reach the console: instead, it returns a list with result = NULL and error set to the error condition object that would have been signalled:\n\nsafe_log &lt;- .trap_safely(log)\nsafe_log(\"a\")\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): non-numeric argument to mathematical function&gt;\n\n\nA successful call returns a list with the same two elements, with error set to NULL instead, and result set to the calculated logarithm.\n\nsafe_log(10)\n\n$result\n[1] 2.302585\n\n$error\nNULL\n\n\nThis is particularly useful when mapping a function over many inputs and some of them are expected to fail – rather than the whole iteration aborting on the first error, each element’s outcome (success or failure) is captured individually. Combining .trap_safely() with minimap’s .iter_map() is a convenient way to illustrate exactly that pattern.\n\nmixed_list &lt;- list(4, \"a\", 9)\nmixed_list |&gt;\n  .iter_map(.trap_safely(sqrt)) |&gt;\n  .iter_map_lgl(\\(r) is.null(r$error))\n\n[1]  TRUE FALSE  TRUE\n\n\nAs one would expect, this output shows that sqrt(4) succeeds, sqrt(\"a\") errors, and sqrt(9) succeeds. The error that would normally be produced at the second step does not stop execution, and instead is captured and recorded. (Note that minitrap does not itself depend on minimap: this page sources that script to show the two minis operating together.)",
     "crumbs": [
       "Minis",
       "minitrap"
@@ -37,7 +37,18 @@
     "href": "minitrap/index.html#trap_quietly",
     "title": "minitrap",
     "section": ".trap_quietly()",
-    "text": ".trap_quietly()\nWhere .trap_safely() is about errors, .trap_quietly() is about everything a function might print along the way: cat()/print() output, warning()s, and message()s. Rather than letting any of that reach the console, .trap_quietly() collects it all and hands it back as part of the return value:\n\nquiet_fn &lt;- .trap_quietly(function() {\n  message(\"starting\")\n  warning(\"using a default\")\n  42\n})\nquiet_fn()\n\n$result\n[1] 42\n\n$output\n[1] \"\"\n\n$warnings\n[1] \"using a default\"\n\n$messages\n[1] \"starting\\n\"\n\n\nNote the shape of the result: result holds the ordinary return value (42), warnings and messages are character vectors with one entry per condition raised (in the order they occurred), and output is whatever was printed via cat()/print(), collapsed into a single string – empty here, since this function didn’t print anything directly:\n\nloud_fn &lt;- .trap_quietly(function() {\n  cat(\"computing...\\n\")\n  99\n})\nloud_fn()\n\n$result\n[1] 99\n\n$output\n[1] \"computing...\"\n\n$warnings\ncharacter(0)\n\n$messages\ncharacter(0)\n\n\nCrucially, .trap_quietly() does not catch errors – a function that errors still aborts the call, same as if it were called directly. Compose it with .trap_safely() when you want both output-trapping and error-trapping at once:\n\n.trap_quietly(function() stop(\"boom\"))()\n\nError in `.f()`:\n! boom\n\n\n\nrobust_fn &lt;- .trap_safely(.trap_quietly(function() stop(\"boom\")))\nrobust_fn()\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): boom&gt;\n\n\nNote the order of composition: .trap_quietly() wraps the original function first, and .trap_safely() wraps the result, so that the error thrown inside the quietly-wrapped call is the thing .trap_safely() catches. Composing the other way around – .trap_quietly(.trap_safely(.f)) – would instead capture a function that never errors in the first place (since .trap_safely() already turned errors into ordinary return values), so there would be nothing left for the outer .trap_quietly() to trap on that front.",
+    "text": ".trap_quietly()\nWhere .trap_safely() is about errors, .trap_quietly() is about outputs: printed output, return values, warnings, and messages. Rather than letting any of that reach the console, .trap_quietly() collects it all and hands it back as part of the return value:\n\nquiet_fn &lt;- .trap_quietly(function() {\n  message(\"starting\")\n  warning(\"using a default\")\n  42\n})\nquiet_fn()\n\n$result\n[1] 42\n\n$output\n[1] \"\"\n\n$warnings\n[1] \"using a default\"\n\n$messages\n[1] \"starting\\n\"\n\n\nNote the shape of the result: result holds the ordinary return value (i.e. 42), warnings and messages are character vectors with one entry per condition raised (in the order they occurred), and output is whatever was printed via cat()/print(), collapsed into a single string – empty here, since the original function would not have printed anything directly.\nCrucially, .trap_quietly() does not catch errors – a function that errors still aborts the call, same as if it were called directly.\n\n.trap_quietly(function() stop(\"boom\"))()\n\nError in `.f()`:\n! boom",
+    "crumbs": [
+      "Minis",
+      "minitrap"
+    ]
+  },
+  {
+    "objectID": "minitrap/index.html#composition",
+    "href": "minitrap/index.html#composition",
+    "title": "minitrap",
+    "section": "Composition",
+    "text": "Composition\nAs you can see, the two functions serve complementary purposes: .trap_safely() catches errors but not outputs, whereas .trap_quietly() catches outputs but not errors. Should you need output-trapping and error-trapping together, you can compose the two functions:\n\nrobust_fn &lt;- .trap_safely(.trap_quietly(function() stop(\"boom\")))\nrobust_fn()\n\n$result\nNULL\n\n$error\n&lt;simpleError in .f(...): boom&gt;\n\n\nPay attention to the order of composition: silence the function first, then make it safe. In the example above .trap_quietly() wraps the original function first, and .trap_safely() wraps the result, so that the error thrown inside the quietly-wrapped call becomes the thing that .trap_safely() catches. Composing in the opposite order does not produce the behaviour you most likely want.",
     "crumbs": [
       "Minis",
       "minitrap"
@@ -48,7 +59,7 @@
     "href": "minipivot/index.html",
     "title": "minipivot",
     "section": "",
-    "text": "minipivot provides two functions, .pivot_longer() and .pivot_wider(), minimal reimplementations of tidyr::pivot_longer() and tidyr::pivot_wider(): reshaping a data frame between “long” and “wide” layouts. See the README for scope notes; this page walks through both functions on a small toy data frame, including the column-selection styles .pivot_longer() supports and what happens when .pivot_wider() is asked to spread duplicate rows into one cell.",
+    "text": "The purpose of minipivot is to provide a zero-dependency reimplementation of two functions from the tidyr package: pivot_longer() and pivot_wider(). Together they reshape a data frame between “long” and “wide” layouts. The README provides scope notes; this page walks through both functions on a small toy data frame, including the column-selection styles .pivot_longer() supports and what happens when .pivot_wider() is asked to spread duplicate rows into one cell.",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -59,7 +70,7 @@
     "href": "minipivot/index.html#functions",
     "title": "minipivot",
     "section": "Functions",
-    "text": "Functions\n\n.pivot_longer(.data, cols, names_to = \"name\", values_to = \"value\") – melt cols into two new columns holding the pivoted column names and their values.\n.pivot_wider(.data, names_from, values_from, values_fill = NULL) – spread the unique values of names_from into new columns, filled from values_from.",
+    "text": "Functions\nThe minipivot.R script supplies two core functions:\n\n.pivot_longer(.data, cols, names_to = \"name\", values_to = \"value\") is used to melt cols into two new columns holding the pivoted column names and their values.\n.pivot_wider(.data, names_from, values_from, values_fill = NULL) is used to spread the unique values of names_from into new columns, filled from values_from.\n\nIt contains no internal helpers.",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -81,7 +92,7 @@
     "href": "minipivot/index.html#wide-to-long",
     "title": "minipivot",
     "section": "Wide to long",
-    "text": "Wide to long\n.pivot_longer() needs to know which columns to pivot. Here, count is the only column with values to melt, and location/species along for the ride as id columns:\n\n.pivot_longer(fish, count, names_to = \"metric\", values_to = \"n\")\n\n  location species metric n\n1     lake   trout  count 5\n2     lake    bass  count 3\n3      sea   trout  count 7\n4      sea    bass  count 2",
+    "text": "Wide to long\nThe .pivot_longer() function needs to know which columns to pivot. Here, count is the only column with values to melt, and location/species come along for the ride as id columns:\n\n.pivot_longer(fish, count, names_to = \"metric\", values_to = \"n\")\n\n  location species metric n\n1     lake   trout  count 5\n2     lake    bass  count 3\n3      sea   trout  count 7\n4      sea    bass  count 2",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -92,7 +103,7 @@
     "href": "minipivot/index.html#long-to-wide",
     "title": "minipivot",
     "section": "Long to wide",
-    "text": "Long to wide\n.pivot_wider() spreads species’s unique values (trout/bass) into new columns, filled from count. There’s no id_cols argument to set – every column other than names_from/values_from (location, here) is treated as an id column automatically:\n\nwide &lt;- .pivot_wider(fish, names_from = \"species\", values_from = \"count\")\nwide\n\n  location trout bass\n1     lake     5    3\n2      sea     7    2",
+    "text": "Long to wide\nThe .pivot_wider() function spreads species’s unique values (trout/bass) into new columns, filled from count. There’s no id_cols argument to set – every column other than names_from/values_from (location, here) is treated as an id column automatically:\n\nwide &lt;- .pivot_wider(fish, names_from = \"species\", values_from = \"count\")\nwide\n\n  location trout bass\n1     lake     5    3\n2      sea     7    2",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -114,7 +125,7 @@
     "href": "minipivot/index.html#selecting-cols-a-few-different-ways",
     "title": "minipivot",
     "section": "Selecting cols a few different ways",
-    "text": "Selecting cols a few different ways\n.pivot_longer()’s cols accepts more than just a single bare name. Bare names combined with c(...), a plain character vector, and a negated -c(...) (“every column except these”) all agree, since trout/bass are the only two columns not already used as an id column above:\n\nidentical(\n  .pivot_longer(wide, c(trout, bass)),\n  .pivot_longer(wide, c(\"trout\", \"bass\"))\n)\n\n[1] TRUE\n\nidentical(\n  .pivot_longer(wide, c(trout, bass)),\n  .pivot_longer(wide, -location)\n)\n\n[1] TRUE\n\n\nThere is no tidyselect-style starts_with()/everything() support – just bare names, c(...), character/numeric vectors, and unary - negation.",
+    "text": "Selecting cols a few different ways\nThe cols argument to .pivot_longer() accepts more than just a single bare name. Bare names combined with c(...), a plain character vector, and a negated -c(...) (“every column except these”) all agree, since trout/bass are the only two columns not already used as an id column above:\n\nidentical(\n  .pivot_longer(wide, c(trout, bass)),\n  .pivot_longer(wide, c(\"trout\", \"bass\"))\n)\n\n[1] TRUE\n\nidentical(\n  .pivot_longer(wide, c(trout, bass)),\n  .pivot_longer(wide, -location)\n)\n\n[1] TRUE\n\n\nThere is no tidyselect-style starts_with()/everything() support – just bare names, c(...), character/numeric vectors, and unary - negation.",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -125,7 +136,7 @@
     "href": "minipivot/index.html#missing-combinations-values_fill",
     "title": "minipivot",
     "section": "Missing combinations: values_fill",
-    "text": "Missing combinations: values_fill\nDropping a row before widening leaves a combination unrepresented – sea/bass is missing below, so it comes back as NA by default:\n\n.pivot_wider(fish[-4, ], names_from = \"species\", values_from = \"count\")\n\n  location trout bass\n1     lake     5    3\n2      sea     7   NA\n\n\nvalues_fill supplies a value to use instead:\n\n.pivot_wider(fish[-4, ], names_from = \"species\", values_from = \"count\", values_fill = 0)\n\n  location trout bass\n1     lake     5    3\n2      sea     7    0",
+    "text": "Missing combinations: values_fill\nDropping a row before widening leaves a combination unrepresented – sea/bass is missing below, so it comes back as NA by default:\n\n.pivot_wider(fish[-4, ], names_from = \"species\", values_from = \"count\")\n\n  location trout bass\n1     lake     5    3\n2      sea     7   NA\n\n\nThe values_fill argument supplies a value to use instead:\n\n.pivot_wider(fish[-4, ], names_from = \"species\", values_from = \"count\", values_fill = 0)\n\n  location trout bass\n1     lake     5    3\n2      sea     7    0",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -136,7 +147,7 @@
     "href": "minipivot/index.html#duplicate-combinations-are-an-error-not-a-list-column",
     "title": "minipivot",
     "section": "Duplicate combinations are an error, not a list-column",
-    "text": "Duplicate combinations are an error, not a list-column\nReal tidyr::pivot_wider() handles a duplicate names_from/id combination by warning and packing the extra values into a list-column. minipivot has no list-column support (matching minitable’s scope), so the same situation is a hard error instead:\n\ndup &lt;- rbind(fish, data.frame(location = \"lake\", species = \"trout\", count = 99))\n.pivot_wider(dup, names_from = \"species\", values_from = \"count\")\n\nError in `.pivot_wider()`:\n! .pivot_wider(): `names_from`/id-column combination is not unique (duplicate rows would need to be aggregated); this mini does not implement a `values_fn`-style aggregation step.",
+    "text": "Duplicate combinations are an error, not a list-column\nReal tidyr::pivot_wider() handles a duplicate names_from/id combination by warning and packing the extra values into a list-column. This mini has no list-column support (matching minitable’s scope), so the same situation is a hard error instead:\n\ndup &lt;- rbind(fish, data.frame(location = \"lake\", species = \"trout\", count = 99))\n.pivot_wider(dup, names_from = \"species\", values_from = \"count\")\n\nError in `.pivot_wider()`:\n! .pivot_wider(): `names_from`/id-column combination is not unique (duplicate rows would need to be aggregated); this mini does not implement a `values_fn`-style aggregation step.",
     "crumbs": [
       "Minis",
       "minipivot"
@@ -147,7 +158,7 @@
     "href": "minijoin/index.html",
     "title": "minijoin",
     "section": "",
-    "text": "The minijoin mini provides a tiny slice of dplyr-like syntax for mutating joins, all built atop base merge(). See the README for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the by argument in more detail.",
+    "text": "The purpose of minijoin is to provide a zero-dependency slice of dplyr-style syntax for mutating joins, all built atop base R’s merge(). The README provides the full argument reference; this page compares all four join functions side by side on two small toy data frames with a partial overlap, then covers the by argument in more detail.",
     "crumbs": [
       "Minis",
       "minijoin"
@@ -158,7 +169,7 @@
     "href": "minijoin/index.html#functions",
     "title": "minijoin",
     "section": "Functions",
-    "text": "Functions\nThe core functions are these:\n\n.join_inner_join(x, y, by, ...) – keep only rows with a match in both x and y.\n.join_left_join(x, y, by, ...) – keep all rows of x, filling in NA for y’s columns where there’s no match.\n.join_right_join(x, y, by, ...) – keep all rows of y, filling in NA for x’s columns where there’s no match.\n.join_full_join(x, y, by, ...) – keep all rows of both x and y, filling in NA on whichever side has no match.\n\nAdditionally, minijoin has one internal helper, .join_worker(), which all four join functions delegate to after fixing the right combination of merge()’s all.x/all.y arguments; it also restores x’s original row order, which merge() doesn’t guarantee on its own.",
+    "text": "Functions\nThe minijoin.R script supplies four core functions:\n\n.join_inner_join(x, y, by, ...) is used to keep only rows with a match in both x and y.\n.join_left_join(x, y, by, ...) is used to keep all rows of x, filling in NA for y’s columns where there’s no match.\n.join_right_join(x, y, by, ...) is used to keep all rows of y, filling in NA for x’s columns where there’s no match.\n.join_full_join(x, y, by, ...) is used to keep all rows of both x and y, filling in NA on whichever side has no match.\n\nThere is also one internal helper:\n\n.join_worker() is the shared implementation that all four join functions delegate to, after fixing the right combination of merge()’s all.x/all.y arguments; it also restores x’s original row order, which merge() doesn’t guarantee on its own.",
     "crumbs": [
       "Minis",
       "minijoin"
@@ -169,7 +180,7 @@
     "href": "minijoin/index.html#minimal-data-frames",
     "title": "minijoin",
     "section": "Minimal data frames",
-    "text": "Minimal data frames\n\nbands &lt;- data.frame(\n  band = c(\"Beatles\", \"Rolling Stones\", \"Kinks\"),\n  founded = c(1960, 1962, 1963)\n)\nalbums &lt;- data.frame(\n  band = c(\"Beatles\", \"Kinks\", \"Queen\"),\n  album = c(\"Abbey Road\", \"Arthur\", \"A Night at the Opera\")\n)\nbands\n\n            band founded\n1        Beatles    1960\n2 Rolling Stones    1962\n3          Kinks    1963\n\nalbums\n\n     band                album\n1 Beatles           Abbey Road\n2   Kinks               Arthur\n3   Queen A Night at the Opera\n\n\nI will be honest. An AI designed these two data frames. Here we have bands and albums as the data sets, sharing \"Beatles\" and \"Kinks\". The \"Rolling Stones\" exist only in bands, but \"Queen\" exists only in albums. The four join types differ only in which of those non-matching rows they keep. This is perfectly fine as a toy example but – for reasons I should not need to explain – I am deeply personally offended by the decision to list Arthur rather than Lola Versus Powerman, and this is merely the beginning of my long list of concerns.",
+    "text": "Minimal data frames\n\nbands &lt;- data.frame(\n  band = c(\"Beatles\", \"Rolling Stones\", \"Kinks\"),\n  founded = c(1960, 1962, 1963)\n)\nalbums &lt;- data.frame(\n  band = c(\"Beatles\", \"Kinks\", \"Queen\"),\n  album = c(\"Abbey Road\", \"Arthur\", \"A Night at the Opera\")\n)\nbands\n\n            band founded\n1        Beatles    1960\n2 Rolling Stones    1962\n3          Kinks    1963\n\nalbums\n\n     band                album\n1 Beatles           Abbey Road\n2   Kinks               Arthur\n3   Queen A Night at the Opera\n\n\nHere we have bands and albums as the data sets, sharing \"Beatles\" and \"Kinks\". The \"Rolling Stones\" exist only in bands, but \"Queen\" exists only in albums. The four join types differ only in which of those non-matching rows they keep.",
     "crumbs": [
       "Minis",
       "minijoin"
@@ -191,7 +202,7 @@
     "href": "minijoin/index.html#left-join-all-rows-of-x-bands",
     "title": "minijoin",
     "section": "Left join: all rows of x (bands)",
-    "text": "Left join: all rows of x (bands)\n\"Rolling Stones\" is kept, with NA for album, since it has no match in albums. This is the join to reach for when x is your “main” table and you’re enriching it with optional data from y:\n\n.join_left_join(bands, albums, by = \"band\")\n\n            band founded      album\n1        Beatles    1960 Abbey Road\n2 Rolling Stones    1962       &lt;NA&gt;\n3          Kinks    1963     Arthur",
+    "text": "Left join: all rows of x (bands)\nThe \"Rolling Stones\" row is kept, with NA for album, since it has no match in albums. This is the join to reach for when x is your “main” table and you’re enriching it with optional data from y:\n\n.join_left_join(bands, albums, by = \"band\")\n\n            band founded      album\n1        Beatles    1960 Abbey Road\n2 Rolling Stones    1962       &lt;NA&gt;\n3          Kinks    1963     Arthur",
     "crumbs": [
       "Minis",
       "minijoin"
@@ -202,7 +213,7 @@
     "href": "minijoin/index.html#right-join-all-rows-of-y-albums",
     "title": "minijoin",
     "section": "Right join: all rows of y (albums)",
-    "text": "Right join: all rows of y (albums)\n\"Queen\" is kept, with NA for founded. A right join is really just a left join with the arguments swapped – .join_right_join(x, y, ...) behaves like .join_left_join(y, x, ...), with columns in x‘s original order. Note the row order below: matched rows still come first, in bands’ original order, with the unmatched-in-x row (\"Queen\") appended at the end – minijoin always restores x’s original row order for matched rows, rather than y’s:\n\n.join_right_join(bands, albums, by = \"band\")\n\n     band founded                album\n1 Beatles    1960           Abbey Road\n2   Kinks    1963               Arthur\n3   Queen      NA A Night at the Opera",
+    "text": "Right join: all rows of y (albums)\nThe \"Queen\" row is kept, with NA for founded. A right join is really just a left join with the arguments swapped – .join_right_join(x, y, ...) behaves like .join_left_join(y, x, ...), with columns in x‘s original order. Note the row order below: matched rows still come first, in bands’ original order, with the unmatched-in-x row (\"Queen\") appended at the end – minijoin always restores x’s original row order for matched rows, rather than y’s:\n\n.join_right_join(bands, albums, by = \"band\")\n\n     band founded                album\n1 Beatles    1960           Abbey Road\n2   Kinks    1963               Arthur\n3   Queen      NA A Night at the Opera",
     "crumbs": [
       "Minis",
       "minijoin"
@@ -235,7 +246,7 @@
     "href": "minicondition/index.html",
     "title": "minicondition",
     "section": "",
-    "text": "minicondition provides thin wrappers around base R’s own condition system that signal a classed condition, catchable specifically by that class. See the README for the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for minicondition over plain stop()/warning()/message().",
+    "text": "The purpose of minicondition is to provide a zero-dependency reimplementation of a small slice of the rlang package: thin wrappers around base R’s own condition system that signal a classed condition, catchable specifically by that class. The README provides the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for minicondition over plain stop()/warning()/message().",
     "crumbs": [
       "Minis",
       "minicondition"
@@ -246,7 +257,7 @@
     "href": "minicondition/index.html#functions",
     "title": "minicondition",
     "section": "Functions",
-    "text": "Functions\nThese are the core functions:\n\n.cond_abort(message, class = NULL) – signal a classed error.\n.cond_warn(message, class = NULL) – signal a classed warning.\n.cond_inform(message, class = NULL) – signal a classed message.\n.cond_assert(expr, message, class = NULL) – call .cond_abort() if expr isn’t entirely TRUE; NA counts as a failure.\n\nminicondition also has one internal helper:\n\n.cond_condition() builds the classed condition object that .cond_abort()/ _warn()/ _inform() each hand off to base stop()/warning()/message().",
+    "text": "Functions\nThe minicondition.R script supplies four core functions:\n\n.cond_abort(message, class = NULL) is used to signal a classed error.\n.cond_warn(message, class = NULL) is used to signal a classed warning.\n.cond_inform(message, class = NULL) is used to signal a classed message.\n.cond_assert(expr, message, class = NULL) is used to call .cond_abort() if expr isn’t entirely TRUE; NA counts as a failure.\n\nThere is also one internal helper:\n\n.cond_condition() builds the classed condition object that .cond_abort()/_warn()/_inform() each hand off to base stop()/warning()/message().",
     "crumbs": [
       "Minis",
       "minicondition"
@@ -257,7 +268,7 @@
     "href": "minicondition/index.html#why-classes-matter",
     "title": "minicondition",
     "section": "Why classes matter",
-    "text": "Why classes matter\nA plain stop(\"bad input\") produces a condition of class c(\"simpleError\", \"error\", \"condition\") – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to this specific kind of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. .cond_abort() solves that by adding an extra class on top of \"error\", so tryCatch() can dispatch on it directly:\n\ntryCatch(\n  .cond_abort(\"bad input\", class = \"mypkg_invalid_input\"),\n  mypkg_invalid_input = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: bad input\n\n\nNote that .cond_abort() uses base stop() internally, not rlang::abort() – but the mechanics of catching by class are identical either way. tryCatch()/withCallingHandlers() dispatch on a condition object’s class attribute, regardless of what function signalled it:\n\ne &lt;- tryCatch(.cond_abort(\"x\", class = \"mypkg_invalid_input\"), error = function(e) e)\nclass(e)\n\n[1] \"mypkg_invalid_input\" \"error\"               \"condition\"",
+    "text": "Why classes matter\nA plain stop(\"bad input\") produces a condition of class c(\"simpleError\", \"error\", \"condition\") – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to this specific kind of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. The .cond_abort() function solves that by adding an extra class on top of \"error\", so tryCatch() can dispatch on it directly:\n\ntryCatch(\n  .cond_abort(\"bad input\", class = \"mypkg_invalid_input\"),\n  mypkg_invalid_input = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: bad input\n\n\nNote that .cond_abort() uses base stop() internally, not rlang::abort() – but the mechanics of catching by class are identical either way. The tryCatch()/withCallingHandlers() functions dispatch on a condition object’s class attribute, regardless of what function signalled it:\n\ne &lt;- tryCatch(.cond_abort(\"x\", class = \"mypkg_invalid_input\"), error = function(e) e)\nclass(e)\n\n[1] \"mypkg_invalid_input\" \"error\"               \"condition\"",
     "crumbs": [
       "Minis",
       "minicondition"
@@ -279,7 +290,7 @@
     "href": "minicondition/index.html#warnings-and-messages-work-the-same-way",
     "title": "minicondition",
     "section": "Warnings and messages work the same way",
-    "text": "Warnings and messages work the same way\n.cond_warn() signals a classed warning, catchable via withCallingHandlers() (warnings, unlike errors, don’t unwind the call stack, so catching them with tryCatch() would abandon whatever code was about to run after the warning – withCallingHandlers() lets the handler run and then hand control back):\n\nwithCallingHandlers(\n  .cond_warn(\"using a fallback default\", class = \"mypkg_fallback_used\"),\n  mypkg_fallback_used = function(w) {\n    message(\"caught warning: \", conditionMessage(w))\n    invokeRestart(\"muffleWarning\")\n  }\n)\n\ncaught warning: using a fallback default\n\n\nThe invokeRestart(\"muffleWarning\") call suppresses the warning from also being printed by R’s default warning handler – without it, the warning would print a second time after the custom handler runs.\n.cond_inform() signals a classed message – uncaught, it just prints like an ordinary message() call, since messages are typically meant to be seen unless something specifically wants to intercept them:\n\n.cond_inform(\"starting up\", class = \"mypkg_startup\")\n\nstarting up",
+    "text": "Warnings and messages work the same way\nThe .cond_warn() function signals a classed warning, catchable via withCallingHandlers() (warnings, unlike errors, don’t unwind the call stack, so catching them with tryCatch() would abandon whatever code was about to run after the warning – withCallingHandlers() lets the handler run and then hand control back):\n\nwithCallingHandlers(\n  .cond_warn(\"using a fallback default\", class = \"mypkg_fallback_used\"),\n  mypkg_fallback_used = function(w) {\n    message(\"caught warning: \", conditionMessage(w))\n    invokeRestart(\"muffleWarning\")\n  }\n)\n\ncaught warning: using a fallback default\n\n\nThe invokeRestart(\"muffleWarning\") call suppresses the warning from also being printed by R’s default warning handler – without it, the warning would print a second time after the custom handler runs.\nThe .cond_inform() function signals a classed message – uncaught, it just prints like an ordinary message() call, since messages are typically meant to be seen unless something specifically wants to intercept them:\n\n.cond_inform(\"starting up\", class = \"mypkg_startup\")\n\nstarting up",
     "crumbs": [
       "Minis",
       "minicondition"
@@ -290,7 +301,7 @@
     "href": "minicondition/index.html#cond_assert-abort-if-a-condition-doesnt-hold",
     "title": "minicondition",
     "section": ".cond_assert(): abort if a condition doesn’t hold",
-    "text": ".cond_assert(): abort if a condition doesn’t hold\n.cond_assert() is .cond_abort() plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely TRUE. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:\n\nx &lt;- 5\n.cond_assert(x &gt; 0, \"x must be positive.\")\n\nA failing one raises a classed error, catchable the same way as .cond_abort() – which makes sense, since that’s exactly what it calls internally:\n\ntryCatch(\n  .cond_assert(x &gt; 0 && x &lt; 3, \"x must be between 0 and 3.\", class = \"mypkg_range_error\"),\n  mypkg_range_error = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: x must be between 0 and 3.",
+    "text": ".cond_assert(): abort if a condition doesn’t hold\nThe .cond_assert() function is .cond_abort() plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely TRUE. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:\n\nx &lt;- 5\n.cond_assert(x &gt; 0, \"x must be positive.\")\n\nA failing one raises a classed error, catchable the same way as .cond_abort() – which makes sense, since that’s exactly what it calls internally:\n\ntryCatch(\n  .cond_assert(x &gt; 0 && x &lt; 3, \"x must be between 0 and 3.\", class = \"mypkg_range_error\"),\n  mypkg_range_error = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: x must be between 0 and 3.",
     "crumbs": [
       "Minis",
       "minicondition"
@@ -301,7 +312,7 @@
     "href": "minicondition/index.html#na-counts-as-a-failure-not-a-crash",
     "title": "minicondition",
     "section": "NA counts as a failure, not a crash",
-    "text": "NA counts as a failure, not a crash\n.cond_assert() accepts a vector, not just a single logical value, and checks that every element is TRUE. That raises a subtlety: what should happen if the vector contains NA? This is a deliberate fix relative to the source this was adapted from: a naive if (any(expr == FALSE)) errors outright when expr contains NA (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. .cond_assert() checks anyNA(expr) explicitly first, so a vector containing NA fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:\n\ny &lt;- c(TRUE, TRUE, NA)\n.cond_assert(y, \"y must not contain NA.\", class = \"mypkg_na_error\")\n\nError:\n! y must not contain NA.",
+    "text": "NA counts as a failure, not a crash\nThe .cond_assert() function accepts a vector, not just a single logical value, and checks that every element is TRUE. That raises a subtlety: what should happen if the vector contains NA? This is a deliberate fix relative to the source this was adapted from: a naive if (any(expr == FALSE)) errors outright when expr contains NA (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. It checks anyNA(expr) explicitly first instead, so a vector containing NA fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:\n\ny &lt;- c(TRUE, TRUE, NA)\n.cond_assert(y, \"y must not contain NA.\", class = \"mypkg_na_error\")\n\nError:\n! y must not contain NA.",
     "crumbs": [
       "Minis",
       "minicondition"
@@ -312,7 +323,7 @@
     "href": "minicase/index.html",
     "title": "minicase",
     "section": "",
-    "text": "minicase provides a single function, .case_when(), a minimal reimplementation of dplyr::case_when(): vectorised if/else across a sequence of condition ~ value formulas, first match wins. See the README for scope notes; this page walks through it on the same toy fruits data frame used in the minifilter vignette, building up to how missing values and default values interact.",
+    "text": "The purpose of minicase is to provide a zero-dependency reimplementation of a single function from the dplyr package: case_when(). It performs a vectorised if/else across a sequence of condition ~ value formulas, where the first match wins. The README provides scope notes; this page walks through it on the same toy fruits data frame used in the minifilter vignette, building up to how missing values and default values interact.",
     "crumbs": [
       "Minis",
       "minicase"
@@ -323,7 +334,7 @@
     "href": "minicase/index.html#functions",
     "title": "minicase",
     "section": "Functions",
-    "text": "Functions\nThere is one core function:\n\n.case_when(...) – given a sequence of condition ~ value formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is TRUE at each position, and NA wherever no condition matched.\n\nIt is supported by five internal helpers, all supporting .case_when()’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:\n\n.case_validate_length()\n.case_replace_with()\n.case_check_length()\n.case_check_type()\n.case_check_class()",
+    "text": "Functions\nThe minicase.R script supplies one core function:\n\n.case_when(...) is used to take a sequence of condition ~ value formulas and return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is TRUE at each position, and NA wherever no condition matched.\n\nIt is supported by five internal helpers, all of which support .case_when()’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:\n\n.case_validate_length()\n.case_replace_with()\n.case_check_length()\n.case_check_type()\n.case_check_class()",
     "crumbs": [
       "Minis",
       "minicase"
@@ -345,7 +356,7 @@
     "href": "minicase/index.html#no-data-masking",
     "title": "minicase",
     "section": "No data-masking",
-    "text": "No data-masking\nThere is no data-masking in this mini: you must reference columns with $, or wrap in with(). Unlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in with(data, ...) which temporarily makes the data frame’s columns available as bare names for the duration of the call:\n\nwith(fruits, .case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nReferring to columns via fruits$price directly, without with(), works exactly the same way – with() is a convenience, not a requirement:\n\nidentical(\n  with(fruits, .case_when(price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")),\n  .case_when(fruits$price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")\n)\n\n[1] TRUE",
+    "text": "No data-masking\nThere is no data-masking in this mini: you must reference columns with $, or wrap in with(). Unlike dplyr::case_when(), conditions and values are evaluated in the caller’s environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that, mirrored here from base R, is to wrap the whole call in with(data, ...), which temporarily makes the data frame’s columns available as bare names for the duration of the call:\n\nwith(fruits, .case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nReferring to columns via fruits$price directly, without with(), works exactly the same way – with() is a convenience, not a requirement:\n\nidentical(\n  with(fruits, .case_when(price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")),\n  .case_when(fruits$price &lt; 3 ~ \"cheap\", TRUE ~ \"not cheap\")\n)\n\n[1] TRUE",
     "crumbs": [
       "Minis",
       "minicase"
@@ -356,7 +367,7 @@
     "href": "minicase/index.html#first-match-wins",
     "title": "minicase",
     "section": "First match wins",
-    "text": "First match wins\nFormulas are checked in order, and the first TRUE condition for each position determines its value, even if a later condition would also match. cherry (price 3.00) is a good illustration: it fails price &lt; 3, but matches price &gt;= 3, so it’s classified as \"pricey\" above. Conditions can combine several tests with &, which is useful for layering more specific rules ahead of more general ones:\n\nwith(fruits, .case_when(\n  in_stock & price &lt; 1 ~ \"cheap and in stock\",\n  in_stock             ~ \"in stock\",\n  TRUE                 ~ \"out of stock or unknown price\"\n))\n\n[1] \"in stock\"                      \"cheap and in stock\"           \n[3] \"out of stock or unknown price\" \"in stock\"                     \n[5] \"in stock\"                     \n\n\nbanana matches both the first and second formula here (it’s in stock and under $1), but because the first-match-wins rule checks formulas top to bottom, it’s classified by the more specific \"cheap and in stock\" rule rather than the more general \"in stock\" one. Ordering formulas from most to least specific is exactly how you get that behaviour deliberately, rather than by accident.",
+    "text": "First match wins\nFormulas are checked in order, and the first TRUE condition for each position determines its value, even if a later condition would also match. The cherry row (price 3.00) is a good illustration: it fails price &lt; 3, but matches price &gt;= 3, so it’s classified as \"pricey\" above. Conditions can combine several tests with &, which is useful for layering more specific rules ahead of more general ones:\n\nwith(fruits, .case_when(\n  in_stock & price &lt; 1 ~ \"cheap and in stock\",\n  in_stock             ~ \"in stock\",\n  TRUE                 ~ \"out of stock or unknown price\"\n))\n\n[1] \"in stock\"                      \"cheap and in stock\"           \n[3] \"out of stock or unknown price\" \"in stock\"                     \n[5] \"in stock\"                     \n\n\nThe banana row matches both the first and second formula here (it’s in stock and under $1), but because the first-match-wins rule checks formulas top to bottom, it’s classified by the more specific \"cheap and in stock\" rule rather than the more general \"in stock\" one. Ordering formulas from most to least specific is exactly how you get that behaviour deliberately, rather than by accident.",
     "crumbs": [
       "Minis",
       "minicase"
@@ -367,7 +378,7 @@
     "href": "minicase/index.html#unmatched-positions-are-na",
     "title": "minicase",
     "section": "Unmatched positions are NA",
-    "text": "Unmatched positions are NA\ndate has a missing price, so every condition involving price evaluates to NA for that row – neither TRUE nor FALSE – and date itself gets NA in the result, since there’s no condition it definitively satisfies:\n\nwith(fruits, .case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nAdd a TRUE ~ ... formula at the end as a catch-all default, the same way you would in dplyr, and every remaining position – including ones where every prior condition was NA rather than FALSE – picks up that value instead:\n\nwith(fruits, .case_when(\n  price &lt; 1  ~ \"cheap\",\n  price &lt; 3  ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\"",
+    "text": "Unmatched positions are NA\nThe date row has a missing price, so every condition involving price evaluates to NA for that row – neither TRUE nor FALSE – and date itself gets NA in the result, since there’s no condition it definitively satisfies:\n\nwith(fruits, .case_when(\n  price &lt; 1 ~ \"cheap\",\n  price &lt; 3 ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\"\n))\n\n[1] \"mid\"    \"cheap\"  \"pricey\" NA       \"pricey\"\n\n\nAdd a TRUE ~ ... formula at the end as a catch-all default, the same way you would in dplyr, and every remaining position – including ones where every prior condition was NA rather than FALSE – picks up that value instead:\n\nwith(fruits, .case_when(\n  price &lt; 1  ~ \"cheap\",\n  price &lt; 3  ~ \"mid\",\n  price &gt;= 3 ~ \"pricey\",\n  TRUE       ~ \"unknown\"\n))\n\n[1] \"mid\"     \"cheap\"   \"pricey\"  \"unknown\" \"pricey\"",
     "crumbs": [
       "Minis",
       "minicase"
@@ -378,7 +389,7 @@
     "href": "minicase/index.html#scope-no-.default.ptype.size",
     "title": "minicase",
     "section": "Scope: no .default/.ptype/.size",
-    "text": "Scope: no .default/.ptype/.size\nThe mini does not implement any of these arguments. The trailing TRUE ~ \"unknown\" formula in the previous example is the idiomatic way to get a default value (and indeed is very often used in when writing code with the real dplyr::case_when() function). I simply decided there was no need for this mini to implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing, nor did I think there was much to be gained by adding .ptype/ .size to control the output type/length explicitly. If your use case needs those, a plain TRUE ~ value formula covers .default, and the output length/type simply follow from whatever the conditions. If that still isn’t sufficient, then it’s likely you need the real version not the mini.",
+    "text": "Scope: no .default/.ptype/.size\nThe mini does not implement any of these arguments. The trailing TRUE ~ \"unknown\" formula in the previous example is the idiomatic way to get a default value, and is in fact very often used when writing code with the real dplyr::case_when() function. There was no need for this mini to implement dplyr’s newer, separate .default argument as an alternative spelling of the same thing, and little to be gained by adding .ptype/.size to control the output type/length explicitly. If your use case needs those, a plain TRUE ~ value formula covers .default, and the output length/type simply follow from the conditions. If that still isn’t sufficient, then it’s likely you need the real version, not the mini.",
     "crumbs": [
       "Minis",
       "minicase"
@@ -399,7 +410,7 @@
     "href": "minicli/index.html",
     "title": "minicli",
     "section": "",
-    "text": "minicli is a minimal stand-in for the small slice of cli most packages actually use: coloured alert messages, unicode symbols with an ascii fallback, a rule, and a bullet list. See the README for the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.",
+    "text": "The purpose of minicli is to provide a zero-dependency stand-in for the small slice of cli that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and a bulleted list. The README provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.",
     "crumbs": [
       "Minis",
       "minicli"
@@ -410,7 +421,7 @@
     "href": "minicli/index.html#functions",
     "title": "minicli",
     "section": "Functions",
-    "text": "Functions\n\nCore functions\n\n.cli_alert_success()/_danger()/_warning()/_info() – print a message() with a coloured symbol prefix; extra ... arguments are passed through sprintf().\n.cli_symbol(name) – look up a single symbol by name, returning its unicode glyph or an ascii fallback depending on what’s safe to print.\n.cli_rule(title = NULL) – print a horizontal divider spanning the console width, optionally with a centred title.\n.cli_bullets(items) – print a simple bulleted list, one entry per line.\n.cli_col_black()/_red()/_green()/_yellow()/_blue()/ _magenta()/_cyan()/_white()/_grey() – wrap a string in an ANSI colour code.\n.cli_style_bold()/_dim()/_italic()/_underline() – wrap a string in an ANSI style code.\n\n\n\nInternal helpers\n\n.cli_ansi_enabled() – decide whether it’s currently safe to emit ANSI escape codes (checks cli.num_colors, NO_COLOR, whether knitr/Quarto is rendering, whether output is being captured, whether it’s running in Positron’s or RStudio’s Console pane, and whether stdout is a real terminal).\n.cli_positron_console_with_color()/ .cli_rstudio_console_with_color() – recognise Positron’s and RStudio’s Console panes explicitly, since neither is a real tty but both do support ANSI colour.\n.cli_unicode_enabled() – decide whether it’s currently safe to print unicode symbols (checks cli.unicode, then the session’s locale).\n.cli_ansi_style(code) – factory that builds one of the .cli_col_*()/.cli_style_*() functions from a raw SGR code.\n.cli_alert(symbol_name, color_fn, text, ...) – shared implementation behind the four .cli_alert_*() functions.",
+    "text": "Functions\nThe minicli.R script supplies the following as its core functions:\n\n.cli_alert_success()/_danger()/_warning()/_info() are used to print a message with a coloured symbol prefix.\n.cli_symbol(name) looks up a single symbol by name, returning its unicode glyph or an ASCII fallback depending on what’s safe to print.\n.cli_rule(title = NULL) prints a horizontal divider spanning the console width, optionally with a centred title.\n.cli_bullets(items) prints a simple bulleted list, one entry per line.\n.cli_col_black()/_red()/_green()/_yellow()/_blue()/ _magenta()/_cyan()/_white()/_grey() are used to generate output in a particular colour, which they achieve by wrapping a string in an ANSI colour code.\n.cli_style_bold()/_dim()/_italic()/_underline() are used to generate output in a particular style, which they achieve by wrapping a string in an ANSI style code.\n\nThere are also a collection of internal helper functions:\n\n.cli_ansi_enabled() is used to decide whether it’s currently safe to emit ANSI escape codes, which it does by checking cli.num_colors, NO_COLOR, whether knitr/Quarto is rendering, whether output is being captured, whether it’s running in Positron’s or RStudio’s Console pane, and whether stdout is a real terminal.\n.cli_positron_console_with_color()/.cli_rstudio_console_with_color() are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.\n.cli_unicode_enabled() is used to decide whether it’s currently safe to print unicode symbols, by checking cli.unicode and then the session locale.\n.cli_ansi_style(code) is a function factory that builds one of the .cli_col_*()/.cli_style_*() functions from a raw SGR code.\n.cli_alert(symbol_name, color_fn, text, ...) is the shared implementation behind the four .cli_alert_*() functions.",
     "crumbs": [
       "Minis",
       "minicli"
@@ -421,7 +432,7 @@
     "href": "minicli/index.html#capability-detection",
     "title": "minicli",
     "section": "Capability detection",
-    "text": "Capability detection\nEvery colour/symbol decision in minicli runs through .cli_ansi_enabled() and .cli_unicode_enabled(), so the same code looks right whether it’s running in an interactive terminal that supports unicode and colour, Positron’s or RStudio’s Console pane (neither of which is a real tty, but both of which do support ANSI colour), a plain terminal that supports neither, or – as on this page – a Quarto render. Quarto/knitr renders are detected as a non-terminal (getOption(\"knitr.in.progress\")), so ANSI colour is disabled automatically here. That means the alerts below print in plain text with their symbol prefix, exactly as they would in a captured log or a non-interactive session, rather than showing colour codes as literal text on the page.",
+    "text": "Capability detection\nEvery colour/symbol decision in minicli runs through .cli_ansi_enabled() and .cli_unicode_enabled(), so the same code looks right whether it’s running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling getOption(\"knitr.in.progress\"). As a consequence, ANSI colour is automatically disabled here. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.",
     "crumbs": [
       "Minis",
       "minicli"
@@ -432,7 +443,7 @@
     "href": "minicli/index.html#alerts",
     "title": "minicli",
     "section": "Alerts",
-    "text": "Alerts\n.cli_alert_success()/_danger()/_warning()/_info() are the functions you’ll reach for most often: thin message() wrappers with a symbol prefix, meant for the kind of status line a script prints while it works. Extra ... arguments are passed through sprintf(), so the first argument can be a format string:\n\n.cli_alert_success(\"Wrote %d files to %s\", 3, \"output/\")\n\n✔ Wrote 3 files to output/\n\n\n\n.cli_alert_warning(\"Skipped %d rows with missing values\", 12)\n\n⚠ Skipped 12 rows with missing values\n\n\n\n.cli_alert_danger(\"Failed to connect to %s\", \"database\")\n\n✖ Failed to connect to database\n\n\n\n.cli_alert_info(\"Using default configuration\")\n\nℹ Using default configuration\n\n\nIf there’s no ... to format with, the text is used as-is – no sprintf() call, so a literal % in the message is safe:\n\n.cli_alert_info(\"Discount: 10% off\")\n\nℹ Discount: 10% off",
+    "text": "Alerts\nThe .cli_alert_success()/_danger()/_warning()/_info() functions are the ones you are likely to reach for most often in a package: each one is a thin wrapper around message() with a symbol prefix, meant for the kind of status line a script prints while it works. Extra ... arguments are passed through sprintf(), so the first argument can be a format string:\n\n.cli_alert_success(\"Wrote %d files to %s\", 3, \"output/\")\n\n✔ Wrote 3 files to output/\n\n\n\n.cli_alert_warning(\"Skipped %d rows with missing values\", 12)\n\n⚠ Skipped 12 rows with missing values\n\n\n\n.cli_alert_danger(\"Failed to connect to %s\", \"database\")\n\n✖ Failed to connect to database\n\n\n\n.cli_alert_info(\"Using default configuration\")\n\nℹ Using default configuration\n\n\nIf no arguments are passed through ... to format with, the text is used as-is. That is, no sprintf() call is made, so a literal % in the message is safe:\n\n.cli_alert_info(\"Discount: 10% off\")\n\nℹ Discount: 10% off",
     "crumbs": [
       "Minis",
       "minicli"
@@ -443,7 +454,7 @@
     "href": "minicli/index.html#symbols",
     "title": "minicli",
     "section": "Symbols",
-    "text": "Symbols\nEach alert’s prefix comes from .cli_symbol(), which looks up a named symbol and returns either its unicode glyph or an ascii fallback, depending on .cli_unicode_enabled(). It’s also useful on its own, for building custom messages that follow the same convention as the built-in alerts:\n\n.cli_symbol(\"tick\")\n\n[1] \"✔\"\n\n.cli_symbol(\"cross\")\n\n[1] \"✖\"\n\n.cli_symbol(\"arrow_right\")\n\n[1] \"→\"\n\n\nAn unrecognised name is an error rather than a silent NA:\n\n.cli_symbol(\"star\")\n\nError:\n! Unknown symbol: star",
+    "text": "Symbols\nEach alert’s prefix comes from .cli_symbol(), which looks up a named symbol and returns either its unicode glyph or an ASCII fallback, depending on .cli_unicode_enabled(). It’s also useful on its own, for building custom messages that follow the same convention as the built-in alerts:\n\n.cli_symbol(\"tick\")\n\n[1] \"✔\"\n\n.cli_symbol(\"cross\")\n\n[1] \"✖\"\n\n.cli_symbol(\"arrow_right\")\n\n[1] \"→\"\n\n\nAn unrecognised name is an error rather than a silent NA:\n\n.cli_symbol(\"star\")\n\nError:\n! Unknown symbol: star",
     "crumbs": [
       "Minis",
       "minicli"
@@ -454,7 +465,7 @@
     "href": "minicli/index.html#rule",
     "title": "minicli",
     "section": "Rule",
-    "text": "Rule\n.cli_rule() prints a horizontal divider, useful for separating sections of console output. Called with no arguments, it spans the full console width:\n\n.cli_rule()\n\n────────────────────────────────────────────────────────────────────────────────\n\n\nPass a title and it’s centred within the rule instead:\n\n.cli_rule(\"Summary\")\n\n─────────────────────────────────── Summary ────────────────────────────────────",
+    "text": "Rule\nThe .cli_rule() function prints a horizontal divider, useful for separating sections of console output. When called with no arguments, it spans the full console width:\n\n.cli_rule()\n\n────────────────────────────────────────────────────────────────────────────────\n\n\nIf a title is passed, the text appears centred within the rule instead:\n\n.cli_rule(\"Summary\")\n\n─────────────────────────────────── Summary ────────────────────────────────────",
     "crumbs": [
       "Minis",
       "minicli"
@@ -465,7 +476,7 @@
     "href": "minicli/index.html#bullets",
     "title": "minicli",
     "section": "Bullets",
-    "text": "Bullets\n.cli_bullets() prints a simple bulleted list, one entry per line – handy for summarising a small set of results without reaching for a full table:\n\n.cli_bullets(c(\"one\", \"two\", \"three\"))\n\n• one\n• two\n• three",
+    "text": "Bullets\nThe .cli_bullets() function prints a simple bulleted list, one entry per line, which is handy for summarising a small set of results:\n\n.cli_bullets(c(\"one\", \"two\", \"three\"))\n\n• one\n• two\n• three",
     "crumbs": [
       "Minis",
       "minicli"
@@ -476,7 +487,7 @@
     "href": "minicli/index.html#colours-and-styles",
     "title": "minicli",
     "section": "Colours and styles",
-    "text": "Colours and styles\nUnder the hood, each alert calls one of the .cli_col_*() functions to colour its symbol. Those functions – along with the .cli_style_*() family – are also exported directly, for colouring or styling arbitrary text of your own. Both wrap their input in an ANSI escape code and its matching reset code, and both are no-ops (returning the text unchanged) whenever .cli_ansi_enabled() is FALSE – which, per the capability-detection note above, is always true on this page:\n\nidentical(.cli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(.cli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE\n\n\nColours and styles nest freely, since each wrapper’s reset code is emitted immediately after its own content rather than at the very end of the whole string:\n\n.cli_style_bold(.cli_col_red(\"bold and red\"))\n\n[1] \"bold and red\"\n\n\nOutside of a Quarto render – in an interactive terminal session, say – that same call would print bold red text rather than the plain string shown here.",
+    "text": "Colours and styles\nUnder the hood, each alert calls one of the .cli_col_*() functions to colour its symbol. Those functions, along with the .cli_style_*() family, are also exported directly in case you would like to apply colouring or styling to arbitrary text. Both wrap their input in an ANSI escape code and its matching reset code, and both return the text unchanged whenever .cli_ansi_enabled() is FALSE, as is the case for this page.\n\nidentical(.cli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(.cli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE\n\n\nColours and styles nest freely, since each wrapper’s reset code is emitted immediately after its own content rather than at the very end of the whole string:\n\n.cli_style_bold(.cli_col_red(\"bold and red\"))\n\n[1] \"bold and red\"\n\n\nOutside of a Quarto render – in an interactive terminal session, for instance – that same call would print bold red text rather than the plain string shown here.",
     "crumbs": [
       "Minis",
       "minicli"
@@ -487,7 +498,7 @@
     "href": "minifilter/index.html",
     "title": "minifilter",
     "section": "",
-    "text": "minifilter provides a single function, .filter(), a minimal reimplementation of dplyr::filter(): it keeps rows of a data frame where all of a set of unquoted conditions are TRUE. See the README for scope notes; this page walks through its behaviour on a small toy data frame, including two behaviours worth knowing about before you rely on it: how missing values are handled, and what happens with no conditions at all.",
+    "text": "The purpose of minifilter is to provide a zero-dependency reimplementation of a single function from the dplyr package: filter(). It keeps rows of a data frame where every one of a set of unquoted conditions is TRUE. The README provides scope notes; this page walks through its behaviour on a small toy data frame, including two things worth knowing about before you rely on it: how missing values are handled, and what happens when no conditions are supplied at all.",
     "crumbs": [
       "Minis",
       "minifilter"
@@ -498,7 +509,7 @@
     "href": "minifilter/index.html#functions",
     "title": "minifilter",
     "section": "Functions",
-    "text": "Functions\nThere is a single core function to this mini:\n\n.filter(.data, ...) – keep rows of .data where every condition in ... evaluates to TRUE. Conditions are evaluated in the scope of .data, so columns can be referred to by bare name.\n\nThere is also one internal helper:\n\n.filter_dotdotdot() captures the unevaluated ... conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.",
+    "text": "Functions\nThe minifilter.R script supplies a single core function:\n\n.filter(.data, ...) is used to keep rows of .data where every condition in ... evaluates to TRUE. Conditions are evaluated in the scope of .data, so columns can be referred to by bare name.\n\nThere is also one internal helper:\n\n.filter_dotdotdot() captures the unevaluated ... conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.",
     "crumbs": [
       "Minis",
       "minifilter"
@@ -542,7 +553,7 @@
     "href": "minifilter/index.html#na-conditions-drop-the-row",
     "title": "minifilter",
     "section": "NA conditions drop the row",
-    "text": "NA conditions drop the row\ndate has a missing price, so any condition involving price is NA for that row rather than TRUE/FALSE. .filter() treats NA the same way dplyr::filter() does: as “not proven to be kept”, so the row is dropped rather than kept by default or raising an error:\n\n.filter(fruits, price &gt; 1)\n\n        name price in_stock\n1      apple   1.2     TRUE\n3     cherry   3.0    FALSE\n5 elderberry   4.5     TRUE\n\n\nNotice that date disappears from the result entirely, rather than appearing with NA values or being kept because “we don’t know” – this is a common surprise for anyone used to base R’s [ subsetting, where an NA index instead produces a row of NAs:\n\nfruits[fruits$price &gt; 1, ]\n\n         name price in_stock\n1       apple   1.2     TRUE\n3      cherry   3.0    FALSE\nNA       &lt;NA&gt;    NA       NA\n5  elderberry   4.5     TRUE",
+    "text": "NA conditions drop the row\nThe date row has a missing price, so any condition involving price is NA for that row rather than TRUE/FALSE. The .filter() function treats NA the same way dplyr::filter() does: as “not proven to be kept”, so the row is dropped rather than kept by default or causing an error:\n\n.filter(fruits, price &gt; 1)\n\n        name price in_stock\n1      apple   1.2     TRUE\n3     cherry   3.0    FALSE\n5 elderberry   4.5     TRUE\n\n\nNotice that date disappears from the result entirely, rather than appearing with NA values or being kept because “we don’t know” – this is a common surprise for anyone used to base R’s [ subsetting, where an NA index instead produces a row of NAs:\n\nfruits[fruits$price &gt; 1, ]\n\n         name price in_stock\n1       apple   1.2     TRUE\n3      cherry   3.0    FALSE\nNA       &lt;NA&gt;    NA       NA\n5  elderberry   4.5     TRUE",
     "crumbs": [
       "Minis",
       "minifilter"
@@ -553,7 +564,7 @@
     "href": "minifilter/index.html#no-conditions-returns-the-data-frame-unchanged",
     "title": "minifilter",
     "section": "No conditions returns the data frame unchanged",
-    "text": "No conditions returns the data frame unchanged\nCalling .filter() with no conditions at all is a legitimate, supported no-op – useful when conditions are built up programmatically and might end up empty:\n\nidentical(.filter(fruits), fruits)\n\n[1] TRUE\n\n\nThis is a deliberate fix relative to the poorman logic minifilter was adapted from, which didn’t guard against empty ... and would have silently dropped every row instead – see the README for details.",
+    "text": "No conditions returns the data frame unchanged\nCalling .filter() with no conditions at all is legitimate and simply leaves the data frame unchanged – useful when conditions are built up programmatically and might end up empty:\n\nidentical(.filter(fruits), fruits)\n\n[1] TRUE\n\n\nThis is a deliberate fix relative to the poorman logic minifilter was adapted from, which didn’t guard against empty ... and would have silently dropped every row instead – see the README for details.",
     "crumbs": [
       "Minis",
       "minifilter"
@@ -564,7 +575,7 @@
     "href": "minimap/index.html",
     "title": "minimap",
     "section": "",
-    "text": "minimap provides purrr-style mapping functions – .iter_map(), .iter_map2(), .iter_imap(), .iter_walk(), .iter_iwalk(), and the type-stable .iter_map_dbl()/.iter_map_lgl()/.iter_map_chr() – built entirely on lapply()/vapply(). See the README for the full API reference and scope notes; this page walks through each one, starting from the basic case and building up to the two-input and side-effect variants.",
+    "text": "The purpose of minimap is to provide zero-dependency mapping functions analogous to those supplied by the purrr package. Each function iterates over a collection of inputs, applying a user-supplied function to each of the inputs. The README provides full API reference and scope notes; this page walks through the functionality supplied, providing a short tutorial that starts from the basic case and building up to the two-input and side-effect variants.",
     "crumbs": [
       "Minis",
       "minimap"
@@ -575,18 +586,18 @@
     "href": "minimap/index.html#functions",
     "title": "minimap",
     "section": "Functions",
-    "text": "Functions\n\nCore functions\n\n.iter_map(.x, .f) – apply .f to each element of .x, always returning a list, with names preserved.\n.iter_map_dbl()/.iter_map_lgl()/.iter_map_chr() – like .iter_map(), but return an atomic vector of the named type instead of a list, via vapply().\n.iter_map2(.x, .y, .f) – apply .f to corresponding pairs of elements from two same-length lists/vectors.\n.iter_imap(.x, .f) – apply .f to each element of .x together with its name.\n.iter_walk(.x, .f) – like .iter_map(), but for side effects only: returns .x invisibly instead of the results.\n.iter_iwalk(.x, .f) – like .iter_imap(), but for side effects only: returns .x invisibly instead of the results.\n\n\n\nInternal helpers\n\n.iter_assert(expr, message) – a small argument-checking helper built on base stop(), used to validate inputs like matching lengths or the presence of names.",
+    "text": "Functions\nThe minimap.R script supplies the following functions:\n\n.iter_map(.x, .f) is the backbone function in the script, built atop the base lapply() function. It applies the single-argument function .f to every element of .x, always returning a list, and preserving names if they are present.\n.iter_map_dbl(.x, .f), .iter_map_lgl(.x, .f), and .iter_map_chr(.x, .f) are the typed variants, built atop the base vapply() function. They apply .f to every element of .x and return an atomic vector of the named type (double, logical, or character) instead of a list.\n.iter_map2(.x, .y, .f) is the two-input variation, where the two inputs .x and .y are the same length, and .f is a function that takes two inputs. The output is a list that applies .f to each pair of input values.\n.iter_imap(.x, .f) is the variation in which the user passes a named vector or list .x, and .f is a two-argument function that takes the value as its first argument and the name as the second argument, returning a list.\n.iter_walk(.x, .f) behaves analogously to .iter_map() but is used only for the side effects of calling the function .f. It returns .x invisibly instead of the results.\n.iter_iwalk(.x, .f) behaves analogously to .iter_imap() but is used only for the side effects of calling the function .f. It returns .x invisibly instead of the results.\n\nThere is one internal function:\n\n.iter_assert(expr, message) is a small argument-checking helper built on base stop(), used to validate inputs like matching lengths or the presence of names.",
     "crumbs": [
       "Minis",
       "minimap"
     ]
   },
   {
-    "objectID": "minimap/index.html#iter_map",
-    "href": "minimap/index.html#iter_map",
+    "objectID": "minimap/index.html#basic-mapping",
+    "href": "minimap/index.html#basic-mapping",
     "title": "minimap",
-    "section": ".iter_map()",
-    "text": ".iter_map()\n.iter_map() is the workhorse of the mini: apply a function to each element of a list or atomic vector, and get back a list of results the same length, with any names from the input preserved on the output. It’s a thin wrapper around lapply(), so anything you already know about lapply()’s behaviour carries over directly:\n\n.iter_map(1:3, function(x) x + 1)\n\n[[1]]\n[1] 2\n\n[[2]]\n[1] 3\n\n[[3]]\n[1] 4\n\n\n\n.iter_map(c(a = 1, b = 2), function(x) x * 10)\n\n$a\n[1] 10\n\n$b\n[1] 20\n\n\nBecause the return type is always a list, .iter_map() is safe to use even when .f returns different types or lengths for different elements:\n\n.iter_map(1:3, function(x) if (x == 2) c(x, x) else x)\n\n[[1]]\n[1] 1\n\n[[2]]\n[1] 2 2\n\n[[3]]\n[1] 3",
+    "section": "Basic mapping",
+    "text": "Basic mapping\n.iter_map() is the workhorse of the mini: apply a function to each element of a list or atomic vector, and get back a list of results the same length, with any names from the input preserved on the output. It’s a thin wrapper around lapply(), so anything you already know about lapply()’s behaviour carries over directly:\n\n.iter_map(1:3, function(x) x + 1)\n\n[[1]]\n[1] 2\n\n[[2]]\n[1] 3\n\n[[3]]\n[1] 4\n\n\nIf the input is named, the names are preserved in the output:\n\n.iter_map(c(a = 1, b = 2), function(x) x * 10)\n\n$a\n[1] 10\n\n$b\n[1] 20\n\n\nBecause the return type is always a list, .iter_map() is safe to use even when .f returns different types or lengths for different elements:\n\n.iter_map(1:3, function(x) if (x == 2) c(x, x) else x)\n\n[[1]]\n[1] 1\n\n[[2]]\n[1] 2 2\n\n[[3]]\n[1] 3",
     "crumbs": [
       "Minis",
       "minimap"
@@ -604,22 +615,22 @@
     ]
   },
   {
-    "objectID": "minimap/index.html#iter_map2-and-.iter_imap",
-    "href": "minimap/index.html#iter_map2-and-.iter_imap",
+    "objectID": "minimap/index.html#two-input-variants",
+    "href": "minimap/index.html#two-input-variants",
     "title": "minimap",
-    "section": ".iter_map2() and .iter_imap()",
-    "text": ".iter_map2() and .iter_imap()\nSometimes one input isn’t enough. .iter_map2() walks two same-length vectors in parallel, calling .f with one element from each:\n\n.iter_map2(1:3, 4:6, function(x, y) x + y)\n\n[[1]]\n[1] 5\n\n[[2]]\n[1] 7\n\n[[3]]\n[1] 9\n\n\nPassing vectors of mismatched length is a deliberate error rather than silent recycling:\n\n.iter_map2(1:3, 1:2, function(x, y) x + y)\n\nError:\n! `.x` and `.y` must have the same length\n\n\n.iter_imap() covers a related but different need: walking a single named vector together with its own names, rather than a second vector. .f is called with the element first, then its name:\n\n.iter_imap(c(a = 1, b = 2), function(val, name) paste0(name, \"=\", val))\n\n$a\n[1] \"a=1\"\n\n$b\n[1] \"b=2\"\n\n\n.x must actually be named for .iter_imap() to make sense, and that’s enforced:\n\n.iter_imap(1:3, function(val, name) paste0(name, \"=\", val))\n\nError:\n! `.x` must be named",
+    "section": "Two-input variants",
+    "text": "Two-input variants\nSometimes one input isn’t enough. .iter_map2() walks two same-length vectors in parallel, calling .f with one element from each:\n\n.iter_map2(1:3, 4:6, function(x, y) x + y)\n\n[[1]]\n[1] 5\n\n[[2]]\n[1] 7\n\n[[3]]\n[1] 9\n\n\nPassing vectors of mismatched length is a deliberate error rather than silent recycling:\n\n.iter_map2(1:3, 1:2, function(x, y) x + y)\n\nError:\n! `.x` and `.y` must have the same length\n\n\n.iter_imap() covers a related but different need: iterating over a single named vector together with its own names. Strictly speaking it is a two-input mapping function, but the inputs are the values of .x and the names of .x, and .f is called with the value first and the name second:\n\n.iter_imap(c(a = 1, b = 2), function(val, name) paste0(name, \"=\", val))\n\n$a\n[1] \"a=1\"\n\n$b\n[1] \"b=2\"\n\n\nNote that .x must actually be named for .iter_imap() to make sense, and that’s enforced. An error is produced if .x does not have names:\n\n.iter_imap(1:3, function(val, name) paste0(name, \"=\", val))\n\nError:\n! `.x` must be named",
     "crumbs": [
       "Minis",
       "minimap"
     ]
   },
   {
-    "objectID": "minimap/index.html#iter_walk-and-.iter_iwalk",
-    "href": "minimap/index.html#iter_walk-and-.iter_iwalk",
+    "objectID": "minimap/index.html#iterating-for-the-side-effects-only",
+    "href": "minimap/index.html#iterating-for-the-side-effects-only",
     "title": "minimap",
-    "section": ".iter_walk() and .iter_iwalk()",
-    "text": ".iter_walk() and .iter_iwalk()\n.iter_map() and .iter_imap() are for when you want the results. .iter_walk() and .iter_iwalk() are their side-effect-only counterparts: same iteration behaviour, but the return value is .x itself, returned invisibly, so they compose neatly at the end of a pipeline without cluttering the console with the results of every call to .f:\n\n.iter_walk(1:3, function(x) cat(\"value:\", x, \"\\n\"))\n\nvalue: 1 \nvalue: 2 \nvalue: 3 \n\n\n\n.iter_iwalk(c(a = 1, b = 2), function(val, name) cat(name, \"-&gt;\", val, \"\\n\"))\n\na -&gt; 1 \nb -&gt; 2 \n\n\nBecause the input is returned invisibly, .iter_walk()/.iter_iwalk() can be dropped into the middle of a longer expression purely for their printing side effect, without changing what the expression evaluates to:\n\nresult &lt;- .iter_walk(1:3, function(x) cat(\"processing\", x, \"\\n\"))\n\nprocessing 1 \nprocessing 2 \nprocessing 3 \n\nidentical(result, 1:3)\n\n[1] TRUE",
+    "section": "Iterating for the side-effects only",
+    "text": "Iterating for the side-effects only\nThe .iter_map() and .iter_imap() functions exist for the situation where you want the results of applying a function to every input. Sometimes, however, you’re not actually interested in what .f returns, but are instead interested in what it does as a side effect (e.g., save a file). In this situation, you may prefer to use the .iter_walk() and .iter_iwalk() variations. These “walk” functions iterate over the inputs in the same way that the analogous “map” functions do, producing side-effects as the mapping unfolds, but they don’t capture the results. Instead, they always return the original .x input invisibly.\n\n.iter_walk(1:3, function(x) cat(\"value:\", x, \"\\n\"))\n\nvalue: 1 \nvalue: 2 \nvalue: 3 \n\n\n\n.iter_iwalk(c(a = 1, b = 2), function(val, name) cat(name, \"-&gt;\", val, \"\\n\"))\n\na -&gt; 1 \nb -&gt; 2 \n\n\nBecause the input is returned invisibly, .iter_walk()/.iter_iwalk() can be dropped into the middle of a longer expression purely for their printing side effect, without changing what the expression evaluates to:\n\nresult &lt;- .iter_walk(1:3, function(x) cat(\"processing\", x, \"\\n\"))\n\nprocessing 1 \nprocessing 2 \nprocessing 3 \n\nidentical(result, 1:3)\n\n[1] TRUE",
     "crumbs": [
       "Minis",
       "minimap"
@@ -630,7 +641,7 @@
     "href": "minitable/index.html",
     "title": "minitable",
     "section": "",
-    "text": "The goal with minitable is to provide a few tibble-like construction/coercion helpers built entirely on data frames. Results are plain data frames, not actual tibbles. See the README for the full scope notes; this page walks through each function, including the cross-column-reference behaviour that’s the trickiest part of the mini to get right.",
+    "text": "The purpose of minitable is to provide a zero-dependency reimplementation of a few construction/coercion helpers from the tibble package, built entirely on data frames. The results are plain data frames, not actual tibbles. The README provides the full scope notes; this page walks through each function, including the cross-column-reference behaviour that’s the trickiest part of the mini to get right.",
     "crumbs": [
       "Minis",
       "minitable"
@@ -641,7 +652,7 @@
     "href": "minitable/index.html#functions",
     "title": "minitable",
     "section": "Functions",
-    "text": "Functions\nThere are currently four core functions:\n\n.table_tibble(...) – build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.\n.table_as_tibble(x, ...) – coerce x to a plain data frame via as.data.frame(), preserving literal (non-syntactic) column names.\n.table_rownames_to_column(.data, var) – move .data’s row names into an explicit column named var; a no-op if the row names are just the default sequential ones.\n.table_add_row(.data, ...) – append a single row to .data, with the same cross-column-reference support as .table_tibble().\n\nAdditionally minitable has one internal helper:\n\n.table_drop_dup_list() is used by both .table_tibble() and .table_add_row() to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below).",
+    "text": "Functions\nThe minitable.R script supplies four core functions:\n\n.table_tibble(...) is used to build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.\n.table_as_tibble(x, ...) is used to coerce x to a plain data frame via as.data.frame(), preserving literal (non-syntactic) column names.\n.table_rownames_to_column(.data, var) is used to move .data’s row names into an explicit column named var; it leaves .data unchanged if the row names are just the default sequential ones.\n.table_add_row(.data, ...) is used to append a single row to .data, with the same cross-column-reference support as .table_tibble().\n\nThere is also one internal helper:\n\n.table_drop_dup_list() is used by both .table_tibble() and .table_add_row() to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below).",
     "crumbs": [
       "Minis",
       "minitable"
@@ -652,7 +663,7 @@
     "href": "minitable/index.html#sequential-cross-referencing-construction",
     "title": "minitable",
     "section": "Sequential, cross-referencing construction",
-    "text": "Sequential, cross-referencing construction\nBuilding a data frame with data.frame() directly requires every column to already exist as a complete vector before the call – you can’t refer to a column you’re building in the same call. Like tibble::tibble(), .table_tibble() lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:\n\n.table_tibble(a = 1:3, b = a * 2, c = a + b)\n\n  a b c\n1 1 2 3\n2 2 4 6\n3 3 6 9\n\n\nHere b refers to a, and c refers to both a and b – neither would resolve to anything if evaluated outside the call, since a, b, and c don’t otherwise exist in this session. Getting this right took real care in the implementation, but you can take a look at the code if you’re interested.",
+    "text": "Sequential, cross-referencing construction\nBuilding a data frame with data.frame() directly requires every column to already exist as a complete vector before the call – you can’t refer to a column you’re building in the same call. Like tibble::tibble(), .table_tibble() lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:\n\n.table_tibble(a = 1:3, b = a * 2, c = a + b)\n\n  a b c\n1 1 2 3\n2 2 4 6\n3 3 6 9\n\n\nHere b refers to a, and c refers to both a and b – neither would resolve to anything if evaluated outside the call, since a, b, and c don’t otherwise exist in this session. Getting this right took real care in the implementation, but you can look at minitable.R directly if you’re interested in the mechanics.",
     "crumbs": [
       "Minis",
       "minitable"
@@ -674,7 +685,7 @@
     "href": "minitable/index.html#minimalist-coercion",
     "title": "minitable",
     "section": "Minimalist coercion",
-    "text": "Minimalist coercion\nThere’s no tibble class or special printing here – it’s just as.data.frame() with check.names = FALSE, so a literal, non-syntactic column name (like \"1:3\" from the previous section) survives unchanged instead of being sanitised by make.names():\n\n.table_as_tibble(list(a = 1:2, b = c(\"x\", \"y\")))\n\n  a b\n1 1 x\n2 2 y\n\n\nThe difference from calling as.data.frame() directly shows up with a name that isn’t a syntactically valid R identifier, like the \"1:3\" name .table_tibble() generated automatically two sections ago:\n\nnames(.table_as_tibble(list(`1:3` = 1:3)))\n\n[1] \"1:3\"\n\nnames(as.data.frame(list(`1:3` = 1:3)))\n\n[1] \"X1.3\"\n\n\nas.data.frame()’s default check.names = TRUE rewrites \"1:3\" into the syntactically valid \"X1.3\"; .table_as_tibble() passes check.names = FALSE through instead, so the literal name survives.",
+    "text": "Minimalist coercion\nThere’s no tibble class or special printing here – it’s just as.data.frame() with check.names = FALSE, so a literal, non-syntactic column name (like \"1:3\" from the previous section) survives unchanged instead of being sanitised by make.names():\n\n.table_as_tibble(list(a = 1:2, b = c(\"x\", \"y\")))\n\n  a b\n1 1 x\n2 2 y\n\n\nThe difference from calling as.data.frame() directly shows up with a name that isn’t a syntactically valid R identifier, like the \"1:3\" name .table_tibble() generated automatically two sections ago:\n\nnames(.table_as_tibble(list(`1:3` = 1:3)))\n\n[1] \"1:3\"\n\nnames(as.data.frame(list(`1:3` = 1:3)))\n\n[1] \"X1.3\"\n\n\nBy default, check.names = TRUE in as.data.frame() rewrites \"1:3\" into the syntactically valid \"X1.3\"; .table_as_tibble() passes check.names = FALSE through instead, so the literal name survives.",
     "crumbs": [
       "Minis",
       "minitable"
@@ -707,7 +718,7 @@
     "href": "minitable/index.html#scope-data-frame-dropping-still-exists",
     "title": "minitable",
     "section": "Scope: data frame dropping still exists",
-    "text": "Scope: data frame dropping still exists\nNothing in this mini changes the fact that the return objects are genuine data frames, which means that [ still behaves exactly the same as usual for a data frame, and subsetting is therefore subject to the data frame dropping rule. It is possible that a future extension could layer a very thin S3 class that addresses this, but I am cautious about this: the risk of introducing unexpected behaviour if a “quasi-tibble” classed object escapes into the wild seems too much to countenance in a mini.",
+    "text": "Scope: data frame dropping still exists\nNothing in this mini changes the fact that the return objects are genuine data frames, which means that [ still behaves exactly the same as usual for a data frame, and subsetting is therefore subject to the data frame dropping rule. A future extension could in principle layer a very thin S3 class to address this, but that step is deliberately avoided here: the risk of introducing unexpected behaviour if a “quasi-tibble” classed object escapes into the wild seems too much to countenance in a mini.",
     "crumbs": [
       "Minis",
       "minitable"

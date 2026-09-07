@@ -417,6 +417,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
   <li><a href="#trap_safely" id="toc-trap_safely" class="nav-link" data-scroll-target="#trap_safely"><code>.trap_safely()</code></a></li>
   <li><a href="#trap_quietly" id="toc-trap_quietly" class="nav-link" data-scroll-target="#trap_quietly"><code>.trap_quietly()</code></a></li>
+  <li><a href="#composition" id="toc-composition" class="nav-link" data-scroll-target="#composition">Composition</a></li>
   </ul>
 </nav>
     </div>
@@ -443,18 +444,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minitrap</code> provides two <code>purrr</code>-style function adverbs, <code>.trap_safely()</code> and <code>.trap_quietly()</code>. A function adverb takes a function and returns a <em>new</em> function with modified behaviour – here, one that traps errors or console output instead of letting them propagate or print. See the <a href="https://github.com/djnavarro/minis/tree/main/minitrap">README</a> for the full API reference and scope notes; this page walks through both in action, and how they compose together.</p>
+<p>The purpose of <strong>minitrap</strong> is to provide zero-dependency versions of two <a href="https://purrr.tidyverse.org/"><strong>purrr</strong></a> adverbs that are used to “trap” one or more aspects of the output of another function. Like all adverb functions they take one function as input, and return a modified function as the output. The <a href="https://github.com/djnavarro/minis/tree/main/minitrap">README</a> provides the full API reference and scope notes; this page provides a short tutorial that shows how to use the functions, and how they compose together.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minitrap/minitrap.R"><strong>minitrap.R</strong></a> script supplies two functions:</p>
 <ul>
-<li><code>.trap_safely(.f)</code> – wrap <code>.f</code> so that a call which would normally throw an error instead returns <code>list(result = ..., error = ...)</code>, with exactly one of the two <code>NULL</code>.</li>
-<li><code>.trap_quietly(.f)</code> – wrap <code>.f</code> so that printed output, warnings, and messages are captured instead of shown, returning <code>list(result = ..., output = ..., warnings = ..., messages = ...)</code>.</li>
+<li><code>.trap_safely(.f)</code> is used to wrap <code>.f</code> so that a call which would normally produce an error instead returns a list containing two elements named <code>result</code> and <code>error</code>, with exactly one of the two set to <code>NULL</code> depending on whether the unmodified function would have errored when called the same way.</li>
+<li><code>.trap_quietly(.f)</code> is used to wrap <code>.f</code> so that all printed output, warnings, and messages are silently captured instead of shown, returning a four-element named list with components <code>result</code>, <code>output</code>, <code>warnings</code>, and <code>messages</code>.</li>
 </ul>
-<p><code>minitrap</code> has no internal helpers – both functions are short enough to be self-contained.</p>
+<p>It contains no internal helpers.</p>
 </section>
 <section id="trap_safely" class="level2">
 <h2 class="anchored" data-anchor-id="trap_safely"><code>.trap_safely()</code></h2>
-<p>Ordinarily, a function that errors stops execution and requires you to wrap every call site in <code>tryCatch()</code> if you want to keep going. <code>.trap_safely()</code> inverts that: it takes a function and returns a new one that never throws, instead capturing the error as data. Calling <code>.trap_safely(log)</code> on a non-numeric input, for example, doesn’t let the resulting error reach the console – it comes back as a list with <code>result = NULL</code> and <code>error</code> set to the condition object that would have been signalled:</p>
+<p>Ordinarily, a function that errors stops execution and requires you to wrap the call in <code>tryCatch()</code> if you want to capture the error and take some other action instead of stopping the execution. The goal of <code>.trap_safely()</code> is to invert this: it takes a function and returns a new one that never throws an error, instead capturing the error as data. Calling <code>.trap_safely(log)</code> on a non-numeric input, for example, doesn’t let the resulting error reach the console: instead, it returns a list with <code>result = NULL</code> and <code>error</code> set to the error condition object that would have been signalled:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>safe_log <span class="ot">&lt;-</span> <span class="fu">.trap_safely</span>(log)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_log</span>(<span class="st">"a"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -466,7 +468,7 @@ $error
 &lt;simpleError in .f(...): non-numeric argument to mathematical function&gt;</code></pre>
 </div>
 </div>
-<p>A successful call returns the result with <code>error</code> set to <code>NULL</code> instead, so the two fields are always mutually exclusive – checking <code>is.null(out$error)</code> tells you unambiguously whether the call succeeded:</p>
+<p>A successful call returns a list with the same two elements, with <code>error</code> set to <code>NULL</code> instead, and <code>result</code> set to the calculated logarithm.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_log</span>(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -477,18 +479,21 @@ $error
 NULL</code></pre>
 </div>
 </div>
-<p>This is particularly useful when mapping a function over many inputs and some of them are expected to fail – rather than the whole iteration aborting on the first error, each element’s outcome (success or failure) is captured individually. Combining <code>.trap_safely()</code> with <a href="../minimap/"><code>minimap</code></a>’s <code>.iter_map()</code> gives exactly that pattern (this page sources <code>minimap.R</code> too, purely to demonstrate the two minis working together – <code>minitrap</code> itself has no dependency on <code>minimap</code>):</p>
+<p>This is particularly useful when mapping a function over many inputs and some of them are expected to fail – rather than the whole iteration aborting on the first error, each element’s outcome (success or failure) is captured individually. Combining <code>.trap_safely()</code> with <a href="../minimap/"><strong>minimap</strong></a>’s <code>.iter_map()</code> is a convenient way to illustrate exactly that pattern.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">.iter_map</span>(<span class="fu">list</span>(<span class="dv">4</span>, <span class="st">"a"</span>, <span class="dv">9</span>), <span class="fu">.trap_safely</span>(sqrt))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map_lgl</span>(results, <span class="cf">function</span>(r) <span class="fu">is.null</span>(r<span class="sc">$</span>error))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mixed_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="dv">4</span>, <span class="st">"a"</span>, <span class="dv">9</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mixed_list <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.iter_map</span>(<span class="fu">.trap_safely</span>(sqrt)) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.iter_map_lgl</span>(\(r) <span class="fu">is.null</span>(r<span class="sc">$</span>error))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  TRUE FALSE  TRUE</code></pre>
 </div>
 </div>
+<p>As one would expect, this output shows that <code>sqrt(4)</code> succeeds, <code>sqrt("a")</code> errors, and <code>sqrt(9)</code> succeeds. The error that would normally be produced at the second step does not stop execution, and instead is captured and recorded. (Note that <strong>minitrap</strong> does not itself depend on <strong>minimap</strong>: this page sources that script to show the two minis operating together.)</p>
 </section>
 <section id="trap_quietly" class="level2">
 <h2 class="anchored" data-anchor-id="trap_quietly"><code>.trap_quietly()</code></h2>
-<p>Where <code>.trap_safely()</code> is about errors, <code>.trap_quietly()</code> is about everything a function might print along the way: <code>cat()</code>/<code>print()</code> output, <code>warning()</code>s, and <code>message()</code>s. Rather than letting any of that reach the console, <code>.trap_quietly()</code> collects it all and hands it back as part of the return value:</p>
+<p>Where <code>.trap_safely()</code> is about errors, <code>.trap_quietly()</code> is about outputs: printed output, return values, warnings, and messages. Rather than letting any of that reach the console, <code>.trap_quietly()</code> collects it all and hands it back as part of the return value:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>quiet_fn <span class="ot">&lt;-</span> <span class="fu">.trap_quietly</span>(<span class="cf">function</span>() {</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"starting"</span>)</span>
@@ -510,38 +515,22 @@ $messages
 [1] "starting\n"</code></pre>
 </div>
 </div>
-<p>Note the shape of the result: <code>result</code> holds the ordinary return value (<code>42</code>), <code>warnings</code> and <code>messages</code> are character vectors with one entry per condition raised (in the order they occurred), and <code>output</code> is whatever was printed via <code>cat()</code>/<code>print()</code>, collapsed into a single string – empty here, since this function didn’t print anything directly:</p>
+<p>Note the shape of the result: <code>result</code> holds the ordinary return value (i.e.&nbsp;<code>42</code>), <code>warnings</code> and <code>messages</code> are character vectors with one entry per condition raised (in the order they occurred), and <code>output</code> is whatever was printed via <code>cat()</code>/<code>print()</code>, collapsed into a single string – empty here, since the original function would not have printed anything directly.</p>
+<p>Crucially, <code>.trap_quietly()</code> does <em>not</em> catch errors – a function that errors still aborts the call, same as if it were called directly.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>loud_fn <span class="ot">&lt;-</span> <span class="fu">.trap_quietly</span>(<span class="cf">function</span>() {</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"computing...</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">99</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">loud_fn</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$result
-[1] 99
-
-$output
-[1] "computing..."
-
-$warnings
-character(0)
-
-$messages
-character(0)</code></pre>
-</div>
-</div>
-<p>Crucially, <code>.trap_quietly()</code> does <em>not</em> catch errors – a function that errors still aborts the call, same as if it were called directly. Compose it with <code>.trap_safely()</code> when you want both output-trapping and error-trapping at once:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.trap_quietly</span>(<span class="cf">function</span>() <span class="fu">stop</span>(<span class="st">"boom"</span>))()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.trap_quietly</span>(<span class="cf">function</span>() <span class="fu">stop</span>(<span class="st">"boom"</span>))()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-error">
 <pre><code>Error in `.f()`:
 ! boom</code></pre>
 </div>
 </div>
+</section>
+<section id="composition" class="level2">
+<h2 class="anchored" data-anchor-id="composition">Composition</h2>
+<p>As you can see, the two functions serve complementary purposes: <code>.trap_safely()</code> catches errors but not outputs, whereas <code>.trap_quietly()</code> catches outputs but not errors. Should you need output-trapping and error-trapping together, you can compose the two functions:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>robust_fn <span class="ot">&lt;-</span> <span class="fu">.trap_safely</span>(<span class="fu">.trap_quietly</span>(<span class="cf">function</span>() <span class="fu">stop</span>(<span class="st">"boom"</span>)))</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">robust_fn</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>robust_fn <span class="ot">&lt;-</span> <span class="fu">.trap_safely</span>(<span class="fu">.trap_quietly</span>(<span class="cf">function</span>() <span class="fu">stop</span>(<span class="st">"boom"</span>)))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">robust_fn</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$result
 NULL
@@ -550,7 +539,7 @@ $error
 &lt;simpleError in .f(...): boom&gt;</code></pre>
 </div>
 </div>
-<p>Note the order of composition: <code>.trap_quietly()</code> wraps the original function first, and <code>.trap_safely()</code> wraps the result, so that the error thrown <em>inside</em> the quietly-wrapped call is the thing <code>.trap_safely()</code> catches. Composing the other way around – <code>.trap_quietly(.trap_safely(.f))</code> – would instead capture a function that never errors in the first place (since <code>.trap_safely()</code> already turned errors into ordinary return values), so there would be nothing left for the outer <code>.trap_quietly()</code> to trap on that front.</p>
+<p>Pay attention to the order of composition: silence the function first, then make it safe. In the example above <code>.trap_quietly()</code> wraps the original function first, and <code>.trap_safely()</code> wraps the result, so that the error thrown <em>inside</em> the quietly-wrapped call becomes the thing that <code>.trap_safely()</code> catches. Composing in the opposite order does not produce the behaviour you most likely want.</p>
 
 
 </section>

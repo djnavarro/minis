@@ -448,13 +448,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minipivot</code> provides two functions, <code>.pivot_longer()</code> and <code>.pivot_wider()</code>, minimal reimplementations of <code>tidyr::pivot_longer()</code> and <code>tidyr::pivot_wider()</code>: reshaping a data frame between “long” and “wide” layouts. See the <a href="https://github.com/djnavarro/minis/tree/main/minipivot">README</a> for scope notes; this page walks through both functions on a small toy data frame, including the column-selection styles <code>.pivot_longer()</code> supports and what happens when <code>.pivot_wider()</code> is asked to spread duplicate rows into one cell.</p>
+<p>The purpose of <strong>minipivot</strong> is to provide a zero-dependency reimplementation of two functions from the <a href="https://tidyr.tidyverse.org/"><strong>tidyr</strong></a> package: <code>pivot_longer()</code> and <code>pivot_wider()</code>. Together they reshape a data frame between “long” and “wide” layouts. The <a href="https://github.com/djnavarro/minis/tree/main/minipivot">README</a> provides scope notes; this page walks through both functions on a small toy data frame, including the column-selection styles <code>.pivot_longer()</code> supports and what happens when <code>.pivot_wider()</code> is asked to spread duplicate rows into one cell.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minipivot/minipivot.R"><strong>minipivot.R</strong></a> script supplies two core functions:</p>
 <ul>
-<li><code>.pivot_longer(.data, cols, names_to = "name", values_to = "value")</code> – melt <code>cols</code> into two new columns holding the pivoted column names and their values.</li>
-<li><code>.pivot_wider(.data, names_from, values_from, values_fill = NULL)</code> – spread the unique values of <code>names_from</code> into new columns, filled from <code>values_from</code>.</li>
+<li><code>.pivot_longer(.data, cols, names_to = "name", values_to = "value")</code> is used to melt <code>cols</code> into two new columns holding the pivoted column names and their values.</li>
+<li><code>.pivot_wider(.data, names_from, values_from, values_fill = NULL)</code> is used to spread the unique values of <code>names_from</code> into new columns, filled from <code>values_from</code>.</li>
 </ul>
+<p>It contains no internal helpers.</p>
 </section>
 <section id="a-minimal-data-set" class="level2">
 <h2 class="anchored" data-anchor-id="a-minimal-data-set">A minimal data set</h2>
@@ -476,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="wide-to-long" class="level2">
 <h2 class="anchored" data-anchor-id="wide-to-long">Wide to long</h2>
-<p><code>.pivot_longer()</code> needs to know which columns to pivot. Here, <code>count</code> is the only column with values to melt, and <code>location</code>/<code>species</code> along for the ride as id columns:</p>
+<p>The <code>.pivot_longer()</code> function needs to know which columns to pivot. Here, <code>count</code> is the only column with values to melt, and <code>location</code>/<code>species</code> come along for the ride as id columns:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.pivot_longer</span>(fish, count, <span class="at">names_to =</span> <span class="st">"metric"</span>, <span class="at">values_to =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -490,7 +492,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="long-to-wide" class="level2">
 <h2 class="anchored" data-anchor-id="long-to-wide">Long to wide</h2>
-<p><code>.pivot_wider()</code> spreads <code>species</code>’s unique values (<code>trout</code>/<code>bass</code>) into new columns, filled from <code>count</code>. There’s no <code>id_cols</code> argument to set – every column other than <code>names_from</code>/<code>values_from</code> (<code>location</code>, here) is treated as an id column automatically:</p>
+<p>The <code>.pivot_wider()</code> function spreads <code>species</code>’s unique values (<code>trout</code>/<code>bass</code>) into new columns, filled from <code>count</code>. There’s no <code>id_cols</code> argument to set – every column other than <code>names_from</code>/<code>values_from</code> (<code>location</code>, here) is treated as an id column automatically:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>wide <span class="ot">&lt;-</span> <span class="fu">.pivot_wider</span>(fish, <span class="at">names_from =</span> <span class="st">"species"</span>, <span class="at">values_from =</span> <span class="st">"count"</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>wide</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -517,7 +519,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="selecting-cols-a-few-different-ways" class="level2">
 <h2 class="anchored" data-anchor-id="selecting-cols-a-few-different-ways">Selecting <code>cols</code> a few different ways</h2>
-<p><code>.pivot_longer()</code>’s <code>cols</code> accepts more than just a single bare name. Bare names combined with <code>c(...)</code>, a plain character vector, and a negated <code>-c(...)</code> (“every column except these”) all agree, since <code>trout</code>/<code>bass</code> are the only two columns not already used as an id column above:</p>
+<p>The <code>cols</code> argument to <code>.pivot_longer()</code> accepts more than just a single bare name. Bare names combined with <code>c(...)</code>, a plain character vector, and a negated <code>-c(...)</code> (“every column except these”) all agree, since <code>trout</code>/<code>bass</code> are the only two columns not already used as an id column above:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.pivot_longer</span>(wide, <span class="fu">c</span>(trout, bass)),</span>
@@ -547,7 +549,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 2      sea     7   NA</code></pre>
 </div>
 </div>
-<p><code>values_fill</code> supplies a value to use instead:</p>
+<p>The <code>values_fill</code> argument supplies a value to use instead:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.pivot_wider</span>(fish[<span class="sc">-</span><span class="dv">4</span>, ], <span class="at">names_from =</span> <span class="st">"species"</span>, <span class="at">values_from =</span> <span class="st">"count"</span>, <span class="at">values_fill =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -559,7 +561,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="duplicate-combinations-are-an-error-not-a-list-column" class="level2">
 <h2 class="anchored" data-anchor-id="duplicate-combinations-are-an-error-not-a-list-column">Duplicate combinations are an error, not a list-column</h2>
-<p>Real <code>tidyr::pivot_wider()</code> handles a duplicate <code>names_from</code>/id combination by warning and packing the extra values into a list-column. <code>minipivot</code> has no list-column support (matching <a href="../minitable/"><code>minitable</code></a>’s scope), so the same situation is a hard error instead:</p>
+<p>Real <code>tidyr::pivot_wider()</code> handles a duplicate <code>names_from</code>/id combination by warning and packing the extra values into a list-column. This mini has no list-column support (matching <a href="../minitable/"><strong>minitable</strong></a>’s scope), so the same situation is a hard error instead:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dup <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fish, <span class="fu">data.frame</span>(<span class="at">location =</span> <span class="st">"lake"</span>, <span class="at">species =</span> <span class="st">"trout"</span>, <span class="at">count =</span> <span class="dv">99</span>))</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.pivot_wider</span>(dup, <span class="at">names_from =</span> <span class="st">"species"</span>, <span class="at">values_from =</span> <span class="st">"count"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

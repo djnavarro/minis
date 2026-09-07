@@ -446,12 +446,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minifilter</code> provides a single function, <code>.filter()</code>, a minimal reimplementation of <code>dplyr::filter()</code>: it keeps rows of a data frame where all of a set of unquoted conditions are <code>TRUE</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a> for scope notes; this page walks through its behaviour on a small toy data frame, including two behaviours worth knowing about before you rely on it: how missing values are handled, and what happens with no conditions at all.</p>
+<p>The purpose of <strong>minifilter</strong> is to provide a zero-dependency reimplementation of a single function from the <a href="https://dplyr.tidyverse.org/"><strong>dplyr</strong></a> package: <code>filter()</code>. It keeps rows of a data frame where every one of a set of unquoted conditions is <code>TRUE</code>. The <a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a> provides scope notes; this page walks through its behaviour on a small toy data frame, including two things worth knowing about before you rely on it: how missing values are handled, and what happens when no conditions are supplied at all.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>There is a single core function to this mini:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minifilter/minifilter.R"><strong>minifilter.R</strong></a> script supplies a single core function:</p>
 <ul>
-<li><code>.filter(.data, ...)</code> – keep rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
+<li><code>.filter(.data, ...)</code> is used to keep rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
 </ul>
 <p>There is also one internal helper:</p>
 <ul>
@@ -479,7 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="a-single-condition" class="level2">
 <h2 class="anchored" data-anchor-id="a-single-condition">A single condition</h2>
-<p>Columns are referred to by bare name, evaluated in the scope of the data frame – there’s no need to write <code>fruits$in_stock</code> or wrap the call in <code>with()</code>, as you would for <a href="../minicase/"><code>minicase</code></a>’s <code>.case_when()</code>:</p>
+<p>Columns are referred to by bare name, evaluated in the scope of the data frame – there’s no need to write <code>fruits$in_stock</code> or wrap the call in <code>with()</code>, as you would for <a href="../minicase/"><strong>minicase</strong></a>’s <code>.case_when()</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, in_stock)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -515,7 +515,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="na-conditions-drop-the-row" class="level2">
 <h2 class="anchored" data-anchor-id="na-conditions-drop-the-row"><code>NA</code> conditions drop the row</h2>
-<p><code>date</code> has a missing <code>price</code>, so any condition involving <code>price</code> is <code>NA</code> for that row rather than <code>TRUE</code>/<code>FALSE</code>. <code>.filter()</code> treats <code>NA</code> the same way <code>dplyr::filter()</code> does: as “not proven to be kept”, so the row is dropped rather than kept by default or raising an error:</p>
+<p>The <code>date</code> row has a missing <code>price</code>, so any condition involving <code>price</code> is <code>NA</code> for that row rather than <code>TRUE</code>/<code>FALSE</code>. The <code>.filter()</code> function treats <code>NA</code> the same way <code>dplyr::filter()</code> does: as “not proven to be kept”, so the row is dropped rather than kept by default or causing an error:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, price <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -539,14 +539,14 @@ NA       &lt;NA&gt;    NA       NA
 </section>
 <section id="no-conditions-returns-the-data-frame-unchanged" class="level2">
 <h2 class="anchored" data-anchor-id="no-conditions-returns-the-data-frame-unchanged">No conditions returns the data frame unchanged</h2>
-<p>Calling <code>.filter()</code> with no conditions at all is a legitimate, supported no-op – useful when conditions are built up programmatically and might end up empty:</p>
+<p>Calling <code>.filter()</code> with no conditions at all is legitimate and simply leaves the data frame unchanged – useful when conditions are built up programmatically and might end up empty:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">.filter</span>(fruits), fruits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
 </div>
 </div>
-<p>This is a deliberate fix relative to the poorman logic <code>minifilter</code> was adapted from, which didn’t guard against empty <code>...</code> and would have silently dropped every row instead – see the <a href="https://github.com/djnavarro/minis/tree/main/minifilter#deliberate-fix-relative-to-the-source-this-was-adapted-from">README</a> for details.</p>
+<p>This is a deliberate fix relative to the <a href="https://github.com/nathaneastwood/poorman"><strong>poorman</strong></a> logic <strong>minifilter</strong> was adapted from, which didn’t guard against empty <code>...</code> and would have silently dropped every row instead – see the <a href="https://github.com/djnavarro/minis/tree/main/minifilter#deliberate-fix-relative-to-the-source-this-was-adapted-from">README</a> for details.</p>
 
 
 </section>

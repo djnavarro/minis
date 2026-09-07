@@ -414,11 +414,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a>
-  <ul class="collapse">
-  <li><a href="#core-functions" id="toc-core-functions" class="nav-link" data-scroll-target="#core-functions">Core functions</a></li>
-  <li><a href="#internal-helpers" id="toc-internal-helpers" class="nav-link" data-scroll-target="#internal-helpers">Internal helpers</a></li>
-  </ul></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
   <li><a href="#capability-detection" id="toc-capability-detection" class="nav-link" data-scroll-target="#capability-detection">Capability detection</a></li>
   <li><a href="#alerts" id="toc-alerts" class="nav-link" data-scroll-target="#alerts">Alerts</a></li>
   <li><a href="#symbols" id="toc-symbols" class="nav-link" data-scroll-target="#symbols">Symbols</a></li>
@@ -451,38 +447,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicli</code> is a minimal stand-in for the small slice of <code>cli</code> most packages actually use: coloured alert messages, unicode symbols with an ascii fallback, a rule, and a bullet list. See the <a href="https://github.com/djnavarro/minis/tree/main/minicli">README</a> for the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.</p>
+<p>The purpose of <strong>minicli</strong> is to provide a zero-dependency stand-in for the small slice of <a href="https://cli.r-lib.org/"><strong>cli</strong></a> that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and a bulleted list. The <a href="https://github.com/djnavarro/minis/tree/main/minicli">README</a> provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<section id="core-functions" class="level3">
-<h3 class="anchored" data-anchor-id="core-functions">Core functions</h3>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minicli/minicli.R"><strong>minicli.R</strong></a> script supplies the following as its core functions:</p>
 <ul>
-<li><code>.cli_alert_success()</code>/<code>_danger()</code>/<code>_warning()</code>/<code>_info()</code> – print a <code>message()</code> with a coloured symbol prefix; extra <code>...</code> arguments are passed through <code>sprintf()</code>.</li>
-<li><code>.cli_symbol(name)</code> – look up a single symbol by name, returning its unicode glyph or an ascii fallback depending on what’s safe to print.</li>
-<li><code>.cli_rule(title = NULL)</code> – print a horizontal divider spanning the console width, optionally with a centred title.</li>
-<li><code>.cli_bullets(items)</code> – print a simple bulleted list, one entry per line.</li>
-<li><code>.cli_col_black()</code>/<code>_red()</code>/<code>_green()</code>/<code>_yellow()</code>/<code>_blue()</code>/ <code>_magenta()</code>/<code>_cyan()</code>/<code>_white()</code>/<code>_grey()</code> – wrap a string in an ANSI colour code.</li>
-<li><code>.cli_style_bold()</code>/<code>_dim()</code>/<code>_italic()</code>/<code>_underline()</code> – wrap a string in an ANSI style code.</li>
+<li><code>.cli_alert_success()</code>/<code>_danger()</code>/<code>_warning()</code>/<code>_info()</code> are used to print a message with a coloured symbol prefix.</li>
+<li><code>.cli_symbol(name)</code> looks up a single symbol by name, returning its unicode glyph or an ASCII fallback depending on what’s safe to print.</li>
+<li><code>.cli_rule(title = NULL)</code> prints a horizontal divider spanning the console width, optionally with a centred title.</li>
+<li><code>.cli_bullets(items)</code> prints a simple bulleted list, one entry per line.</li>
+<li><code>.cli_col_black()</code>/<code>_red()</code>/<code>_green()</code>/<code>_yellow()</code>/<code>_blue()</code>/ <code>_magenta()</code>/<code>_cyan()</code>/<code>_white()</code>/<code>_grey()</code> are used to generate output in a particular colour, which they achieve by wrapping a string in an ANSI colour code.</li>
+<li><code>.cli_style_bold()</code>/<code>_dim()</code>/<code>_italic()</code>/<code>_underline()</code> are used to generate output in a particular style, which they achieve by wrapping a string in an ANSI style code.</li>
 </ul>
-</section>
-<section id="internal-helpers" class="level3">
-<h3 class="anchored" data-anchor-id="internal-helpers">Internal helpers</h3>
+<p>There are also a collection of internal helper functions:</p>
 <ul>
-<li><code>.cli_ansi_enabled()</code> – decide whether it’s currently safe to emit ANSI escape codes (checks <code>cli.num_colors</code>, <code>NO_COLOR</code>, whether knitr/Quarto is rendering, whether output is being captured, whether it’s running in Positron’s or RStudio’s Console pane, and whether stdout is a real terminal).</li>
-<li><code>.cli_positron_console_with_color()</code>/ <code>.cli_rstudio_console_with_color()</code> – recognise Positron’s and RStudio’s Console panes explicitly, since neither is a real tty but both do support ANSI colour.</li>
-<li><code>.cli_unicode_enabled()</code> – decide whether it’s currently safe to print unicode symbols (checks <code>cli.unicode</code>, then the session’s locale).</li>
-<li><code>.cli_ansi_style(code)</code> – factory that builds one of the <code>.cli_col_*()</code>/<code>.cli_style_*()</code> functions from a raw SGR code.</li>
-<li><code>.cli_alert(symbol_name, color_fn, text, ...)</code> – shared implementation behind the four <code>.cli_alert_*()</code> functions.</li>
+<li><code>.cli_ansi_enabled()</code> is used to decide whether it’s currently safe to emit ANSI escape codes, which it does by checking <code>cli.num_colors</code>, <code>NO_COLOR</code>, whether knitr/Quarto is rendering, whether output is being captured, whether it’s running in Positron’s or RStudio’s Console pane, and whether stdout is a real terminal.</li>
+<li><code>.cli_positron_console_with_color()</code>/<code>.cli_rstudio_console_with_color()</code> are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.</li>
+<li><code>.cli_unicode_enabled()</code> is used to decide whether it’s currently safe to print unicode symbols, by checking <code>cli.unicode</code> and then the session locale.</li>
+<li><code>.cli_ansi_style(code)</code> is a function factory that builds one of the <code>.cli_col_*()</code>/<code>.cli_style_*()</code> functions from a raw SGR code.</li>
+<li><code>.cli_alert(symbol_name, color_fn, text, ...)</code> is the shared implementation behind the four <code>.cli_alert_*()</code> functions.</li>
 </ul>
-</section>
 </section>
 <section id="capability-detection" class="level2">
 <h2 class="anchored" data-anchor-id="capability-detection">Capability detection</h2>
-<p>Every colour/symbol decision in <code>minicli</code> runs through <code>.cli_ansi_enabled()</code> and <code>.cli_unicode_enabled()</code>, so the same code looks right whether it’s running in an interactive terminal that supports unicode and colour, Positron’s or RStudio’s Console pane (neither of which is a real tty, but both of which do support ANSI colour), a plain terminal that supports neither, or – as on this page – a Quarto render. Quarto/knitr renders are detected as a non-terminal (<code>getOption("knitr.in.progress")</code>), so ANSI colour is disabled automatically here. That means the alerts below print in plain text with their symbol prefix, exactly as they would in a captured log or a non-interactive session, rather than showing colour codes as literal text on the page.</p>
+<p>Every colour/symbol decision in <code>minicli</code> runs through <code>.cli_ansi_enabled()</code> and <code>.cli_unicode_enabled()</code>, so the same code looks right whether it’s running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling <code>getOption("knitr.in.progress")</code>. As a consequence, ANSI colour is automatically disabled here. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.</p>
 </section>
 <section id="alerts" class="level2">
 <h2 class="anchored" data-anchor-id="alerts">Alerts</h2>
-<p><code>.cli_alert_success()</code>/<code>_danger()</code>/<code>_warning()</code>/<code>_info()</code> are the functions you’ll reach for most often: thin <code>message()</code> wrappers with a symbol prefix, meant for the kind of status line a script prints while it works. Extra <code>...</code> arguments are passed through <code>sprintf()</code>, so the first argument can be a format string:</p>
+<p>The <code>.cli_alert_success()</code>/<code>_danger()</code>/<code>_warning()</code>/<code>_info()</code> functions are the ones you are likely to reach for most often in a package: each one is a thin wrapper around <code>message()</code> with a symbol prefix, meant for the kind of status line a script prints while it works. Extra <code>...</code> arguments are passed through <code>sprintf()</code>, so the first argument can be a format string:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cli_alert_success</span>(<span class="st">"Wrote %d files to %s"</span>, <span class="dv">3</span>, <span class="st">"output/"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -507,7 +499,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>ℹ Using default configuration</code></pre>
 </div>
 </div>
-<p>If there’s no <code>...</code> to format with, the text is used as-is – no <code>sprintf()</code> call, so a literal <code>%</code> in the message is safe:</p>
+<p>If no arguments are passed through <code>...</code> to format with, the text is used as-is. That is, no <code>sprintf()</code> call is made, so a literal <code>%</code> in the message is safe:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cli_alert_info</span>(<span class="st">"Discount: 10% off"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -517,7 +509,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="symbols" class="level2">
 <h2 class="anchored" data-anchor-id="symbols">Symbols</h2>
-<p>Each alert’s prefix comes from <code>.cli_symbol()</code>, which looks up a named symbol and returns either its unicode glyph or an ascii fallback, depending on <code>.cli_unicode_enabled()</code>. It’s also useful on its own, for building custom messages that follow the same convention as the built-in alerts:</p>
+<p>Each alert’s prefix comes from <code>.cli_symbol()</code>, which looks up a named symbol and returns either its unicode glyph or an ASCII fallback, depending on <code>.cli_unicode_enabled()</code>. It’s also useful on its own, for building custom messages that follow the same convention as the built-in alerts:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cli_symbol</span>(<span class="st">"tick"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -543,14 +535,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="rule" class="level2">
 <h2 class="anchored" data-anchor-id="rule">Rule</h2>
-<p><code>.cli_rule()</code> prints a horizontal divider, useful for separating sections of console output. Called with no arguments, it spans the full console width:</p>
+<p>The <code>.cli_rule()</code> function prints a horizontal divider, useful for separating sections of console output. When called with no arguments, it spans the full console width:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cli_rule</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>────────────────────────────────────────────────────────────────────────────────</code></pre>
 </div>
 </div>
-<p>Pass a <code>title</code> and it’s centred within the rule instead:</p>
+<p>If a <code>title</code> is passed, the text appears centred within the rule instead:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cli_rule</span>(<span class="st">"Summary"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -560,7 +552,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="bullets" class="level2">
 <h2 class="anchored" data-anchor-id="bullets">Bullets</h2>
-<p><code>.cli_bullets()</code> prints a simple bulleted list, one entry per line – handy for summarising a small set of results without reaching for a full table:</p>
+<p>The <code>.cli_bullets()</code> function prints a simple bulleted list, one entry per line, which is handy for summarising a small set of results:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cli_bullets</span>(<span class="fu">c</span>(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -572,7 +564,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="colours-and-styles" class="level2">
 <h2 class="anchored" data-anchor-id="colours-and-styles">Colours and styles</h2>
-<p>Under the hood, each alert calls one of the <code>.cli_col_*()</code> functions to colour its symbol. Those functions – along with the <code>.cli_style_*()</code> family – are also exported directly, for colouring or styling arbitrary text of your own. Both wrap their input in an ANSI escape code and its matching reset code, and both are no-ops (returning the text unchanged) whenever <code>.cli_ansi_enabled()</code> is <code>FALSE</code> – which, per the capability-detection note above, is always true on this page:</p>
+<p>Under the hood, each alert calls one of the <code>.cli_col_*()</code> functions to colour its symbol. Those functions, along with the <code>.cli_style_*()</code> family, are also exported directly in case you would like to apply colouring or styling to arbitrary text. Both wrap their input in an ANSI escape code and its matching reset code, and both return the text unchanged whenever <code>.cli_ansi_enabled()</code> is <code>FALSE</code>, as is the case for this page.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">.cli_col_red</span>(<span class="st">"danger"</span>), <span class="st">"danger"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -590,7 +582,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] "bold and red"</code></pre>
 </div>
 </div>
-<p>Outside of a Quarto render – in an interactive terminal session, say – that same call would print bold red text rather than the plain string shown here.</p>
+<p>Outside of a Quarto render – in an interactive terminal session, for instance – that same call would print bold red text rather than the plain string shown here.</p>
 
 
 </section>

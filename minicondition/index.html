@@ -446,24 +446,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicondition</code> provides thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class. See the <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> for the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for <code>minicondition</code> over plain <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</p>
+<p>The purpose of <strong>minicondition</strong> is to provide a zero-dependency reimplementation of a small slice of the <a href="https://rlang.r-lib.org/"><strong>rlang</strong></a> package: thin wrappers around base R’s own condition system that signal a <em>classed</em> condition, catchable specifically by that class. The <a href="https://github.com/djnavarro/minis/tree/main/minicondition">README</a> provides the <strong>rlang</strong>-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for <strong>minicondition</strong> over plain <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>These are the core functions:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minicondition/minicondition.R"><strong>minicondition.R</strong></a> script supplies four core functions:</p>
 <ul>
-<li><code>.cond_abort(message, class = NULL)</code> – signal a classed error.</li>
-<li><code>.cond_warn(message, class = NULL)</code> – signal a classed warning.</li>
-<li><code>.cond_inform(message, class = NULL)</code> – signal a classed message.</li>
-<li><code>.cond_assert(expr, message, class = NULL)</code> – call <code>.cond_abort()</code> if <code>expr</code> isn’t entirely <code>TRUE</code>; <code>NA</code> counts as a failure.</li>
+<li><code>.cond_abort(message, class = NULL)</code> is used to signal a classed error.</li>
+<li><code>.cond_warn(message, class = NULL)</code> is used to signal a classed warning.</li>
+<li><code>.cond_inform(message, class = NULL)</code> is used to signal a classed message.</li>
+<li><code>.cond_assert(expr, message, class = NULL)</code> is used to call <code>.cond_abort()</code> if <code>expr</code> isn’t entirely <code>TRUE</code>; <code>NA</code> counts as a failure.</li>
 </ul>
-<p><code>minicondition</code> also has one internal helper:</p>
+<p>There is also one internal helper:</p>
 <ul>
-<li><code>.cond_condition()</code> builds the classed condition object that <code>.cond_abort()</code>/ <code>_warn()</code>/ <code>_inform()</code> each hand off to base <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</li>
+<li><code>.cond_condition()</code> builds the classed condition object that <code>.cond_abort()</code>/<code>_warn()</code>/<code>_inform()</code> each hand off to base <code>stop()</code>/<code>warning()</code>/<code>message()</code>.</li>
 </ul>
 </section>
 <section id="why-classes-matter" class="level2">
 <h2 class="anchored" data-anchor-id="why-classes-matter">Why classes matter</h2>
-<p>A plain <code>stop("bad input")</code> produces a condition of class <code>c("simpleError", "error", "condition")</code> – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to <em>this specific kind</em> of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. <code>.cond_abort()</code> solves that by adding an extra class on top of <code>"error"</code>, so <code>tryCatch()</code> can dispatch on it directly:</p>
+<p>A plain <code>stop("bad input")</code> produces a condition of class <code>c("simpleError", "error", "condition")</code> – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to <em>this specific kind</em> of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. The <code>.cond_abort()</code> function solves that by adding an extra class on top of <code>"error"</code>, so <code>tryCatch()</code> can dispatch on it directly:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tryCatch</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.cond_abort</span>(<span class="st">"bad input"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>),</span>
@@ -473,7 +473,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>caught: bad input</code></pre>
 </div>
 </div>
-<p>Note that <code>.cond_abort()</code> uses base <code>stop()</code> internally, not <code>rlang::abort()</code> – but the mechanics of catching by class are identical either way. <code>tryCatch()</code>/<code>withCallingHandlers()</code> dispatch on a condition object’s <code>class</code> attribute, regardless of what function signalled it:</p>
+<p>Note that <code>.cond_abort()</code> uses base <code>stop()</code> internally, not <code>rlang::abort()</code> – but the mechanics of catching by class are identical either way. The <code>tryCatch()</code>/<code>withCallingHandlers()</code> functions dispatch on a condition object’s <code>class</code> attribute, regardless of what function signalled it:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="fu">.cond_abort</span>(<span class="st">"x"</span>, <span class="at">class =</span> <span class="st">"mypkg_invalid_input"</span>), <span class="at">error =</span> <span class="cf">function</span>(e) e)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -499,7 +499,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="warnings-and-messages-work-the-same-way" class="level2">
 <h2 class="anchored" data-anchor-id="warnings-and-messages-work-the-same-way">Warnings and messages work the same way</h2>
-<p><code>.cond_warn()</code> signals a classed warning, catchable via <code>withCallingHandlers()</code> (warnings, unlike errors, don’t unwind the call stack, so catching them with <code>tryCatch()</code> would abandon whatever code was about to run after the warning – <code>withCallingHandlers()</code> lets the handler run and then hand control back):</p>
+<p>The <code>.cond_warn()</code> function signals a classed warning, catchable via <code>withCallingHandlers()</code> (warnings, unlike errors, don’t unwind the call stack, so catching them with <code>tryCatch()</code> would abandon whatever code was about to run after the warning – <code>withCallingHandlers()</code> lets the handler run and then hand control back):</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">withCallingHandlers</span>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.cond_warn</span>(<span class="st">"using a fallback default"</span>, <span class="at">class =</span> <span class="st">"mypkg_fallback_used"</span>),</span>
@@ -513,7 +513,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>The <code>invokeRestart("muffleWarning")</code> call suppresses the warning from also being printed by R’s default warning handler – without it, the warning would print a second time after the custom handler runs.</p>
-<p><code>.cond_inform()</code> signals a classed message – uncaught, it just prints like an ordinary <code>message()</code> call, since messages are typically meant to be seen unless something specifically wants to intercept them:</p>
+<p>The <code>.cond_inform()</code> function signals a classed message – uncaught, it just prints like an ordinary <code>message()</code> call, since messages are typically meant to be seen unless something specifically wants to intercept them:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cond_inform</span>(<span class="st">"starting up"</span>, <span class="at">class =</span> <span class="st">"mypkg_startup"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -523,7 +523,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="cond_assert-abort-if-a-condition-doesnt-hold" class="level2">
 <h2 class="anchored" data-anchor-id="cond_assert-abort-if-a-condition-doesnt-hold"><code>.cond_assert()</code>: abort if a condition doesn’t hold</h2>
-<p><code>.cond_assert()</code> is <code>.cond_abort()</code> plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely <code>TRUE</code>. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:</p>
+<p>The <code>.cond_assert()</code> function is <code>.cond_abort()</code> plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely <code>TRUE</code>. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">5</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.cond_assert</span>(x <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"x must be positive."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -541,7 +541,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="na-counts-as-a-failure-not-a-crash" class="level2">
 <h2 class="anchored" data-anchor-id="na-counts-as-a-failure-not-a-crash"><code>NA</code> counts as a failure, not a crash</h2>
-<p><code>.cond_assert()</code> accepts a vector, not just a single logical value, and checks that <em>every</em> element is <code>TRUE</code>. That raises a subtlety: what should happen if the vector contains <code>NA</code>? This is a deliberate fix relative to the source this was adapted from: a naive <code>if (any(expr == FALSE))</code> errors outright when <code>expr</code> contains <code>NA</code> (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. <code>.cond_assert()</code> checks <code>anyNA(expr)</code> explicitly first, so a vector containing <code>NA</code> fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:</p>
+<p>The <code>.cond_assert()</code> function accepts a vector, not just a single logical value, and checks that <em>every</em> element is <code>TRUE</code>. That raises a subtlety: what should happen if the vector contains <code>NA</code>? This is a deliberate fix relative to the source this was adapted from: a naive <code>if (any(expr == FALSE))</code> errors outright when <code>expr</code> contains <code>NA</code> (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. It checks <code>anyNA(expr)</code> explicitly first instead, so a vector containing <code>NA</code> fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">NA</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.cond_assert</span>(y, <span class="st">"y must not contain NA."</span>, <span class="at">class =</span> <span class="st">"mypkg_na_error"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

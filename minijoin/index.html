@@ -447,17 +447,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The <code>minijoin</code> mini provides a tiny slice of dplyr-like syntax for mutating joins, all built atop base <code>merge()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the <code>by</code> argument in more detail.</p>
+<p>The purpose of <strong>minijoin</strong> is to provide a zero-dependency slice of <a href="https://dplyr.tidyverse.org/"><strong>dplyr</strong></a>-style syntax for mutating joins, all built atop base R’s <code>merge()</code>. The <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> provides the full argument reference; this page compares all four join functions side by side on two small toy data frames with a partial overlap, then covers the <code>by</code> argument in more detail.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>The core functions are these:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minijoin/minijoin.R"><strong>minijoin.R</strong></a> script supplies four core functions:</p>
 <ul>
-<li><code>.join_inner_join(x, y, by, ...)</code> – keep only rows with a match in both <code>x</code> and <code>y</code>.</li>
-<li><code>.join_left_join(x, y, by, ...)</code> – keep all rows of <code>x</code>, filling in <code>NA</code> for <code>y</code>’s columns where there’s no match.</li>
-<li><code>.join_right_join(x, y, by, ...)</code> – keep all rows of <code>y</code>, filling in <code>NA</code> for <code>x</code>’s columns where there’s no match.</li>
-<li><code>.join_full_join(x, y, by, ...)</code> – keep all rows of both <code>x</code> and <code>y</code>, filling in <code>NA</code> on whichever side has no match.</li>
+<li><code>.join_inner_join(x, y, by, ...)</code> is used to keep only rows with a match in both <code>x</code> and <code>y</code>.</li>
+<li><code>.join_left_join(x, y, by, ...)</code> is used to keep all rows of <code>x</code>, filling in <code>NA</code> for <code>y</code>’s columns where there’s no match.</li>
+<li><code>.join_right_join(x, y, by, ...)</code> is used to keep all rows of <code>y</code>, filling in <code>NA</code> for <code>x</code>’s columns where there’s no match.</li>
+<li><code>.join_full_join(x, y, by, ...)</code> is used to keep all rows of both <code>x</code> and <code>y</code>, filling in <code>NA</code> on whichever side has no match.</li>
 </ul>
-<p>Additionally, <code>minijoin</code> has one internal helper, <code>.join_worker()</code>, which all four join functions delegate to after fixing the right combination of <code>merge()</code>’s <code>all.x</code>/<code>all.y</code> arguments; it also restores <code>x</code>’s original row order, which <code>merge()</code> doesn’t guarantee on its own.</p>
+<p>There is also one internal helper:</p>
+<ul>
+<li><code>.join_worker()</code> is the shared implementation that all four join functions delegate to, after fixing the right combination of <code>merge()</code>’s <code>all.x</code>/<code>all.y</code> arguments; it also restores <code>x</code>’s original row order, which <code>merge()</code> doesn’t guarantee on its own.</li>
+</ul>
 </section>
 <section id="minimal-data-frames" class="level2">
 <h2 class="anchored" data-anchor-id="minimal-data-frames">Minimal data frames</h2>
@@ -485,7 +488,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3   Queen A Night at the Opera</code></pre>
 </div>
 </div>
-<p>I will be honest. An AI designed these two data frames. Here we have <code>bands</code> and <code>albums</code> as the data sets, sharing <code>"Beatles"</code> and <code>"Kinks"</code>. The <code>"Rolling Stones"</code> exist only in <code>bands</code>, but <code>"Queen"</code> exists only in <code>albums</code>. The four join types differ only in which of those non-matching rows they keep. This is perfectly fine as a toy example but – for reasons I should not need to explain – I am deeply personally offended by the decision to list <em>Arthur</em> rather than <em>Lola Versus Powerman</em>, and this is merely the beginning of my long list of concerns.</p>
+<p>Here we have <code>bands</code> and <code>albums</code> as the data sets, sharing <code>"Beatles"</code> and <code>"Kinks"</code>. The <code>"Rolling Stones"</code> exist only in <code>bands</code>, but <code>"Queen"</code> exists only in <code>albums</code>. The four join types differ only in which of those non-matching rows they keep.</p>
 </section>
 <section id="inner-join-only-rows-matching-in-both" class="level2">
 <h2 class="anchored" data-anchor-id="inner-join-only-rows-matching-in-both">Inner join: only rows matching in both</h2>
@@ -501,7 +504,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="left-join-all-rows-of-x-bands" class="level2">
 <h2 class="anchored" data-anchor-id="left-join-all-rows-of-x-bands">Left join: all rows of <code>x</code> (<code>bands</code>)</h2>
-<p><code>"Rolling Stones"</code> is kept, with <code>NA</code> for <code>album</code>, since it has no match in <code>albums</code>. This is the join to reach for when <code>x</code> is your “main” table and you’re enriching it with optional data from <code>y</code>:</p>
+<p>The <code>"Rolling Stones"</code> row is kept, with <code>NA</code> for <code>album</code>, since it has no match in <code>albums</code>. This is the join to reach for when <code>x</code> is your “main” table and you’re enriching it with optional data from <code>y</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_left_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -514,7 +517,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="right-join-all-rows-of-y-albums" class="level2">
 <h2 class="anchored" data-anchor-id="right-join-all-rows-of-y-albums">Right join: all rows of <code>y</code> (<code>albums</code>)</h2>
-<p><code>"Queen"</code> is kept, with <code>NA</code> for <code>founded</code>. A right join is really just a left join with the arguments swapped – <code>.join_right_join(x, y, ...)</code> behaves like <code>.join_left_join(y, x, ...)</code>, with columns in <code>x</code>‘s original order. Note the row order below: matched rows still come first, in <code>bands</code>’ original order, with the unmatched-in-<code>x</code> row (<code>"Queen"</code>) appended at the end – <code>minijoin</code> always restores <code>x</code>’s original row order for matched rows, rather than <code>y</code>’s:</p>
+<p>The <code>"Queen"</code> row is kept, with <code>NA</code> for <code>founded</code>. A right join is really just a left join with the arguments swapped – <code>.join_right_join(x, y, ...)</code> behaves like <code>.join_left_join(y, x, ...)</code>, with columns in <code>x</code>‘s original order. Note the row order below: matched rows still come first, in <code>bands</code>’ original order, with the unmatched-in-<code>x</code> row (<code>"Queen"</code>) appended at the end – <code>minijoin</code> always restores <code>x</code>’s original row order for matched rows, rather than <code>y</code>’s:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_right_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
