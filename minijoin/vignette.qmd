@@ -7,23 +7,33 @@ title: "minijoin"
 source(file.path("minijoin", "minijoin.R"))
 ```
 
-The `minijoin` mini provides a tiny slice of dplyr-like syntax for mutating joins, all built atop base `merge()`. See the [README](https://github.com/djnavarro/minis/tree/main/minijoin) for the full argument reference; this page compares all four side by side on two small toy data frames with a partial overlap, then covers the `by` argument in more detail.
+The purpose of **minijoin** is to provide a zero-dependency slice of
+[**dplyr**](https://dplyr.tidyverse.org/)-style syntax for mutating
+joins, all built atop base R's `merge()`. The [README](https://github.com/djnavarro/minis/tree/main/minijoin)
+provides the full argument reference; this page compares all four join
+functions side by side on two small toy data frames with a partial
+overlap, then covers the `by` argument in more detail.
 
 ## Functions
 
-The core functions are these:
+The [**minijoin.R**](https://github.com/djnavarro/minis/blob/main/minijoin/minijoin.R)
+script supplies four core functions:
 
-- `.join_inner_join(x, y, by, ...)` -- keep only rows with a match in
-  both `x` and `y`.
-- `.join_left_join(x, y, by, ...)` -- keep all rows of `x`, filling in
-  `NA` for `y`'s columns where there's no match.
-- `.join_right_join(x, y, by, ...)` -- keep all rows of `y`, filling in
-  `NA` for `x`'s columns where there's no match.
-- `.join_full_join(x, y, by, ...)` -- keep all rows of both `x` and
-  `y`, filling in `NA` on whichever side has no match.
+- `.join_inner_join(x, y, by, ...)` is used to keep only rows with a
+  match in both `x` and `y`.
+- `.join_left_join(x, y, by, ...)` is used to keep all rows of `x`,
+  filling in `NA` for `y`'s columns where there's no match.
+- `.join_right_join(x, y, by, ...)` is used to keep all rows of `y`,
+  filling in `NA` for `x`'s columns where there's no match.
+- `.join_full_join(x, y, by, ...)` is used to keep all rows of both
+  `x` and `y`, filling in `NA` on whichever side has no match.
 
-Additionally, `minijoin` has one internal helper, `.join_worker()`, which all four join functions delegate to after fixing the right combination of `merge()`'s `all.x`/`all.y` arguments; it also restores `x`'s original
-row order, which `merge()` doesn't guarantee on its own.
+There is also one internal helper:
+
+- `.join_worker()` is the shared implementation that all four join
+  functions delegate to, after fixing the right combination of
+  `merge()`'s `all.x`/`all.y` arguments; it also restores `x`'s
+  original row order, which `merge()` doesn't guarantee on its own.
 
 ## Minimal data frames
 
@@ -40,7 +50,10 @@ bands
 albums
 ```
 
-I will be honest. An AI designed these two data frames. Here we have `bands` and `albums`  as the data sets, sharing `"Beatles"` and `"Kinks"`. The `"Rolling Stones"` exist only in `bands`, but `"Queen"` exists only in `albums`. The four join types differ only in which of those non-matching rows they keep. This is perfectly fine as a toy example but -- for reasons I should not need to explain -- I am deeply personally offended by the decision to list *Arthur* rather than *Lola Versus Powerman*, and this is merely the beginning of my long list of concerns. 
+Here we have `bands` and `albums` as the data sets, sharing
+`"Beatles"` and `"Kinks"`. The `"Rolling Stones"` exist only in
+`bands`, but `"Queen"` exists only in `albums`. The four join types
+differ only in which of those non-matching rows they keep.
 
 ## Inner join: only rows matching in both
 
@@ -52,7 +65,9 @@ Neither `"Rolling Stones"` nor `"Queen"` appears -- an inner join is the most re
 
 ## Left join: all rows of `x` (`bands`)
 
-`"Rolling Stones"` is kept, with `NA` for `album`, since it has no match in `albums`. This is the join to reach for when `x` is your "main" table and you're enriching it with optional data from `y`:
+The `"Rolling Stones"` row is kept, with `NA` for `album`, since it has
+no match in `albums`. This is the join to reach for when `x` is your
+"main" table and you're enriching it with optional data from `y`:
 
 ```{r}
 .join_left_join(bands, albums, by = "band")
@@ -60,7 +75,14 @@ Neither `"Rolling Stones"` nor `"Queen"` appears -- an inner join is the most re
 
 ## Right join: all rows of `y` (`albums`)
 
-`"Queen"` is kept, with `NA` for `founded`. A right join is really just a left join with the arguments swapped -- `.join_right_join(x, y, ...)` behaves like `.join_left_join(y, x, ...)`, with columns in `x`'s original order. Note the row order below: matched rows still come first, in `bands`' original order, with the unmatched-in-`x` row (`"Queen"`) appended at the end -- `minijoin` always restores `x`'s original row order for matched rows, rather than `y`'s:
+The `"Queen"` row is kept, with `NA` for `founded`. A right join is
+really just a left join with the arguments swapped --
+`.join_right_join(x, y, ...)` behaves like `.join_left_join(y, x, ...)`,
+with columns in `x`'s original order. Note the row order below:
+matched rows still come first, in `bands`' original order, with the
+unmatched-in-`x` row (`"Queen"`) appended at the end -- `minijoin`
+always restores `x`'s original row order for matched rows, rather than
+`y`'s:
 
 ```{r}
 .join_right_join(bands, albums, by = "band")
