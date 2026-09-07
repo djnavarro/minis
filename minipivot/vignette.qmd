@@ -7,24 +7,29 @@ title: "minipivot"
 source(file.path("minipivot", "minipivot.R"))
 ```
 
-`minipivot` provides two functions, `.pivot_longer()` and
-`.pivot_wider()`, minimal reimplementations of `tidyr::pivot_longer()`
-and `tidyr::pivot_wider()`: reshaping a data frame between "long" and
-"wide" layouts. See the
-[README](https://github.com/djnavarro/minis/tree/main/minipivot) for
-scope notes; this page walks through both functions on a small toy
-data frame, including the column-selection styles `.pivot_longer()`
-supports and what happens when `.pivot_wider()` is asked to spread
-duplicate rows into one cell.
+The purpose of **minipivot** is to provide a zero-dependency
+reimplementation of two functions from the
+[**tidyr**](https://tidyr.tidyverse.org/) package: `pivot_longer()`
+and `pivot_wider()`. Together they reshape a data frame between "long"
+and "wide" layouts. The [README](https://github.com/djnavarro/minis/tree/main/minipivot)
+provides scope notes; this page walks through both functions on a
+small toy data frame, including the column-selection styles
+`.pivot_longer()` supports and what happens when `.pivot_wider()` is
+asked to spread duplicate rows into one cell.
 
 ## Functions
 
+The [**minipivot.R**](https://github.com/djnavarro/minis/blob/main/minipivot/minipivot.R)
+script supplies two core functions:
+
 - `.pivot_longer(.data, cols, names_to = "name", values_to = "value")`
-  -- melt `cols` into two new columns holding the pivoted column names
-  and their values.
+  is used to melt `cols` into two new columns holding the pivoted
+  column names and their values.
 - `.pivot_wider(.data, names_from, values_from, values_fill = NULL)`
-  -- spread the unique values of `names_from` into new columns, filled
-  from `values_from`.
+  is used to spread the unique values of `names_from` into new
+  columns, filled from `values_from`.
+
+It contains no internal helpers.
 
 ## A minimal data set
 
@@ -39,9 +44,9 @@ fish
 
 ## Wide to long
 
-`.pivot_longer()` needs to know which columns to pivot. Here, `count`
-is the only column with values to melt, and `location`/`species`
-along for the ride as id columns:
+The `.pivot_longer()` function needs to know which columns to pivot.
+Here, `count` is the only column with values to melt, and
+`location`/`species` come along for the ride as id columns:
 
 ```{r}
 .pivot_longer(fish, count, names_to = "metric", values_to = "n")
@@ -49,10 +54,11 @@ along for the ride as id columns:
 
 ## Long to wide
 
-`.pivot_wider()` spreads `species`'s unique values (`trout`/`bass`)
-into new columns, filled from `count`. There's no `id_cols` argument
-to set -- every column other than `names_from`/`values_from`
-(`location`, here) is treated as an id column automatically:
+The `.pivot_wider()` function spreads `species`'s unique values
+(`trout`/`bass`) into new columns, filled from `count`. There's no
+`id_cols` argument to set -- every column other than
+`names_from`/`values_from` (`location`, here) is treated as an id
+column automatically:
 
 ```{r}
 wide <- .pivot_wider(fish, names_from = "species", values_from = "count")
@@ -70,11 +76,11 @@ Pivoting the wide result back out reproduces the original long data
 
 ## Selecting `cols` a few different ways
 
-`.pivot_longer()`'s `cols` accepts more than just a single bare name.
-Bare names combined with `c(...)`, a plain character vector, and a
-negated `-c(...)` ("every column except these") all agree, since
-`trout`/`bass` are the only two columns not already used as an id
-column above:
+The `cols` argument to `.pivot_longer()` accepts more than just a
+single bare name. Bare names combined with `c(...)`, a plain character
+vector, and a negated `-c(...)` ("every column except these") all
+agree, since `trout`/`bass` are the only two columns not already used
+as an id column above:
 
 ```{r}
 identical(
@@ -100,7 +106,7 @@ Dropping a row before widening leaves a combination unrepresented --
 .pivot_wider(fish[-4, ], names_from = "species", values_from = "count")
 ```
 
-`values_fill` supplies a value to use instead:
+The `values_fill` argument supplies a value to use instead:
 
 ```{r}
 .pivot_wider(fish[-4, ], names_from = "species", values_from = "count", values_fill = 0)
@@ -110,9 +116,9 @@ Dropping a row before widening leaves a combination unrepresented --
 
 Real `tidyr::pivot_wider()` handles a duplicate `names_from`/id
 combination by warning and packing the extra values into a
-list-column. `minipivot` has no list-column support (matching
-[`minitable`](../minitable/)'s scope), so the same situation is a hard
-error instead:
+list-column. This mini has no list-column support (matching
+[**minitable**](../minitable/)'s scope), so the same situation is a
+hard error instead:
 
 ```{r}
 #| error: true
