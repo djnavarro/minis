@@ -19,7 +19,7 @@
 ##   base `stop()`, not `rlang::abort()` -- deliberately simpler than
 ##   the internal helper this was adapted from, since pulling in rlang
 ##   purely for custom condition classes isn't worth it for a mini.
-## - Deliberately excluded: pmap()/pmap_*(), map_if()/map_at()/map_at(),
+## - Deliberately excluded: pmap()/pmap_*(), map_if()/map_at(),
 ##   list-column-aware behaviour, and purrr's richer
 ##   call-aware error messages -- this covers the common case of
 ##   "I want lapply()/vapply(), but want to write it as map()".
