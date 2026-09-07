@@ -18,10 +18,10 @@ No `Imports`/`Suggests` entry needed.
 
 | Function | Purpose |
 |---|---|
-| `mfilter_filter(.data, ...)` | Keep rows where all `...` conditions are `TRUE`; rows with `NA` conditions are dropped; conditions combine with AND |
+| `.filter(.data, ...)` | Keep rows where all `...` conditions are `TRUE`; rows with `NA` conditions are dropped; conditions combine with AND |
 
 ```r
-mfilter_filter(mtcars, cyl == 4, mpg > 25)
+.filter(mtcars, cyl == 4, mpg > 25)
 ```
 
 ## Scope
@@ -32,7 +32,7 @@ column helpers.
 
 ## Deliberate fix relative to the source this was adapted from
 
-Calling `mfilter_filter(df)` with no conditions now returns `.data`
+Calling `.filter(df)` with no conditions now returns `.data`
 unchanged, matching `dplyr::filter(df)`. The original `.filter()` this
 was adapted from didn't guard against the empty-`...`  case, and would
 silently drop every row (`Reduce("&", list())` returns `NULL`, and

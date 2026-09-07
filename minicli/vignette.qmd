@@ -18,44 +18,44 @@ through each piece and builds up to how they combine.
 
 ### Core functions
 
-- `mcli_alert_success()`/`_danger()`/`_warning()`/`_info()` -- print a
+- `.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` -- print a
   `message()` with a coloured symbol prefix; extra `...` arguments are
   passed through `sprintf()`.
-- `mcli_symbol(name)` -- look up a single symbol by name, returning its
+- `.cli_symbol(name)` -- look up a single symbol by name, returning its
   unicode glyph or an ascii fallback depending on what's safe to print.
-- `mcli_rule(title = NULL)` -- print a horizontal divider spanning the
+- `.cli_rule(title = NULL)` -- print a horizontal divider spanning the
   console width, optionally with a centred title.
-- `mcli_bullets(items)` -- print a simple bulleted list, one entry per
+- `.cli_bullets(items)` -- print a simple bulleted list, one entry per
   line.
-- `mcli_col_black()`/`_red()`/`_green()`/`_yellow()`/`_blue()`/
+- `.cli_col_black()`/`_red()`/`_green()`/`_yellow()`/`_blue()`/
   `_magenta()`/`_cyan()`/`_white()`/`_grey()` -- wrap a string in an
   ANSI colour code.
-- `mcli_style_bold()`/`_dim()`/`_italic()`/`_underline()` -- wrap a
+- `.cli_style_bold()`/`_dim()`/`_italic()`/`_underline()` -- wrap a
   string in an ANSI style code.
 
 ### Internal helpers
 
-- `.mcli_ansi_enabled()` -- decide whether it's currently safe to emit
+- `.cli_ansi_enabled()` -- decide whether it's currently safe to emit
   ANSI escape codes (checks `cli.num_colors`, `NO_COLOR`, whether
   knitr/Quarto is rendering, whether output is being captured, whether
   it's running in Positron's or RStudio's Console pane, and whether
   stdout is a real terminal).
-- `.mcli_positron_console_with_color()`/
-  `.mcli_rstudio_console_with_color()` -- recognise Positron's and
+- `.cli_positron_console_with_color()`/
+  `.cli_rstudio_console_with_color()` -- recognise Positron's and
   RStudio's Console panes explicitly, since neither is a real tty but
   both do support ANSI colour.
-- `.mcli_unicode_enabled()` -- decide whether it's currently safe to
+- `.cli_unicode_enabled()` -- decide whether it's currently safe to
   print unicode symbols (checks `cli.unicode`, then the session's
   locale).
-- `.mcli_ansi_style(code)` -- factory that builds one of the
-  `mcli_col_*()`/`mcli_style_*()` functions from a raw SGR code.
-- `.mcli_alert(symbol_name, color_fn, text, ...)` -- shared
-  implementation behind the four `mcli_alert_*()` functions.
+- `.cli_ansi_style(code)` -- factory that builds one of the
+  `.cli_col_*()`/`.cli_style_*()` functions from a raw SGR code.
+- `.cli_alert(symbol_name, color_fn, text, ...)` -- shared
+  implementation behind the four `.cli_alert_*()` functions.
 
 ## Capability detection
 
 Every colour/symbol decision in `minicli` runs through
-`.mcli_ansi_enabled()` and `.mcli_unicode_enabled()`, so the same code
+`.cli_ansi_enabled()` and `.cli_unicode_enabled()`, so the same code
 looks right whether it's running in an interactive terminal that
 supports unicode and colour, Positron's or RStudio's Console pane
 (neither of which is a real tty, but both of which do support ANSI
@@ -69,95 +69,95 @@ text on the page.
 
 ## Alerts
 
-`mcli_alert_success()`/`_danger()`/`_warning()`/`_info()` are the
+`.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` are the
 functions you'll reach for most often: thin `message()` wrappers with a
 symbol prefix, meant for the kind of status line a script prints while
 it works. Extra `...` arguments are passed through `sprintf()`, so the
 first argument can be a format string:
 
 ```{r}
-mcli_alert_success("Wrote %d files to %s", 3, "output/")
+.cli_alert_success("Wrote %d files to %s", 3, "output/")
 ```
 
 ```{r}
-mcli_alert_warning("Skipped %d rows with missing values", 12)
+.cli_alert_warning("Skipped %d rows with missing values", 12)
 ```
 
 ```{r}
-mcli_alert_danger("Failed to connect to %s", "database")
+.cli_alert_danger("Failed to connect to %s", "database")
 ```
 
 ```{r}
-mcli_alert_info("Using default configuration")
+.cli_alert_info("Using default configuration")
 ```
 
 If there's no `...` to format with, the text is used as-is -- no
 `sprintf()` call, so a literal `%` in the message is safe:
 
 ```{r}
-mcli_alert_info("Discount: 10% off")
+.cli_alert_info("Discount: 10% off")
 ```
 
 ## Symbols
 
-Each alert's prefix comes from `mcli_symbol()`, which looks up a named
+Each alert's prefix comes from `.cli_symbol()`, which looks up a named
 symbol and returns either its unicode glyph or an ascii fallback,
-depending on `.mcli_unicode_enabled()`. It's also useful on its own,
+depending on `.cli_unicode_enabled()`. It's also useful on its own,
 for building custom messages that follow the same convention as the
 built-in alerts:
 
 ```{r}
-mcli_symbol("tick")
-mcli_symbol("cross")
-mcli_symbol("arrow_right")
+.cli_symbol("tick")
+.cli_symbol("cross")
+.cli_symbol("arrow_right")
 ```
 
 An unrecognised name is an error rather than a silent `NA`:
 
 ```{r}
 #| error: true
-mcli_symbol("star")
+.cli_symbol("star")
 ```
 
 ## Rule
 
-`mcli_rule()` prints a horizontal divider, useful for separating
+`.cli_rule()` prints a horizontal divider, useful for separating
 sections of console output. Called with no arguments, it spans the
 full console width:
 
 ```{r}
-mcli_rule()
+.cli_rule()
 ```
 
 Pass a `title` and it's centred within the rule instead:
 
 ```{r}
-mcli_rule("Summary")
+.cli_rule("Summary")
 ```
 
 ## Bullets
 
-`mcli_bullets()` prints a simple bulleted list, one entry per line --
+`.cli_bullets()` prints a simple bulleted list, one entry per line --
 handy for summarising a small set of results without reaching for a
 full table:
 
 ```{r}
-mcli_bullets(c("one", "two", "three"))
+.cli_bullets(c("one", "two", "three"))
 ```
 
 ## Colours and styles
 
-Under the hood, each alert calls one of the `mcli_col_*()` functions to
-colour its symbol. Those functions -- along with the `mcli_style_*()`
+Under the hood, each alert calls one of the `.cli_col_*()` functions to
+colour its symbol. Those functions -- along with the `.cli_style_*()`
 family -- are also exported directly, for colouring or styling
 arbitrary text of your own. Both wrap their input in an ANSI escape
 code and its matching reset code, and both are no-ops (returning the
-text unchanged) whenever `.mcli_ansi_enabled()` is `FALSE` -- which, per
+text unchanged) whenever `.cli_ansi_enabled()` is `FALSE` -- which, per
 the capability-detection note above, is always true on this page:
 
 ```{r}
-identical(mcli_col_red("danger"), "danger")
-identical(mcli_style_bold("emphasis"), "emphasis")
+identical(.cli_col_red("danger"), "danger")
+identical(.cli_style_bold("emphasis"), "emphasis")
 ```
 
 Colours and styles nest freely, since each wrapper's reset code is
@@ -165,7 +165,7 @@ emitted immediately after its own content rather than at the very end
 of the whole string:
 
 ```{r}
-mcli_style_bold(mcli_col_red("bold and red"))
+.cli_style_bold(.cli_col_red("bold and red"))
 ```
 
 Outside of a Quarto render -- in an interactive terminal session, say

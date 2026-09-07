@@ -47,16 +47,16 @@ minis/
 
 ### Current minis
 
-| Mini | Prefix | Adapted from | Purpose |
+| Mini | Tag | Adapted from | Purpose |
 |---|---|---|---|
-| `minicli` | `mcli_` | `cli`/`crayon` (own reimplementation) | Coloured alerts/symbols/rules with ANSI/unicode fallback |
-| `minimap` | `mmap_` | `emaxnls`'s `.map()` family (from `purrr`) | `map`/`map2`/`imap`/`walk`/`iwalk`/`map_dbl`/`map_lgl`/`map_chr` |
-| `minitrap` | `mtrap_` | `emaxnls`'s `.safe_fn()`/`.quiet_fn()` (from `purrr`) | `safely()`/`quietly()`-style function adverbs |
-| `minifilter` | `mfilter_` | poorman's `filter()` (from `dplyr`) | Row filtering by unquoted conditions |
-| `minicase` | `mcase_` | poorman's `case_when()` (from `dplyr`) | Vectorised if/else via formulas |
-| `minijoin` | `mjoin_` | poorman's `joins.R` (from `dplyr`) | `inner_join`/`left_join`/`right_join`/`full_join` via `merge()` |
-| `minitable` | `mtable_` | `emaxnls`'s `.tibble()` family (from `tibble`) | `tibble`/`as_tibble`/`rownames_to_column`/`add_row` |
-| `minicondition` | `mcond_` | `emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` (from `rlang`) | Classed errors/warnings/messages, plus `assert()`, via base R's condition system |
+| `minicli` | `.cli_` | `cli`/`crayon` (own reimplementation) | Coloured alerts/symbols/rules with ANSI/unicode fallback |
+| `minimap` | `.iter_` | `emaxnls`'s `.map()` family (from `purrr`) | `.iter_map`/`.iter_map2`/`.iter_imap`/`.iter_walk`/`.iter_iwalk`/`.iter_map_dbl`/`.iter_map_lgl`/`.iter_map_chr` |
+| `minitrap` | `.trap_` | `emaxnls`'s `.safe_fn()`/`.quiet_fn()` (from `purrr`) | `.trap_safely()`/`.trap_quietly()`-style function adverbs |
+| `minifilter` | none (bare `.filter`) | poorman's `filter()` (from `dplyr`) | Row filtering by unquoted conditions |
+| `minicase` | none (bare `.case_when`) | poorman's `case_when()` (from `dplyr`) | Vectorised if/else via formulas |
+| `minijoin` | `.join_` | poorman's `joins.R` (from `dplyr`) | `.join_inner_join`/`.join_left_join`/`.join_right_join`/`.join_full_join` via `merge()` |
+| `minitable` | `.table_` | `emaxnls`'s `.tibble()` family (from `tibble`) | `.table_tibble`/`.table_as_tibble`/`.table_rownames_to_column`/`.table_add_row` |
+| `minicondition` | `.cond_` | `emaxnls`'s `.assert()`/`.abort()`/`.warn()`/`.inform()` (from `rlang`) | Classed errors/warnings/messages, plus `.cond_assert()`, via base R's condition system |
 
 ### Design philosophy
 
@@ -68,9 +68,25 @@ minis/
   `minitrap`), scoped by functionality rather than by origin.
 - **Copy, don't install.** Minis are vendored into a consuming
   package's `R/` directory, never added to `Imports`/`Depends`.
-- **Namespaced defensively.** Exported functions use a mini-specific
-  prefix (see table above); internal helpers use a dot-prefixed version
-  of the same prefix (e.g. `.mtable_drop_dup_list()`).
+- **Namespaced defensively, uniformly dot-prefixed.** Every function in
+  a mini — whether the mini itself would call it "core" or "internal" —
+  is dot-prefixed with the same short, mini-specific tag (see table
+  above), e.g. `.table_tibble()` and `.table_drop_dup_list()`. There is
+  no separate naming convention for exported vs. internal functions,
+  since once a mini is copied into a consuming package, everything in
+  it is an internal implementation detail regardless of how the mini
+  itself scopes "core" vs. "helper". A mini whose entire API is one
+  function named after the mini itself skips the tag on that one
+  function to avoid stutter (`minifilter` exports bare `.filter()`, not
+  `.filter_filter()`; `minicase` exports bare `.case_when()`, not
+  `.case_case_when()`) — the tag is still used on those two minis'
+  internal helpers, since generic helper names are the ones actually at
+  collision risk. `minimap`'s tag is `.iter_` rather than `.map_`,
+  since the mini bundles both a map-family and a walk-family (`walk()`
+  calls `map()` internally, so they stay in one mini per the
+  shared-implementation precedent below), and a tag literally named
+  "map" would misleadingly imply `.iter_walk()` is a kind of mapping
+  operation.
 - **Tested, but tests don't ship.** `tests/testthat/` lives in this
   repo for development only; `testthat`/`withr` are dev dependencies of
   the repo, never of a mini itself.
@@ -151,8 +167,15 @@ published to GitHub Pages by `.github/workflows/site.yaml`.
    grammatical/abstract category it belongs to -- see the `minitrap`
    naming discussion in `.agents/HISTORY.md` for why `miniadverbs` was
    rejected.
-3. Give every exported function a mini-specific prefix; give internal
-   helpers a dot-prefixed version of the same prefix.
+3. Dot-prefix every function (both what the mini itself would call
+   "core" and what it would call "internal") with the same short,
+   mini-specific tag, e.g. `.table_tibble()` and
+   `.table_drop_dup_list()`. If the mini's entire API is one function
+   named after the mini itself, skip the tag on that one function to
+   avoid stutter (bare `.filter()`, not `.filter_filter()`) but keep
+   the tag on its internal helpers. Choose the tag word for what reads
+   well given the mini's actual set of functions -- it need not
+   mechanically match the folder name (see `minimap`'s `.iter_` tag).
 4. Header-comment the source file with: what it reimplements, what's
    deliberately excluded, and any deliberate fixes relative to the
    package/snippet it was adapted from.

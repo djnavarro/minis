@@ -24,21 +24,21 @@ whichever functions you want to expose, or leave them unexported.
 
 | Function | purrr equivalent | Notes |
 |---|---|---|
-| `mmap_map(.x, .f)` | `map()` | Always returns a list; preserves names |
-| `mmap_map_dbl(.x, .f)`, `_lgl()`, `_chr()` | `map_dbl()`, `map_lgl()`, `map_chr()` | Type-stable via `vapply()`; errors if `.f` doesn't return a length-1 value of the right type |
-| `mmap_walk(.x, .f)` | `walk()` | Runs `.f` for its side effects, returns `.x` invisibly |
-| `mmap_map2(.x, .y, .f)` | `map2()` | `.x` and `.y` must have equal length |
-| `mmap_imap(.x, .f)` | `imap()` | `.f` receives `(element, name)`; `.x` must be named |
-| `mmap_iwalk(.x, .f)` | `iwalk()` | Like `mmap_imap()`, for side effects; returns `.x` invisibly |
+| `.iter_map(.x, .f)` | `map()` | Always returns a list; preserves names |
+| `.iter_map_dbl(.x, .f)`, `_lgl()`, `_chr()` | `map_dbl()`, `map_lgl()`, `map_chr()` | Type-stable via `vapply()`; errors if `.f` doesn't return a length-1 value of the right type |
+| `.iter_walk(.x, .f)` | `walk()` | Runs `.f` for its side effects, returns `.x` invisibly |
+| `.iter_map2(.x, .y, .f)` | `map2()` | `.x` and `.y` must have equal length |
+| `.iter_imap(.x, .f)` | `imap()` | `.f` receives `(element, name)`; `.x` must be named |
+| `.iter_iwalk(.x, .f)` | `iwalk()` | Like `.iter_imap()`, for side effects; returns `.x` invisibly |
 
 ```r
-mmap_map(1:3, \(x) x + 1)
+.iter_map(1:3, \(x) x + 1)
 #> [[1]] 2  [[2]] 3  [[3]] 4
 
-mmap_map_dbl(1:3, \(x) x + 1)
+.iter_map_dbl(1:3, \(x) x + 1)
 #> [1] 2 3 4
 
-mmap_imap(c(a = 1, b = 2), \(val, name) paste0(name, "=", val))
+.iter_imap(c(a = 1, b = 2), \(val, name) paste0(name, "=", val))
 #> $a [1] "a=1"   $b [1] "b=2"
 ```
 
@@ -52,7 +52,7 @@ Two changes were made when extracting it as a standalone mini:
 1. **Argument checking uses base `stop()`**, not `rlang::abort()` — a
    mini shouldn't need `rlang` just to raise a clear error, and losing
    custom condition classes is an acceptable trade-off here.
-2. **`mmap_imap()`/`mmap_iwalk()` check `!is.null(names(.x))`**, not
+2. **`.iter_imap()`/`.iter_iwalk()` check `!is.null(names(.x))`**, not
    `!is.null(.x)`. The original checked that `.x` itself wasn't `NULL`,
    which doesn't actually verify `.x` is named — an unnamed vector would
    pass the original check and then silently `imap()` over `NULL` names.

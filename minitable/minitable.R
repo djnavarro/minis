@@ -8,14 +8,16 @@
 ## - Base R only. Results are plain data.frames, not tibbles -- this
 ##   mini gives tibble-style *construction* ergonomics (in particular,
 ##   later columns can refer to earlier ones by name, e.g.
-##   `mtable_tibble(a = 1:3, b = a * 2)`), not tibble's printing,
+##   `.table_tibble(a = 1:3, b = a * 2)`), not tibble's printing,
 ##   stricter recycling-length validation, or class.
-## - Exported functions prefixed `mtable_`; internal helper is
-##   `.mtable_drop_dup_list()`.
+## - All functions are dot-prefixed with the tag `.table_` -- there's
+##   no separate exported-vs-internal naming split, since every
+##   function here is meant to be treated as an implementation detail
+##   once copied into a consuming package.
 ## - IMPORTANT: the sequential-evaluation logic that makes cross-column
 ##   references work (`match.call()` + walking `...` argument by
-##   argument) lives directly inside `mtable_tibble()` and
-##   `mtable_add_row()`, rather than being factored into a shared
+##   argument) lives directly inside `.table_tibble()` and
+##   `.table_add_row()`, rather than being factored into a shared
 ##   `...`-accepting helper. Forwarding `...` through an intermediate
 ##   function turns each argument into an opaque `..1`/`..2` pronoun
 ##   that resolves against the *original* caller's environment when
@@ -40,15 +42,15 @@
 ##
 ## Usage:
 ##   source("minitable.R")
-##   mtable_tibble(a = 1:3, b = a * 2)
-##   mtable_add_row(mtcars, mpg = 99)
-##   mtable_rownames_to_column(mtcars, var = "model")
+##   .table_tibble(a = 1:3, b = a * 2)
+##   .table_add_row(mtcars, mpg = 99)
+##   .table_rownames_to_column(mtcars, var = "model")
 ##
 ## License: MIT (see LICENSE at the root of the minis repo). Logic
 ## adapted from poorman (MIT licensed), not copied from {tibble}.
 
 #' @noRd
-.mtable_drop_dup_list <- function(x) {
+.table_drop_dup_list <- function(x) {
   list_names <- names(x)
   if (identical(list_names, unique(list_names))) return(x)
   count <- table(list_names)
@@ -65,7 +67,7 @@
 #' Build a data frame column by column, sequentially
 #'
 #' Like `tibble::tibble()`, later columns can refer to earlier ones by
-#' name (`mtable_tibble(a = 1:3, b = a * 2)`). Unlike a real tibble, the
+#' name (`.table_tibble(a = 1:3, b = a * 2)`). Unlike a real tibble, the
 #' result is a plain `data.frame`, and recycling/type validation follows
 #' whatever `as.data.frame()` does, not tibble's stricter rules.
 #'
@@ -73,7 +75,7 @@
 #'   `NA`. Unnamed arguments are named after their deparsed expression,
 #'   as in `tibble::tibble()`.
 #' @export
-mtable_tibble <- function(...) {
+.table_tibble <- function(...) {
   fn_call <- match.call()
   list_to_eval <- as.list(fn_call)[-1]
   out <- vector(mode = "list", length = length(list_to_eval))
@@ -84,7 +86,7 @@ mtable_tibble <- function(...) {
     if (is.language(value)) {
       value <- eval(
         value,
-        envir = if (element == 1L) list_to_eval else .mtable_drop_dup_list(out[seq_len(element - 1)])
+        envir = if (element == 1L) list_to_eval else .table_drop_dup_list(out[seq_len(element - 1)])
       )
     }
     if (is.null(value)) {
@@ -103,7 +105,7 @@ mtable_tibble <- function(...) {
 #' @param x An object coercible via `as.data.frame()`.
 #' @param ... Passed on to `as.data.frame()`.
 #' @export
-mtable_as_tibble <- function(x, ...) as.data.frame(x, ..., check.names = FALSE)
+.table_as_tibble <- function(x, ...) as.data.frame(x, ..., check.names = FALSE)
 
 #' Move row names into an explicit column
 #'
@@ -112,7 +114,7 @@ mtable_as_tibble <- function(x, ...) as.data.frame(x, ..., check.names = FALSE)
 #' @param .data A data frame.
 #' @param var Name of the new column.
 #' @export
-mtable_rownames_to_column <- function(.data, var = "rowname") {
+.table_rownames_to_column <- function(.data, var = "rowname") {
   rn <- rownames(.data)
   is_default_rn <- is.null(rn) || identical(rn, as.character(seq_len(NROW(.data))))
   if (is_default_rn) return(.data)
@@ -127,9 +129,9 @@ mtable_rownames_to_column <- function(.data, var = "rowname") {
 #' @param .data A data frame.
 #' @param ... Name-value pairs for the new row, matched to `.data`'s
 #'   columns. Supports the same sequential cross-reference evaluation
-#'   as `mtable_tibble()`.
+#'   as `.table_tibble()`.
 #' @export
-mtable_add_row <- function(.data, ...) {
+.table_add_row <- function(.data, ...) {
   fn_call <- match.call(expand.dots = FALSE)
   list_to_eval <- fn_call[["..."]]
   out <- vector(mode = "list", length = length(list_to_eval))
@@ -140,7 +142,7 @@ mtable_add_row <- function(.data, ...) {
     if (is.language(value)) {
       value <- eval(
         value,
-        envir = if (element == 1L) list_to_eval else .mtable_drop_dup_list(out[seq_len(element - 1)])
+        envir = if (element == 1L) list_to_eval else .table_drop_dup_list(out[seq_len(element - 1)])
       )
     }
     if (is.null(value)) {

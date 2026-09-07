@@ -7,10 +7,15 @@
 ##
 ## Design notes:
 ## - Base R only. No imports, no Suggests required.
-## - All user-facing functions are prefixed `mmap_`; internals are
-##   prefixed `.mmap_`, to avoid collisions when this file is copied
-##   into an existing package's R/ directory.
-## - Argument checking uses a small inlined `.mmap_assert()` built on
+## - All functions are dot-prefixed with the tag `.iter_` (not `.map_`,
+##   even though the mini is named `minimap`) -- the tag names the
+##   general iterate-over-a-list-or-vector family this mini covers (map
+##   AND walk variants), since a tag literally named after only "map"
+##   would misleadingly read as `walk`/`iwalk` being a special case of
+##   `map`. There's no separate exported-vs-internal naming split; every
+##   function here is treated as an implementation detail once copied
+##   into a consuming package.
+## - Argument checking uses a small inlined `.iter_assert()` built on
 ##   base `stop()`, not `rlang::abort()` -- deliberately simpler than
 ##   the internal helper this was adapted from, since pulling in rlang
 ##   purely for custom condition classes isn't worth it for a mini.
@@ -21,8 +26,8 @@
 ##
 ## Usage:
 ##   source("minimap.R")
-##   mmap_map(1:3, function(x) x + 1)
-##   mmap_map_dbl(1:3, function(x) x + 1)
+##   .iter_map(1:3, function(x) x + 1)
+##   .iter_map_dbl(1:3, function(x) x + 1)
 ##
 ## License: MIT (see LICENSE at the root of the minis repo). This file
 ## contains no code copied from {purrr}, only equivalent logic.
@@ -30,7 +35,7 @@
 # --- internal helpers -----------------------------------------------------
 
 #' @noRd
-.mmap_assert <- function(expr, message = "minimap error") {
+.iter_assert <- function(expr, message = "minimap error") {
   if (any(expr == FALSE)) stop(message, call. = FALSE)
 }
 
@@ -41,7 +46,7 @@
 #' @param .f A function of one argument.
 #' @return A list the same length as `.x`, with names preserved.
 #' @export
-mmap_map <- function(.x, .f) {
+.iter_map <- function(.x, .f) {
   out <- lapply(X = .x, FUN = .f)
   names(out) <- names(.x)
   out
@@ -49,10 +54,10 @@ mmap_map <- function(.x, .f) {
 
 #' Apply a function to each element, for its side effect
 #'
-#' Like [mmap_map()], but returns `.x` invisibly instead of the results.
+#' Like [.iter_map()], but returns `.x` invisibly instead of the results.
 #' @export
-mmap_walk <- function(.x, .f) {
-  mmap_map(.x, .f)
+.iter_walk <- function(.x, .f) {
+  .iter_map(.x, .f)
   invisible(.x)
 }
 
@@ -60,16 +65,16 @@ mmap_walk <- function(.x, .f) {
 #' @param .x,.y Lists or atomic vectors of the same length.
 #' @param .f A function of two arguments.
 #' @export
-mmap_map2 <- function(.x, .y, .f) {
-  .mmap_assert(length(.x) == length(.y), "`.x` and `.y` must have the same length")
+.iter_map2 <- function(.x, .y, .f) {
+  .iter_assert(length(.x) == length(.y), "`.x` and `.y` must have the same length")
   lapply(X = seq_along(.x), FUN = function(i) .f(.x[[i]], .y[[i]]))
 }
 
 #' Apply a function to pairs of elements, for its side effect
 #' @export
-mmap_iwalk <- function(.x, .f) {
-  .mmap_assert(!is.null(names(.x)), "`.x` must be named")
-  mmap_map2(.x, names(.x), .f)
+.iter_iwalk <- function(.x, .f) {
+  .iter_assert(!is.null(names(.x)), "`.x` must be named")
+  .iter_map2(.x, names(.x), .f)
   invisible(.x)
 }
 
@@ -77,33 +82,33 @@ mmap_iwalk <- function(.x, .f) {
 #' @param .x A named list or atomic vector.
 #' @param .f A function of two arguments: the element, then its name.
 #' @export
-mmap_imap <- function(.x, .f) {
-  .mmap_assert(!is.null(names(.x)), "`.x` must be named")
-  out <- mmap_map2(.x, names(.x), .f)
+.iter_imap <- function(.x, .f) {
+  .iter_assert(!is.null(names(.x)), "`.x` must be named")
+  out <- .iter_map2(.x, names(.x), .f)
   names(out) <- names(.x)
   out
 }
 
 # --- type-stable variants ------------------------------------------------
 
-#' Type-stable variants of mmap_map()
+#' Type-stable variants of .iter_map()
 #'
-#' Like [mmap_map()], but return an atomic vector of the named type
+#' Like [.iter_map()], but return an atomic vector of the named type
 #' instead of a list, via `vapply()`. Errors if `.f` doesn't return a
 #' length-1 value of the expected type for every element.
 #' @param .x A list or atomic vector.
 #' @param .f A function of one argument.
-#' @name mmap_map_dbl
+#' @name .iter_map_dbl
 NULL
 
-#' @rdname mmap_map_dbl
+#' @rdname .iter_map_dbl
 #' @export
-mmap_map_dbl <- function(.x, .f) vapply(X = .x, FUN = .f, FUN.VALUE = numeric(1L))
+.iter_map_dbl <- function(.x, .f) vapply(X = .x, FUN = .f, FUN.VALUE = numeric(1L))
 
-#' @rdname mmap_map_dbl
+#' @rdname .iter_map_dbl
 #' @export
-mmap_map_lgl <- function(.x, .f) vapply(X = .x, FUN = .f, FUN.VALUE = logical(1L))
+.iter_map_lgl <- function(.x, .f) vapply(X = .x, FUN = .f, FUN.VALUE = logical(1L))
 
-#' @rdname mmap_map_dbl
+#' @rdname .iter_map_dbl
 #' @export
-mmap_map_chr <- function(.x, .f) vapply(X = .x, FUN = .f, FUN.VALUE = character(1L))
+.iter_map_chr <- function(.x, .f) vapply(X = .x, FUN = .f, FUN.VALUE = character(1L))

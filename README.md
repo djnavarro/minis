@@ -23,10 +23,16 @@ relevant mini and copy it straight into `R/`.
   package or added to `Imports`/`Depends`. Copy the `.R` file into your
   own package's `R/` directory (renaming if useful) and vendor it as your
   own code. Keep the license header comment intact.
-- **Namespaced defensively.** Every exported function is prefixed
-  (`mcli_*`, `mmap_*`, `mtrap_*`, `mfilter_*`, `mcase_*`, `mjoin_*`,
-  `mtable_*`, `mcond_*`, etc.) so a dropped-in mini is unlikely to
-  collide with anything already in the consuming package.
+- **Namespaced defensively, with a dot-prefix.** Every function in a
+  mini is dot-prefixed with a short, mini-specific tag (`.cli_*`,
+  `.iter_*`, `.trap_*`, `.join_*`, `.table_*`, `.cond_*`), whether the
+  mini itself thinks of it as a "core" function or an internal helper —
+  once copied into a consuming package, everything from a mini is
+  internal to that package anyway, so there's no reason to distinguish
+  the two in the name. A couple of single-function minis (`minifilter`,
+  `minicase`) skip the tag on their one exported function to avoid
+  stutter (`.filter`, `.case_when`, not `.filter_filter`), keeping the
+  tag only on their internal helpers.
 - **Tested, but the tests don't ship.** Each mini has a `tests/testthat/`
   suite that lives in *this* repo for development purposes. Consumers of
   a mini just take the single source file — the tests use `testthat` and

@@ -6,10 +6,15 @@
 ## Design notes:
 ## - Base R only, adapted from poorman's case_when()/replace_with()
 ##   (https://github.com/nathaneastwood/poorman), itself dependency-free.
-## - Exported function prefixed `mcase_`; internal helpers `.mcase_*`.
+## - The sole exported function is a bare dot-name, `.case_when()` -- not
+##   additionally tagged, since this mini's entire purpose already is
+##   "case_when" and a `.case_case_when()` name would stutter. The
+##   internal helpers keep a short `.case_` tag (e.g. `.case_replace_with()`)
+##   since generic helper names are the ones actually at risk of colliding
+##   with something else once copied into a consuming package.
 ## - Conditions and values are evaluated in the caller's environment
 ##   (there's no data-masking here), so reference data frame columns via
-##   `df$col`, or wrap the call in `with(df, mcase_case_when(...))`.
+##   `df$col`, or wrap the call in `with(df, .case_when(...))`.
 ## - Deliberately excluded: dplyr's `.default`, `.ptype`, `.size`
 ##   arguments -- this covers the plain "match conditions in order,
 ##   first match wins, unmatched positions are NA" case.
@@ -17,7 +22,7 @@
 ## Usage:
 ##   source("minicase.R")
 ##   x <- c(-5, 0, 5, NA)
-##   mcase_case_when(
+##   .case_when(
 ##     x < 0  ~ "negative",
 ##     x == 0 ~ "zero",
 ##     x > 0  ~ "positive",
@@ -36,10 +41,10 @@
 #' @return A vector the same length as the (recycled) conditions/values,
 #'   with `NA` in positions matched by no condition.
 #' @export
-mcase_case_when <- function(...) {
+.case_when <- function(...) {
   fs <- list(...)
   lapply(fs, function(x) {
-    if (!inherits(x, "formula")) stop("`mcase_case_when()` requires formula inputs.")
+    if (!inherits(x, "formula")) stop("`.case_when()` requires formula inputs.")
   })
   n <- length(fs)
   if (n == 0L) stop("No cases provided.")
@@ -51,18 +56,18 @@ mcase_case_when <- function(...) {
     value[[i]] <- eval(fs[[i]][[3]], envir = default_env)
     if (!is.logical(query[[i]])) stop(fs[[i]][[2]], " does not return a `logical` vector.")
   }
-  m <- .mcase_validate_length(query, value, fs)
+  m <- .case_validate_length(query, value, fs)
   out <- value[[1]][rep(NA_integer_, m)]
   replaced <- rep(FALSE, m)
   for (i in seq_len(n)) {
-    out <- .mcase_replace_with(out, query[[i]] & !replaced, value[[i]], NULL)
+    out <- .case_replace_with(out, query[[i]] & !replaced, value[[i]], NULL)
     replaced <- replaced | (query[[i]] & !is.na(query[[i]]))
   }
   out
 }
 
 #' @noRd
-.mcase_validate_length <- function(query, value, fs) {
+.case_validate_length <- function(query, value, fs) {
   lhs_lengths <- lengths(query)
   rhs_lengths <- lengths(value)
   all_lengths <- unique(c(lhs_lengths, rhs_lengths))
@@ -84,11 +89,11 @@ mcase_case_when <- function(...) {
 }
 
 #' @noRd
-.mcase_replace_with <- function(x, i, val, arg_name) {
+.case_replace_with <- function(x, i, val, arg_name) {
   if (is.null(val)) return(x)
-  .mcase_check_length(val, x, arg_name)
-  .mcase_check_type(val, x, arg_name)
-  .mcase_check_class(val, x, arg_name)
+  .case_check_length(val, x, arg_name)
+  .case_check_type(val, x, arg_name)
+  .case_check_class(val, x, arg_name)
   i[is.na(i)] <- FALSE
   if (length(val) == 1L) {
     x[i] <- val
@@ -99,7 +104,7 @@ mcase_case_when <- function(...) {
 }
 
 #' @noRd
-.mcase_check_length <- function(x, y, arg_name) {
+.case_check_length <- function(x, y, arg_name) {
   length_x <- length(x)
   length_y <- length(y)
   if (all(length_x %in% c(1L, length_y))) return(invisible(NULL))
@@ -111,7 +116,7 @@ mcase_case_when <- function(...) {
 }
 
 #' @noRd
-.mcase_check_type <- function(x, y, arg_name) {
+.case_check_type <- function(x, y, arg_name) {
   x_type <- typeof(x)
   y_type <- typeof(y)
   if (identical(x_type, y_type)) return(invisible(NULL))
@@ -119,7 +124,7 @@ mcase_case_when <- function(...) {
 }
 
 #' @noRd
-.mcase_check_class <- function(x, y, arg_name) {
+.case_check_class <- function(x, y, arg_name) {
   if (!is.object(x)) return(invisible(NULL))
   exp_classes <- class(y)
   out_classes <- class(x)

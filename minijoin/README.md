@@ -16,17 +16,17 @@ Copy [`minijoin.R`](minijoin.R) into your package's `R/` directory. No
 
 | Function | Keeps |
 |---|---|
-| `mjoin_inner_join(x, y, by, ...)` | Rows matching in both `x` and `y` |
-| `mjoin_left_join(x, y, by, ...)` | All rows of `x` |
-| `mjoin_right_join(x, y, by, ...)` | All rows of `y` |
-| `mjoin_full_join(x, y, by, ...)` | All rows of both |
+| `.join_inner_join(x, y, by, ...)` | Rows matching in both `x` and `y` |
+| `.join_left_join(x, y, by, ...)` | All rows of `x` |
+| `.join_right_join(x, y, by, ...)` | All rows of `y` |
+| `.join_full_join(x, y, by, ...)` | All rows of both |
 
 ```r
 bands <- data.frame(band = c("Beatles", "Who"), founded = c(1960, 1964))
 albums <- data.frame(band = c("Beatles", "Kinks"), album = c("Abbey Road", "Arthur"))
 
-mjoin_inner_join(bands, albums, by = "band")
-mjoin_left_join(bands, albums, by = "band")
+.join_inner_join(bands, albums, by = "band")
+.join_left_join(bands, albums, by = "band")
 ```
 
 Common arguments across all four:

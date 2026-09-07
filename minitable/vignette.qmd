@@ -13,21 +13,21 @@ The goal with `minitable` is to provide a few `tibble`-like construction/coercio
 
 There are currently four core functions:
 
-- `mtable_tibble(...)` -- build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.
-- `mtable_as_tibble(x, ...)` -- coerce `x` to a plain data frame via `as.data.frame()`, preserving literal (non-syntactic) column names.
-- `mtable_rownames_to_column(.data, var)` -- move `.data`'s row names into an explicit column named `var`; a no-op if the row names are just the default sequential ones.
-- `mtable_add_row(.data, ...)` -- append a single row to `.data`, with the same cross-column-reference support as `mtable_tibble()`.
+- `.table_tibble(...)` -- build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.
+- `.table_as_tibble(x, ...)` -- coerce `x` to a plain data frame via `as.data.frame()`, preserving literal (non-syntactic) column names.
+- `.table_rownames_to_column(.data, var)` -- move `.data`'s row names into an explicit column named `var`; a no-op if the row names are just the default sequential ones.
+- `.table_add_row(.data, ...)` -- append a single row to `.data`, with the same cross-column-reference support as `.table_tibble()`.
 
 Additionally `minitable` has one internal helper:
 
--  `.mtable_drop_dup_list()` is used by both `mtable_tibble()` and `mtable_add_row()` to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below).
+-  `.table_drop_dup_list()` is used by both `.table_tibble()` and `.table_add_row()` to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below).
 
 ## Sequential, cross-referencing construction
 
-Building a data frame with `data.frame()` directly requires every column to already exist as a complete vector before the call -- you can't refer to a column you're building in the same call. Like `tibble::tibble()`, `mtable_tibble()` lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:
+Building a data frame with `data.frame()` directly requires every column to already exist as a complete vector before the call -- you can't refer to a column you're building in the same call. Like `tibble::tibble()`, `.table_tibble()` lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:
 
 ```{r}
-mtable_tibble(a = 1:3, b = a * 2, c = a + b)
+.table_tibble(a = 1:3, b = a * 2, c = a + b)
 ```
 
 Here `b` refers to `a`, and `c` refers to both `a` and `b` -- neither would resolve to anything if evaluated outside the call, since `a`, `b`, and `c` don't otherwise exist in this session. Getting this right took real care in the implementation, but you can take a look at the code if you're interested.
@@ -37,27 +37,27 @@ Here `b` refers to `a`, and `c` refers to both `a` and `b` -- neither would reso
 Just as in `tibble::tibble()`, an argument with no `name =` is named after its own source expression, converted to a string:
 
 ```{r}
-mtable_tibble(1:3, sqrt(1:3))
+.table_tibble(1:3, sqrt(1:3))
 ```
 
-This is mostly useful for quick, throwaway construction; naming columns explicitly (`mtable_tibble(x = 1:3, y = sqrt(1:3))`) is more readable for anything that will be used again later.
+This is mostly useful for quick, throwaway construction; naming columns explicitly (`.table_tibble(x = 1:3, y = sqrt(1:3))`) is more readable for anything that will be used again later.
 
 ## Minimalist coercion
 
 There's no tibble class or special printing here -- it's just `as.data.frame()` with `check.names = FALSE`, so a literal, non-syntactic column name (like `"1:3"` from the previous section) survives unchanged instead of being sanitised by `make.names()`:
 
 ```{r}
-mtable_as_tibble(list(a = 1:2, b = c("x", "y")))
+.table_as_tibble(list(a = 1:2, b = c("x", "y")))
 ```
 
-The difference from calling `as.data.frame()` directly shows up with a name that isn't a syntactically valid R identifier, like the `"1:3"` name `mtable_tibble()` generated automatically two sections ago:
+The difference from calling `as.data.frame()` directly shows up with a name that isn't a syntactically valid R identifier, like the `"1:3"` name `.table_tibble()` generated automatically two sections ago:
 
 ```{r}
-names(mtable_as_tibble(list(`1:3` = 1:3)))
+names(.table_as_tibble(list(`1:3` = 1:3)))
 names(as.data.frame(list(`1:3` = 1:3)))
 ```
 
-`as.data.frame()`'s default `check.names = TRUE` rewrites `"1:3"` into the syntactically valid `"X1.3"`; `mtable_as_tibble()` passes `check.names = FALSE` through instead, so the literal name survives.
+`as.data.frame()`'s default `check.names = TRUE` rewrites `"1:3"` into the syntactically valid `"X1.3"`; `.table_as_tibble()` passes `check.names = FALSE` through instead, so the literal name survives.
 
 ## Rowname to column conversion
 
@@ -65,7 +65,7 @@ A data frame with only the default sequential row names (`"1"`, `"2"`, ...) is r
 
 ```{r}
 identical(
-  mtable_rownames_to_column(data.frame(x = 1:3), var = "id"),
+  .table_rownames_to_column(data.frame(x = 1:3), var = "id"),
   data.frame(x = 1:3)
 )
 ```
@@ -73,20 +73,20 @@ identical(
 Real (non-default) row names do get moved into a new column, placed first:
 
 ```{r}
-mtable_rownames_to_column(head(mtcars, 3), var = "model")
+.table_rownames_to_column(head(mtcars, 3), var = "model")
 ```
 
 ## Adding rows
 
-Appending a row with `mtable_add_row()` supports the same sequential evaluation as `mtable_tibble()`, so a later value in the new row can refer to an earlier one: either a column already in `.data`, or one that is added in the same call.
+Appending a row with `.table_add_row()` supports the same sequential evaluation as `.table_tibble()`, so a later value in the new row can refer to an earlier one: either a column already in `.data`, or one that is added in the same call.
 
 ```{r}
-df <- mtable_tibble(a = 1:2, b = a * 10)
+df <- .table_tibble(a = 1:2, b = a * 10)
 df
-mtable_add_row(df, a = 3, b = a * 10)
+.table_add_row(df, a = 3, b = a * 10)
 ```
 
-Here `a * 10` in the new row refers to the `a = 3` just supplied in that same call, not to the existing column `a` in `df` -- the most recently constructed value for a given name always wins, which is what `.mtable_drop_dup_list()` is for internally.
+Here `a * 10` in the new row refers to the `a = 3` just supplied in that same call, not to the existing column `a` in `df` -- the most recently constructed value for a given name always wins, which is what `.table_drop_dup_list()` is for internally.
 
 ## Scope: data frame dropping still exists
 

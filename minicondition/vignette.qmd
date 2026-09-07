@@ -14,30 +14,30 @@ condition, catchable specifically by that class. See the [README](https://github
 
 These are the core functions:
 
-- `mcond_abort(message, class = NULL)` -- signal a classed error.
-- `mcond_warn(message, class = NULL)` -- signal a classed warning.
-- `mcond_inform(message, class = NULL)` -- signal a classed message.
-- `mcond_assert(expr, message, class = NULL)` -- call `mcond_abort()` if `expr` isn't entirely `TRUE`; `NA` counts as a failure.
+- `.cond_abort(message, class = NULL)` -- signal a classed error.
+- `.cond_warn(message, class = NULL)` -- signal a classed warning.
+- `.cond_inform(message, class = NULL)` -- signal a classed message.
+- `.cond_assert(expr, message, class = NULL)` -- call `.cond_abort()` if `expr` isn't entirely `TRUE`; `NA` counts as a failure.
 
 `minicondition` also has one internal helper:
 
-- `.mcond_condition()` builds the classed condition object that `mcond_abort()`/ `_warn()`/ `_inform()` each hand off to base `stop()`/`warning()`/`message()`.
+- `.cond_condition()` builds the classed condition object that `.cond_abort()`/ `_warn()`/ `_inform()` each hand off to base `stop()`/`warning()`/`message()`.
 
 ## Why classes matter
 
-A plain `stop("bad input")` produces a condition of class `c("simpleError", "error", "condition")` -- generic, and indistinguishable from any other error at the point where it's caught. That's fine for a one-off script, but it's a problem inside a package: callers who want to react to *this specific kind* of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. `mcond_abort()` solves that by adding an extra class on top of `"error"`, so `tryCatch()` can dispatch on it directly:
+A plain `stop("bad input")` produces a condition of class `c("simpleError", "error", "condition")` -- generic, and indistinguishable from any other error at the point where it's caught. That's fine for a one-off script, but it's a problem inside a package: callers who want to react to *this specific kind* of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. `.cond_abort()` solves that by adding an extra class on top of `"error"`, so `tryCatch()` can dispatch on it directly:
 
 ```{r}
 tryCatch(
-  mcond_abort("bad input", class = "mypkg_invalid_input"),
+  .cond_abort("bad input", class = "mypkg_invalid_input"),
   mypkg_invalid_input = function(e) message("caught: ", conditionMessage(e))
 )
 ```
 
-Note that `mcond_abort()` uses base `stop()` internally, not `rlang::abort()` -- but the mechanics of catching by class are identical either way. `tryCatch()`/`withCallingHandlers()` dispatch on a condition object's `class` attribute, regardless of what function signalled it:
+Note that `.cond_abort()` uses base `stop()` internally, not `rlang::abort()` -- but the mechanics of catching by class are identical either way. `tryCatch()`/`withCallingHandlers()` dispatch on a condition object's `class` attribute, regardless of what function signalled it:
 
 ```{r}
-e <- tryCatch(mcond_abort("x", class = "mypkg_invalid_input"), error = function(e) e)
+e <- tryCatch(.cond_abort("x", class = "mypkg_invalid_input"), error = function(e) e)
 class(e)
 ```
 
@@ -47,7 +47,7 @@ A handler for an unrelated class simply doesn't match -- `tryCatch()` tries each
 
 ```{r}
 tryCatch(
-  mcond_abort("bad input", class = "mypkg_invalid_input"),
+  .cond_abort("bad input", class = "mypkg_invalid_input"),
   mypkg_other_class = function(e) message("this handler never runs"),
   error = function(e) message("caught generically as a plain error: ", conditionMessage(e))
 )
@@ -57,11 +57,11 @@ This is the same layering `rlang` conditions use: a custom class sits *in additi
 
 ## Warnings and messages work the same way
 
-`mcond_warn()` signals a classed warning, catchable via `withCallingHandlers()` (warnings, unlike errors, don't unwind the call stack, so catching them with `tryCatch()` would abandon whatever code was about to run after the warning -- `withCallingHandlers()` lets the handler run and then hand control back):
+`.cond_warn()` signals a classed warning, catchable via `withCallingHandlers()` (warnings, unlike errors, don't unwind the call stack, so catching them with `tryCatch()` would abandon whatever code was about to run after the warning -- `withCallingHandlers()` lets the handler run and then hand control back):
 
 ```{r}
 withCallingHandlers(
-  mcond_warn("using a fallback default", class = "mypkg_fallback_used"),
+  .cond_warn("using a fallback default", class = "mypkg_fallback_used"),
   mypkg_fallback_used = function(w) {
     message("caught warning: ", conditionMessage(w))
     invokeRestart("muffleWarning")
@@ -71,36 +71,36 @@ withCallingHandlers(
 
 The `invokeRestart("muffleWarning")` call suppresses the warning from also being printed by R's default warning handler -- without it, the warning would print a second time after the custom handler runs.
 
-`mcond_inform()` signals a classed message -- uncaught, it just prints like an ordinary `message()` call, since messages are typically meant to be seen unless something specifically wants to intercept them:
+`.cond_inform()` signals a classed message -- uncaught, it just prints like an ordinary `message()` call, since messages are typically meant to be seen unless something specifically wants to intercept them:
 
 ```{r}
-mcond_inform("starting up", class = "mypkg_startup")
+.cond_inform("starting up", class = "mypkg_startup")
 ```
 
-## `mcond_assert()`: abort if a condition doesn't hold
+## `.cond_assert()`: abort if a condition doesn't hold
 
-`mcond_assert()` is `mcond_abort()` plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn't entirely `TRUE`. A passing assertion is silent, so it's safe to sprinkle through code as a precondition check without cluttering normal output:
+`.cond_assert()` is `.cond_abort()` plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn't entirely `TRUE`. A passing assertion is silent, so it's safe to sprinkle through code as a precondition check without cluttering normal output:
 
 ```{r}
 x <- 5
-mcond_assert(x > 0, "x must be positive.")
+.cond_assert(x > 0, "x must be positive.")
 ```
 
-A failing one raises a classed error, catchable the same way as `mcond_abort()` -- which makes sense, since that's exactly what it calls internally:
+A failing one raises a classed error, catchable the same way as `.cond_abort()` -- which makes sense, since that's exactly what it calls internally:
 
 ```{r}
 tryCatch(
-  mcond_assert(x > 0 && x < 3, "x must be between 0 and 3.", class = "mypkg_range_error"),
+  .cond_assert(x > 0 && x < 3, "x must be between 0 and 3.", class = "mypkg_range_error"),
   mypkg_range_error = function(e) message("caught: ", conditionMessage(e))
 )
 ```
 
 ## `NA` counts as a failure, not a crash
 
-`mcond_assert()` accepts a vector, not just a single logical value, and checks that *every* element is `TRUE`. That raises a subtlety: what should happen if the vector contains `NA`? This is a deliberate fix relative to the source this was adapted from: a naive `if (any(expr == FALSE))` errors outright when `expr` contains `NA` ("missing value where TRUE/FALSE needed"), which would crash the assertion check itself rather than raising the intended, informative assertion error. `mcond_assert()` checks `anyNA(expr)` explicitly first, so a vector containing `NA` fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:
+`.cond_assert()` accepts a vector, not just a single logical value, and checks that *every* element is `TRUE`. That raises a subtlety: what should happen if the vector contains `NA`? This is a deliberate fix relative to the source this was adapted from: a naive `if (any(expr == FALSE))` errors outright when `expr` contains `NA` ("missing value where TRUE/FALSE needed"), which would crash the assertion check itself rather than raising the intended, informative assertion error. `.cond_assert()` checks `anyNA(expr)` explicitly first, so a vector containing `NA` fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:
 
 ```{r}
 #| error: true
 y <- c(TRUE, TRUE, NA)
-mcond_assert(y, "y must not contain NA.", class = "mypkg_na_error")
+.cond_assert(y, "y must not contain NA.", class = "mypkg_na_error")
 ```

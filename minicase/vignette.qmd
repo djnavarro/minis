@@ -7,25 +7,25 @@ title: "minicase"
 source(file.path("minicase", "minicase.R"))
 ```
 
-`minicase` provides a single function, `mcase_case_when()`, a minimal reimplementation of `dplyr::case_when()`: vectorised if/else across a sequence of `condition ~ value` formulas, first match wins. See the [README](https://github.com/djnavarro/minis/tree/main/minicase) for scope notes; this page walks through it on the same toy fruits data frame used in the [minifilter vignette](../minifilter/), building up to how missing values and default values interact.
+`minicase` provides a single function, `.case_when()`, a minimal reimplementation of `dplyr::case_when()`: vectorised if/else across a sequence of `condition ~ value` formulas, first match wins. See the [README](https://github.com/djnavarro/minis/tree/main/minicase) for scope notes; this page walks through it on the same toy fruits data frame used in the [minifilter vignette](../minifilter/), building up to how missing values and default values interact.
 
 ## Functions
 
 There is one core function:
 
-- `mcase_case_when(...)` -- given a sequence of `condition ~ value`
+- `.case_when(...)` -- given a sequence of `condition ~ value`
   formulas, return a vector the same length as the (recycled)
   conditions/values, taking the value from the first formula whose
   condition is `TRUE` at each position, and `NA` wherever no condition
   matched.
 
-It is supported by five internal helpers, all supporting `mcase_case_when()`'s recycling and type-consistency checks -- there's no need to call any of them directly. The helpers are these:
+It is supported by five internal helpers, all supporting `.case_when()`'s recycling and type-consistency checks -- there's no need to call any of them directly. The helpers are these:
 
-- `.mcase_validate_length()`
-- `.mcase_replace_with()`
-- `.mcase_check_length()`
-- `.mcase_check_type()`
-- `.mcase_check_class()`
+- `.case_validate_length()`
+- `.case_replace_with()`
+- `.case_check_length()`
+- `.case_check_type()`
+- `.case_check_class()`
 
 ## A minimal data set
 
@@ -43,7 +43,7 @@ fruits
 There is no data-masking in this mini: you must reference columns with `$`, or wrap in `with()`. Unlike `dplyr::case_when()`, conditions and values are evaluated in the *caller's* environment, not the data frame's -- so bare column names don't resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in `with(data, ...)` which temporarily makes the data frame's columns available as bare names for the duration of the call:
 
 ```{r}
-with(fruits, mcase_case_when(
+with(fruits, .case_when(
   price < 1 ~ "cheap",
   price < 3 ~ "mid",
   price >= 3 ~ "pricey"
@@ -54,8 +54,8 @@ Referring to columns via `fruits$price` directly, without `with()`, works exactl
 
 ```{r}
 identical(
-  with(fruits, mcase_case_when(price < 3 ~ "cheap", TRUE ~ "not cheap")),
-  mcase_case_when(fruits$price < 3 ~ "cheap", TRUE ~ "not cheap")
+  with(fruits, .case_when(price < 3 ~ "cheap", TRUE ~ "not cheap")),
+  .case_when(fruits$price < 3 ~ "cheap", TRUE ~ "not cheap")
 )
 ```
 
@@ -64,7 +64,7 @@ identical(
 Formulas are checked in order, and the first `TRUE` condition for each position determines its value, even if a later condition would also match. `cherry` (price 3.00) is a good illustration: it fails `price < 3`, but matches `price >= 3`, so it's classified as `"pricey"` above. Conditions can combine several tests with `&`, which is useful for layering more specific rules ahead of more general ones:
 
 ```{r}
-with(fruits, mcase_case_when(
+with(fruits, .case_when(
   in_stock & price < 1 ~ "cheap and in stock",
   in_stock             ~ "in stock",
   TRUE                 ~ "out of stock or unknown price"
@@ -79,7 +79,7 @@ stock"` rule rather than the more general `"in stock"` one. Ordering formulas fr
 `date` has a missing price, so every condition involving `price` evaluates to `NA` for that row -- neither `TRUE` nor `FALSE` -- and `date` itself gets `NA` in the result, since there's no condition it definitively satisfies:
 
 ```{r}
-with(fruits, mcase_case_when(
+with(fruits, .case_when(
   price < 1 ~ "cheap",
   price < 3 ~ "mid",
   price >= 3 ~ "pricey"
@@ -89,7 +89,7 @@ with(fruits, mcase_case_when(
 Add a `TRUE ~ ...` formula at the end as a catch-all default, the same way you would in `dplyr`, and every remaining position -- including ones where every prior condition was `NA` rather than `FALSE` -- picks up that value instead:
 
 ```{r}
-with(fruits, mcase_case_when(
+with(fruits, .case_when(
   price < 1  ~ "cheap",
   price < 3  ~ "mid",
   price >= 3 ~ "pricey",

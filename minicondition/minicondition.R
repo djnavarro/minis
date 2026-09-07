@@ -14,8 +14,10 @@
 ##   a condition of class `my_class` regardless of whether it was raised
 ##   via rlang or via a plain classed condition object passed to
 ##   `stop()`.
-## - Exported functions prefixed `mcond_`; internal helper is
-##   `.mcond_condition()`.
+## - All functions are dot-prefixed with the tag `.cond_` -- there's no
+##   separate exported-vs-internal naming split, since every function here
+##   is meant to be treated as an implementation detail once copied into a
+##   consuming package.
 ## - `class` defaults to `NULL` (no extra class beyond
 ##   error/warning/message/condition) rather than a package-specific
 ##   default -- unlike the internal helper this was adapted from, which
@@ -30,11 +32,11 @@
 ##
 ## Usage:
 ##   source("minicondition.R")
-##   mcond_abort("Input must be positive.", class = "mypkg_invalid_input")
-##   mcond_assert(x > 0, "x must be positive.", class = "mypkg_invalid_input")
+##   .cond_abort("Input must be positive.", class = "mypkg_invalid_input")
+##   .cond_assert(x > 0, "x must be positive.", class = "mypkg_invalid_input")
 ##
 ##   tryCatch(
-##     mcond_abort("bad input", class = "mypkg_invalid_input"),
+##     .cond_abort("bad input", class = "mypkg_invalid_input"),
 ##     mypkg_invalid_input = function(e) cat("caught:", conditionMessage(e), "\n")
 ##   )
 ##
@@ -43,7 +45,7 @@
 ## base R's condition system.
 
 #' @noRd
-.mcond_condition <- function(message, class, base_class) {
+.cond_condition <- function(message, class, base_class) {
   structure(
     class = c(class, base_class, "condition"),
     list(message = message, call = NULL)
@@ -56,22 +58,22 @@
 #'   condition can be caught specifically via `tryCatch(expr, <class> =
 #'   handler)`. Defaults to no extra class.
 #' @export
-mcond_abort <- function(message, class = NULL) {
-  stop(.mcond_condition(message, class, "error"))
+.cond_abort <- function(message, class = NULL) {
+  stop(.cond_condition(message, class, "error"))
 }
 
 #' Signal a classed warning
-#' @inheritParams mcond_abort
+#' @inheritParams .cond_abort
 #' @export
-mcond_warn <- function(message, class = NULL) {
-  warning(.mcond_condition(message, class, "warning"))
+.cond_warn <- function(message, class = NULL) {
+  warning(.cond_condition(message, class, "warning"))
 }
 
 #' Signal a classed message
-#' @inheritParams mcond_abort
+#' @inheritParams .cond_abort
 #' @export
-mcond_inform <- function(message, class = NULL) {
-  message(.mcond_condition(paste0(message, "\n"), class, "message"))
+.cond_inform <- function(message, class = NULL) {
+  message(.cond_condition(paste0(message, "\n"), class, "message"))
 }
 
 #' Abort with a classed error if a condition doesn't hold
@@ -84,6 +86,6 @@ mcond_inform <- function(message, class = NULL) {
 #' @param class Optional character vector of extra classes for the
 #'   resulting error condition.
 #' @export
-mcond_assert <- function(expr, message = "Assertion failed.", class = NULL) {
-  if (anyNA(expr) || any(expr == FALSE)) mcond_abort(message, class)
+.cond_assert <- function(expr, message = "Assertion failed.", class = NULL) {
+  if (anyNA(expr) || any(expr == FALSE)) .cond_abort(message, class)
 }

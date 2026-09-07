@@ -7,7 +7,12 @@
 ## Design notes:
 ## - Base R only, adapted from poorman's joins.R
 ##   (https://github.com/nathaneastwood/poorman), itself dependency-free.
-## - Exported functions prefixed `mjoin_`; internal helper `.mjoin_worker()`.
+## - All functions are dot-prefixed with the tag `.join_` -- there's no
+##   separate exported-vs-internal naming split, since every function
+##   here is meant to be treated as an implementation detail once
+##   copied into a consuming package. (Note: the `.join_id` temporary
+##   column name used internally during the merge is unrelated to this
+##   naming scheme and is not a function identifier.)
 ## - Unlike dplyr, `by` must always be supplied explicitly -- there is
 ##   no auto-detection of common columns. This avoids a class of silent
 ##   bugs and keeps the implementation simple.
@@ -22,14 +27,14 @@
 ##   source("minijoin.R")
 ##   bands <- data.frame(band = c("Beatles", "Who"), founded = c(1960, 1964))
 ##   albums <- data.frame(band = c("Beatles", "Kinks"), album = c("Abbey Road", "Arthur"))
-##   mjoin_inner_join(bands, albums, by = "band")
-##   mjoin_left_join(bands, albums, by = "band")
+##   .join_inner_join(bands, albums, by = "band")
+##   .join_left_join(bands, albums, by = "band")
 ##
 ## License: MIT (see LICENSE at the root of the minis repo). Logic
 ## adapted from poorman (MIT licensed), not copied from {dplyr}.
 
 #' @noRd
-.mjoin_worker <- function(x, y, by, suffix, keep, na_matches, ...) {
+.join_worker <- function(x, y, by, suffix, keep, na_matches, ...) {
   na_matches <- match.arg(arg = na_matches, choices = c("na", "never"), several.ok = FALSE)
   incomparables <- if (na_matches == "never") NA else NULL
   x[, ".join_id"] <- seq_len(nrow(x))
@@ -61,29 +66,29 @@
 #' @param na_matches `"na"` (default) matches `NA` to `NA`, as in
 #'   dplyr/SQL joins; `"never"` never matches `NA` to anything.
 #' @export
-mjoin_inner_join <- function(x, y, by, suffix = c(".x", ".y"), ..., na_matches = c("na", "never")) {
-  .mjoin_worker(x = x, y = y, by = by, suffix = suffix, sort = FALSE, ..., keep = FALSE, na_matches = na_matches)
+.join_inner_join <- function(x, y, by, suffix = c(".x", ".y"), ..., na_matches = c("na", "never")) {
+  .join_worker(x = x, y = y, by = by, suffix = suffix, sort = FALSE, ..., keep = FALSE, na_matches = na_matches)
 }
 
 #' Left join: keep all rows of `x`
-#' @inheritParams mjoin_inner_join
+#' @inheritParams .join_inner_join
 #' @param keep Keep both join columns (suffixed) rather than collapsing
 #'   them into one.
 #' @export
-mjoin_left_join <- function(x, y, by, suffix = c(".x", ".y"), ..., keep = FALSE, na_matches = c("na", "never")) {
-  .mjoin_worker(x = x, y = y, by = by, suffix = suffix, all.x = TRUE, ..., keep = keep, na_matches = na_matches)
+.join_left_join <- function(x, y, by, suffix = c(".x", ".y"), ..., keep = FALSE, na_matches = c("na", "never")) {
+  .join_worker(x = x, y = y, by = by, suffix = suffix, all.x = TRUE, ..., keep = keep, na_matches = na_matches)
 }
 
 #' Right join: keep all rows of `y`
-#' @inheritParams mjoin_left_join
+#' @inheritParams .join_left_join
 #' @export
-mjoin_right_join <- function(x, y, by, suffix = c(".x", ".y"), ..., keep = FALSE, na_matches = c("na", "never")) {
-  .mjoin_worker(x = x, y = y, by = by, suffix = suffix, all.y = TRUE, ..., keep = keep, na_matches = na_matches)
+.join_right_join <- function(x, y, by, suffix = c(".x", ".y"), ..., keep = FALSE, na_matches = c("na", "never")) {
+  .join_worker(x = x, y = y, by = by, suffix = suffix, all.y = TRUE, ..., keep = keep, na_matches = na_matches)
 }
 
 #' Full join: keep all rows of both `x` and `y`
-#' @inheritParams mjoin_left_join
+#' @inheritParams .join_left_join
 #' @export
-mjoin_full_join <- function(x, y, by, suffix = c(".x", ".y"), ..., keep = FALSE, na_matches = c("na", "never")) {
-  .mjoin_worker(x = x, y = y, by = by, suffix = suffix, all = TRUE, ..., keep = keep, na_matches = na_matches)
+.join_full_join <- function(x, y, by, suffix = c(".x", ".y"), ..., keep = FALSE, na_matches = c("na", "never")) {
+  .join_worker(x = x, y = y, by = by, suffix = suffix, all = TRUE, ..., keep = keep, na_matches = na_matches)
 }

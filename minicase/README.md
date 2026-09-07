@@ -15,11 +15,11 @@ Copy [`minicase.R`](minicase.R) into your package's `R/` directory. No
 
 | Function | Purpose |
 |---|---|
-| `mcase_case_when(...)` | Given `condition ~ value` formulas, return a vector where each position takes the value from the first matching condition; unmatched positions are `NA` |
+| `.case_when(...)` | Given `condition ~ value` formulas, return a vector where each position takes the value from the first matching condition; unmatched positions are `NA` |
 
 ```r
 x <- c(-5, 0, 5, NA)
-mcase_case_when(
+.case_when(
   x < 0  ~ "negative",
   x == 0 ~ "zero",
   x > 0  ~ "positive",
@@ -30,7 +30,7 @@ mcase_case_when(
 
 Conditions and values are evaluated in the *caller's* environment --
 there's no data-masking layer here, so reference data frame columns
-with `df$col`, or wrap the call: `with(df, mcase_case_when(...))`.
+with `df$col`, or wrap the call: `with(df, .case_when(...))`.
 
 ## Scope
 

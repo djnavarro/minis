@@ -7,8 +7,12 @@
 ## Design notes:
 ## - Base R only, adapted from poorman's filter()/dots.R
 ##   (https://github.com/nathaneastwood/poorman), itself dependency-free.
-## - Exported function prefixed `mfilter_`; internal helper is
-##   `.mfilter_dotdotdot()`.
+## - The sole exported function is a bare dot-name, `.filter()` -- not
+##   tagged, since this mini's entire purpose already is "filter" and a
+##   `.filter_filter()` name would stutter. The internal helper keeps a
+##   short `.filter_` tag (`.filter_dotdotdot()`) since generic helper
+##   names are the ones actually at risk of colliding with something
+##   else once copied into a consuming package.
 ## - Multiple conditions are combined with logical AND, same as
 ##   `dplyr::filter(df, cond1, cond2)`. Rows where the combined
 ##   condition is `NA` are dropped, matching dplyr's semantics.
@@ -18,13 +22,13 @@
 ##
 ## Usage:
 ##   source("minifilter.R")
-##   mfilter_filter(mtcars, cyl == 4, mpg > 25)
+##   .filter(mtcars, cyl == 4, mpg > 25)
 ##
 ## License: MIT (see LICENSE at the root of the minis repo). Logic
 ## adapted from poorman (MIT licensed), not copied from {dplyr}.
 
 #' @noRd
-.mfilter_dotdotdot <- function(...) {
+.filter_dotdotdot <- function(...) {
   eval(substitute(alist(...)))
 }
 
@@ -38,8 +42,8 @@
 #'   `TRUE`. Rows where the combined condition is `NA` are dropped, as
 #'   in dplyr. Calling with no conditions returns `.data` unchanged.
 #' @export
-mfilter_filter <- function(.data, ...) {
-  conditions <- .mfilter_dotdotdot(...)
+.filter <- function(.data, ...) {
+  conditions <- .filter_dotdotdot(...)
   if (length(conditions) == 0L) return(.data)
   rows <- lapply(
     conditions,

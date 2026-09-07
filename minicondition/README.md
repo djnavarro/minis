@@ -14,20 +14,20 @@ directory. No `Imports`/`Suggests` entry needed.
 
 | Function | rlang equivalent | Notes |
 |---|---|---|
-| `mcond_abort(message, class = NULL)` | `abort()` | Signals a classed error |
-| `mcond_warn(message, class = NULL)` | `warn()` | Signals a classed warning |
-| `mcond_inform(message, class = NULL)` | `inform()` | Signals a classed message |
-| `mcond_assert(expr, message = "Assertion failed.", class = NULL)` | -- | Calls `mcond_abort()` if `expr` contains any `FALSE` or `NA` |
+| `.cond_abort(message, class = NULL)` | `abort()` | Signals a classed error |
+| `.cond_warn(message, class = NULL)` | `warn()` | Signals a classed warning |
+| `.cond_inform(message, class = NULL)` | `inform()` | Signals a classed message |
+| `.cond_assert(expr, message = "Assertion failed.", class = NULL)` | -- | Calls `.cond_abort()` if `expr` contains any `FALSE` or `NA` |
 
 ```r
-mcond_abort("Input must be positive.", class = "mypkg_invalid_input")
+.cond_abort("Input must be positive.", class = "mypkg_invalid_input")
 
 tryCatch(
-  mcond_abort("bad input", class = "mypkg_invalid_input"),
+  .cond_abort("bad input", class = "mypkg_invalid_input"),
   mypkg_invalid_input = function(e) message("caught: ", conditionMessage(e))
 )
 
-mcond_assert(x > 0, "x must be positive.", class = "mypkg_invalid_input")
+.cond_assert(x > 0, "x must be positive.", class = "mypkg_invalid_input")
 ```
 
 ## How it works
@@ -57,7 +57,7 @@ meant to be copied into any package:
 - `message` has no default at all -- a generic placeholder isn't useful
   to any caller.
 
-Also fixed: `mcond_assert()` treats `NA` in `expr` as a failure. The
+Also fixed: `.cond_assert()` treats `NA` in `expr` as a failure. The
 original's `if (any(expr == FALSE))` would itself error with "missing
 value where TRUE/FALSE needed" when `expr` contained `NA`, instead of
 raising the intended assertion error.

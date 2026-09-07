@@ -13,16 +13,16 @@ The `minijoin` mini provides a tiny slice of dplyr-like syntax for mutating join
 
 The core functions are these:
 
-- `mjoin_inner_join(x, y, by, ...)` -- keep only rows with a match in
+- `.join_inner_join(x, y, by, ...)` -- keep only rows with a match in
   both `x` and `y`.
-- `mjoin_left_join(x, y, by, ...)` -- keep all rows of `x`, filling in
+- `.join_left_join(x, y, by, ...)` -- keep all rows of `x`, filling in
   `NA` for `y`'s columns where there's no match.
-- `mjoin_right_join(x, y, by, ...)` -- keep all rows of `y`, filling in
+- `.join_right_join(x, y, by, ...)` -- keep all rows of `y`, filling in
   `NA` for `x`'s columns where there's no match.
-- `mjoin_full_join(x, y, by, ...)` -- keep all rows of both `x` and
+- `.join_full_join(x, y, by, ...)` -- keep all rows of both `x` and
   `y`, filling in `NA` on whichever side has no match.
 
-Additionally, `minijoin` has one internal helper, `.mjoin_worker()`, which all four join functions delegate to after fixing the right combination of `merge()`'s `all.x`/`all.y` arguments; it also restores `x`'s original
+Additionally, `minijoin` has one internal helper, `.join_worker()`, which all four join functions delegate to after fixing the right combination of `merge()`'s `all.x`/`all.y` arguments; it also restores `x`'s original
 row order, which `merge()` doesn't guarantee on its own.
 
 ## Minimal data frames
@@ -47,7 +47,7 @@ I will be honest. An AI designed these two data frames. Here we have `bands` and
 Neither `"Rolling Stones"` nor `"Queen"` appears -- an inner join is the most restrictive of the four, keeping only rows with a counterpart on the other side:
 
 ```{r}
-mjoin_inner_join(bands, albums, by = "band")
+.join_inner_join(bands, albums, by = "band")
 ```
 
 ## Left join: all rows of `x` (`bands`)
@@ -55,15 +55,15 @@ mjoin_inner_join(bands, albums, by = "band")
 `"Rolling Stones"` is kept, with `NA` for `album`, since it has no match in `albums`. This is the join to reach for when `x` is your "main" table and you're enriching it with optional data from `y`:
 
 ```{r}
-mjoin_left_join(bands, albums, by = "band")
+.join_left_join(bands, albums, by = "band")
 ```
 
 ## Right join: all rows of `y` (`albums`)
 
-`"Queen"` is kept, with `NA` for `founded`. A right join is really just a left join with the arguments swapped -- `mjoin_right_join(x, y, ...)` behaves like `mjoin_left_join(y, x, ...)`, with columns in `x`'s original order. Note the row order below: matched rows still come first, in `bands`' original order, with the unmatched-in-`x` row (`"Queen"`) appended at the end -- `minijoin` always restores `x`'s original row order for matched rows, rather than `y`'s:
+`"Queen"` is kept, with `NA` for `founded`. A right join is really just a left join with the arguments swapped -- `.join_right_join(x, y, ...)` behaves like `.join_left_join(y, x, ...)`, with columns in `x`'s original order. Note the row order below: matched rows still come first, in `bands`' original order, with the unmatched-in-`x` row (`"Queen"`) appended at the end -- `minijoin` always restores `x`'s original row order for matched rows, rather than `y`'s:
 
 ```{r}
-mjoin_right_join(bands, albums, by = "band")
+.join_right_join(bands, albums, by = "band")
 ```
 
 ## Full join: all rows of both
@@ -71,7 +71,7 @@ mjoin_right_join(bands, albums, by = "band")
 Both `"Rolling Stones"` and `"Queen"` are kept, each with an `NA` in the column they don't have a match for -- a full join never drops a row from either side, so it's the join to reach for when you want to see everything and let missing matches show up as `NA` rather than disappearing silently:
 
 ```{r}
-mjoin_full_join(bands, albums, by = "band")
+.join_full_join(bands, albums, by = "band")
 ```
 
 ## `by` is always explicit
@@ -85,7 +85,7 @@ albums_renamed <- albums
 names(albums_renamed)[1] <- "artist"
 albums_renamed
 
-mjoin_inner_join(bands, albums_renamed, by = c("band" = "artist"))
+.join_inner_join(bands, albums_renamed, by = c("band" = "artist"))
 ```
 
 Note that the output keeps `x`'s column name (`band`), not `y`'s (`artist`) -- the join collapses the two into a single column, using whichever name `x` had.

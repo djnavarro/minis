@@ -7,9 +7,9 @@ title: "minimap"
 source(file.path("minimap", "minimap.R"))
 ```
 
-`minimap` provides `purrr`-style mapping functions -- `mmap_map()`,
-`mmap_map2()`, `mmap_imap()`, `mmap_walk()`, `mmap_iwalk()`, and the
-type-stable `mmap_map_dbl()`/`mmap_map_lgl()`/`mmap_map_chr()` -- built
+`minimap` provides `purrr`-style mapping functions -- `.iter_map()`,
+`.iter_map2()`, `.iter_imap()`, `.iter_walk()`, `.iter_iwalk()`, and the
+type-stable `.iter_map_dbl()`/`.iter_map_lgl()`/`.iter_map_chr()` -- built
 entirely on `lapply()`/`vapply()`. See the
 [README](https://github.com/djnavarro/minis/tree/main/minimap) for the
 full API reference and scope notes; this page walks through each one,
@@ -20,70 +20,70 @@ side-effect variants.
 
 ### Core functions
 
-- `mmap_map(.x, .f)` -- apply `.f` to each element of `.x`, always
+- `.iter_map(.x, .f)` -- apply `.f` to each element of `.x`, always
   returning a list, with names preserved.
-- `mmap_map_dbl()`/`mmap_map_lgl()`/`mmap_map_chr()` -- like
-  `mmap_map()`, but return an atomic vector of the named type instead
+- `.iter_map_dbl()`/`.iter_map_lgl()`/`.iter_map_chr()` -- like
+  `.iter_map()`, but return an atomic vector of the named type instead
   of a list, via `vapply()`.
-- `mmap_map2(.x, .y, .f)` -- apply `.f` to corresponding pairs of
+- `.iter_map2(.x, .y, .f)` -- apply `.f` to corresponding pairs of
   elements from two same-length lists/vectors.
-- `mmap_imap(.x, .f)` -- apply `.f` to each element of `.x` together
+- `.iter_imap(.x, .f)` -- apply `.f` to each element of `.x` together
   with its name.
-- `mmap_walk(.x, .f)` -- like `mmap_map()`, but for side effects only:
+- `.iter_walk(.x, .f)` -- like `.iter_map()`, but for side effects only:
   returns `.x` invisibly instead of the results.
-- `mmap_iwalk(.x, .f)` -- like `mmap_imap()`, but for side effects
+- `.iter_iwalk(.x, .f)` -- like `.iter_imap()`, but for side effects
   only: returns `.x` invisibly instead of the results.
 
 ### Internal helpers
 
-- `.mmap_assert(expr, message)` -- a small argument-checking helper
+- `.iter_assert(expr, message)` -- a small argument-checking helper
   built on base `stop()`, used to validate inputs like matching
   lengths or the presence of names.
 
-## `mmap_map()`
+## `.iter_map()`
 
-`mmap_map()` is the workhorse of the mini: apply a function to each
+`.iter_map()` is the workhorse of the mini: apply a function to each
 element of a list or atomic vector, and get back a list of results the
 same length, with any names from the input preserved on the output.
 It's a thin wrapper around `lapply()`, so anything you already know
 about `lapply()`'s behaviour carries over directly:
 
 ```{r}
-mmap_map(1:3, function(x) x + 1)
+.iter_map(1:3, function(x) x + 1)
 ```
 
 ```{r}
-mmap_map(c(a = 1, b = 2), function(x) x * 10)
+.iter_map(c(a = 1, b = 2), function(x) x * 10)
 ```
 
-Because the return type is always a list, `mmap_map()` is safe to use
+Because the return type is always a list, `.iter_map()` is safe to use
 even when `.f` returns different types or lengths for different
 elements:
 
 ```{r}
-mmap_map(1:3, function(x) if (x == 2) c(x, x) else x)
+.iter_map(1:3, function(x) if (x == 2) c(x, x) else x)
 ```
 
 ## Type-stable variants
 
 Often you know in advance that every element of the result will be a
 single number, logical, or string -- in which case getting a list back
-is inconvenient. `mmap_map_dbl()`, `mmap_map_lgl()`, and
-`mmap_map_chr()` cover that case: they behave like `mmap_map()`, but
+is inconvenient. `.iter_map_dbl()`, `.iter_map_lgl()`, and
+`.iter_map_chr()` cover that case: they behave like `.iter_map()`, but
 return an atomic vector of the named type via `vapply()`, which also
 means they *validate* that every call to `.f` really does produce a
 length-1 value of the expected type:
 
 ```{r}
-mmap_map_dbl(1:3, function(x) x + 1)
+.iter_map_dbl(1:3, function(x) x + 1)
 ```
 
 ```{r}
-mmap_map_lgl(1:5, function(x) x %% 2 == 0)
+.iter_map_lgl(1:5, function(x) x %% 2 == 0)
 ```
 
 ```{r}
-mmap_map_chr(c(a = 1, b = 2), function(x) sprintf("value is %s", x))
+.iter_map_chr(c(a = 1, b = 2), function(x) sprintf("value is %s", x))
 ```
 
 If `.f` breaks that promise -- by returning a vector of length 2
@@ -92,16 +92,16 @@ producing a malformed or recycled result:
 
 ```{r}
 #| error: true
-mmap_map_dbl(1:3, function(x) c(x, x))
+.iter_map_dbl(1:3, function(x) c(x, x))
 ```
 
-## `mmap_map2()` and `mmap_imap()`
+## `.iter_map2()` and `.iter_imap()`
 
-Sometimes one input isn't enough. `mmap_map2()` walks two same-length
+Sometimes one input isn't enough. `.iter_map2()` walks two same-length
 vectors in parallel, calling `.f` with one element from each:
 
 ```{r}
-mmap_map2(1:3, 4:6, function(x, y) x + y)
+.iter_map2(1:3, 4:6, function(x, y) x + y)
 ```
 
 Passing vectors of mismatched length is a deliberate error rather than
@@ -109,48 +109,48 @@ silent recycling:
 
 ```{r}
 #| error: true
-mmap_map2(1:3, 1:2, function(x, y) x + y)
+.iter_map2(1:3, 1:2, function(x, y) x + y)
 ```
 
-`mmap_imap()` covers a related but different need: walking a single
+`.iter_imap()` covers a related but different need: walking a single
 named vector together with its own names, rather than a second vector.
 `.f` is called with the element first, then its name:
 
 ```{r}
-mmap_imap(c(a = 1, b = 2), function(val, name) paste0(name, "=", val))
+.iter_imap(c(a = 1, b = 2), function(val, name) paste0(name, "=", val))
 ```
 
-`.x` must actually be named for `mmap_imap()` to make sense, and that's
+`.x` must actually be named for `.iter_imap()` to make sense, and that's
 enforced:
 
 ```{r}
 #| error: true
-mmap_imap(1:3, function(val, name) paste0(name, "=", val))
+.iter_imap(1:3, function(val, name) paste0(name, "=", val))
 ```
 
-## `mmap_walk()` and `mmap_iwalk()`
+## `.iter_walk()` and `.iter_iwalk()`
 
-`mmap_map()` and `mmap_imap()` are for when you want the *results*.
-`mmap_walk()` and `mmap_iwalk()` are their side-effect-only
+`.iter_map()` and `.iter_imap()` are for when you want the *results*.
+`.iter_walk()` and `.iter_iwalk()` are their side-effect-only
 counterparts: same iteration behaviour, but the return value is `.x`
 itself, returned invisibly, so they compose neatly at the end of a
 pipeline without cluttering the console with the results of every call
 to `.f`:
 
 ```{r}
-mmap_walk(1:3, function(x) cat("value:", x, "\n"))
+.iter_walk(1:3, function(x) cat("value:", x, "\n"))
 ```
 
 ```{r}
-mmap_iwalk(c(a = 1, b = 2), function(val, name) cat(name, "->", val, "\n"))
+.iter_iwalk(c(a = 1, b = 2), function(val, name) cat(name, "->", val, "\n"))
 ```
 
-Because the input is returned invisibly, `mmap_walk()`/`mmap_iwalk()`
+Because the input is returned invisibly, `.iter_walk()`/`.iter_iwalk()`
 can be dropped into the middle of a longer expression purely for their
 printing side effect, without changing what the expression evaluates
 to:
 
 ```{r}
-result <- mmap_walk(1:3, function(x) cat("processing", x, "\n"))
+result <- .iter_walk(1:3, function(x) cat("processing", x, "\n"))
 identical(result, 1:3)
 ```

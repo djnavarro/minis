@@ -39,19 +39,19 @@ call them internally.
 
 | Function | Purpose |
 |---|---|
-| `mcli_col_red()`, `_green()`, `_yellow()`, `_blue()`, `_magenta()`, `_cyan()`, `_white()`, `_black()`, `_grey()` | Wrap text in an ANSI colour, no-op when disabled |
-| `mcli_style_bold()`, `_dim()`, `_italic()`, `_underline()` | Wrap text in an ANSI style, no-op when disabled |
-| `mcli_symbol(name)` | Unicode symbol (`tick`, `cross`, `info`, `warn`, `bullet`, `arrow_right`, `line`) with ascii fallback |
-| `mcli_alert_success()`, `_danger()`, `_warning()`, `_info()` | `message()`-based alerts with a coloured symbol prefix; extra `...` args go through `sprintf()` |
-| `mcli_rule(title = NULL)` | A horizontal divider, optionally with a centred title |
-| `mcli_bullets(items)` | A simple bulleted list |
+| `.cli_col_red()`, `_green()`, `_yellow()`, `_blue()`, `_magenta()`, `_cyan()`, `_white()`, `_black()`, `_grey()` | Wrap text in an ANSI colour, no-op when disabled |
+| `.cli_style_bold()`, `_dim()`, `_italic()`, `_underline()` | Wrap text in an ANSI style, no-op when disabled |
+| `.cli_symbol(name)` | Unicode symbol (`tick`, `cross`, `info`, `warn`, `bullet`, `arrow_right`, `line`) with ascii fallback |
+| `.cli_alert_success()`, `_danger()`, `_warning()`, `_info()` | `message()`-based alerts with a coloured symbol prefix; extra `...` args go through `sprintf()` |
+| `.cli_rule(title = NULL)` | A horizontal divider, optionally with a centred title |
+| `.cli_bullets(items)` | A simple bulleted list |
 
 ```r
-mcli_alert_success("Wrote %d files to %s", 3, "output/")
+.cli_alert_success("Wrote %d files to %s", 3, "output/")
 #> v Wrote 3 files to output/    (or a green tick + colour, in a real terminal)
 
-mcli_rule("Summary")
-mcli_bullets(c("one", "two", "three"))
+.cli_rule("Summary")
+.cli_bullets(c("one", "two", "three"))
 ```
 
 ## Tests

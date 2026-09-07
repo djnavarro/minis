@@ -22,19 +22,19 @@ whichever functions you want to expose, or leave them unexported.
 
 | Function | purrr equivalent | Returns |
 |---|---|---|
-| `mtrap_safely(.f)` | `safely()` | A function returning `list(result =, error =)`; exactly one is `NULL` per call |
-| `mtrap_quietly(.f)` | `quietly()` | A function returning `list(result =, output =, warnings =, messages =)` |
+| `.trap_safely(.f)` | `safely()` | A function returning `list(result =, error =)`; exactly one is `NULL` per call |
+| `.trap_quietly(.f)` | `quietly()` | A function returning `list(result =, output =, warnings =, messages =)` |
 
 Both return shapes match purrr's, so code built against `minitrap` can
 switch to real purrr later with no changes beyond the function names.
 
 ```r
-safe_log <- mtrap_safely(log)
+safe_log <- .trap_safely(log)
 safe_log(-1)
 #> $result: NULL
 #> $error:  <simpleError in log(-1): NaNs produced>
 
-quiet_fn <- mtrap_quietly(function() {
+quiet_fn <- .trap_quietly(function() {
   message("starting")
   warning("using a default")
   42
@@ -46,17 +46,17 @@ quiet_fn()
 #> $messages: "starting\n"
 ```
 
-`mtrap_quietly()` does not catch errors — a `stop()` inside `.f` still
-propagates. Compose with `mtrap_safely()` if you want both:
+`.trap_quietly()` does not catch errors — a `stop()` inside `.f` still
+propagates. Compose with `.trap_safely()` if you want both:
 
 ```r
-robust_fn <- mtrap_safely(mtrap_quietly(my_function))
+robust_fn <- .trap_safely(.trap_quietly(my_function))
 ```
 
 ## How it works
 
-- `mtrap_safely()` is a thin `tryCatch()` wrapper.
-- `mtrap_quietly()` uses `withCallingHandlers()` with `warning`/`message`
+- `.trap_safely()` is a thin `tryCatch()` wrapper.
+- `.trap_quietly()` uses `withCallingHandlers()` with `warning`/`message`
   handlers that record the condition's text and then call
   `invokeRestart("muffleWarning")`/`invokeRestart("muffleMessage")` to
   stop it from reaching the console. Printed/`cat()`-ed output is

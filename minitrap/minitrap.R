@@ -7,10 +7,14 @@
 ## value.
 ##
 ## Design notes:
-## - Base R only. `mtrap_safely()` uses tryCatch(); `mtrap_quietly()`
+## - Base R only. `.trap_safely()` uses tryCatch(); `.trap_quietly()`
 ##   uses withCallingHandlers() plus the muffleWarning/muffleMessage
 ##   restarts, and sink() to capture printed output.
-## - Exported functions prefixed `mtrap_`; no internal helpers needed.
+## - Functions are dot-prefixed with the tag `.trap_` -- there's no
+##   separate exported-vs-internal naming split, since every function
+##   here is meant to be treated as an implementation detail once
+##   copied into a consuming package (this mini happens to have no
+##   internal helpers).
 ## - Return shapes deliberately mirror purrr's `safely()`/`quietly()`
 ##   (list(result=, error=) and list(result=, output=, warnings=,
 ##   messages=) respectively), so trapped calls are drop-in compatible
@@ -22,11 +26,11 @@
 ##
 ## Usage:
 ##   source("minitrap.R")
-##   safe_log <- mtrap_safely(log)
+##   safe_log <- .trap_safely(log)
 ##   safe_log(-1)   # $result NULL,     $error <simpleError in log(-1): ...>
 ##   safe_log(10)   # $result 2.302585, $error NULL
 ##
-##   quiet_fn <- mtrap_quietly(function() { message("hi"); warning("careful"); 42 })
+##   quiet_fn <- .trap_quietly(function() { message("hi"); warning("careful"); 42 })
 ##   quiet_fn()     # $result 42, $output "", $warnings "careful", $messages "hi\n"
 ##
 ## License: MIT (see LICENSE at the root of the minis repo). This file
@@ -39,7 +43,7 @@
 #'   returns `list(result = ..., error = ...)`: exactly one of the two
 #'   is `NULL` on any given call.
 #' @export
-mtrap_safely <- function(.f) {
+.trap_safely <- function(.f) {
   function(...) {
     tryCatch(
       list(result = .f(...), error = NULL),
@@ -51,8 +55,8 @@ mtrap_safely <- function(.f) {
 #' Wrap a function so printed output, warnings, and messages are
 #' captured instead of shown
 #'
-#' Errors are not caught here -- compose with [mtrap_safely()] for that,
-#' e.g. `mtrap_safely(mtrap_quietly(f))`.
+#' Errors are not caught here -- compose with [.trap_safely()] for that,
+#' e.g. `.trap_safely(.trap_quietly(f))`.
 #'
 #' @param .f A function.
 #' @return A function with the same arguments as `.f`. Calling it
@@ -61,7 +65,7 @@ mtrap_safely <- function(.f) {
 #'   single string; `warnings`/`messages` are character vectors, one
 #'   entry per warning/message raised, in the order they occurred.
 #' @export
-mtrap_quietly <- function(.f) {
+.trap_quietly <- function(.f) {
   function(...) {
     warnings <- character()
     warning_handler <- function(w) {

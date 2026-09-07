@@ -259,3 +259,54 @@ the session. Confirmed while testing that this environment's own
 tests must clear explicitly via `withr::local_envvar()` alongside the
 Positron/RStudio env vars they set, or the ambient value leaks in and
 masks the behaviour under test.
+
+## Repo-wide rename: dropping the exported/internal prefix split for a uniform dot-prefix
+
+The original convention prefixed exported functions with a bare
+mini-specific string (`mtrap_safely`) and internal helpers with a
+dot-prefixed version of the same string (`.mtrap_assert`). Revisited
+this once it became clear the exported/internal distinction doesn't
+actually matter to a mini's consumer: a mini is always copied into a
+package's `R/` directory and treated as wholly internal there,
+regardless of which functions the mini's own author considered "core"
+versus "helper" — so the naming scheme was drawing a distinction real
+usage never observes. Decided instead to dot-prefix every function in
+a mini uniformly with the same short tag, collapsing the two naming
+tiers into one.
+
+Two complications surfaced once this was worked through mini-by-mini,
+both resolved by treating the tag as a per-mini judgment call rather
+than a mechanical truncation of the folder name:
+
+- **Stutter on single-function minis.** `minifilter` and `minicase`
+  each export exactly one function whose name already *is* the
+  natural tag (`filter`, `case_when`), so a mechanically-derived tag
+  produces `.filter_filter()`/`.case_case_when()`. Fix: those two
+  minis export a bare dot-name (`.filter()`, `.case_when()`) with no
+  additional tag, while their internal helpers (`.filter_dotdotdot()`,
+  `.case_replace_with()`, etc.) keep a short tag — the generic helper
+  names are the ones actually at risk of colliding with something
+  else once copied into a consuming package, not the single
+  distinctively-named exported function.
+- **Semantic mismatch on multi-verb minis.** `minimap` bundles a
+  map-family (`map`/`map2`/`imap`/`map_dbl`/`map_lgl`/`map_chr`) and a
+  walk-family (`walk`/`iwalk`, which call `map()` internally for a
+  side-effect variant) in one file, consistent with this repo's
+  "shared implementation stays together" precedent (see the `minijoin`
+  entry above). A tag literally named "map" reads badly on the walk
+  half (`.map_walk()` sounds like walk is a kind of mapping operation,
+  when to a reader it's a related-but-distinct verb). Fix: gave
+  `minimap` the tag `.iter_` instead of `.map_`, decoupling the
+  internal namespace tag from the folder/file name — `minimap` the
+  folder wasn't itself confusing, only a tag mechanically derived from
+  it would have been. This established that the tag is its own
+  per-mini naming decision, not something that has to match the
+  mini's name.
+
+The other five minis (`minicli`, `minitrap`, `minijoin`, `minitable`,
+`minicondition`) kept a straightforward tag matching their folder name
+(`.cli_`, `.trap_`, `.join_`, `.table_`, `.cond_`) since none of their
+exported functions collide with the tag word or span a semantically
+split family. Applied across all eight minis' source files, tests,
+READMEs, and vignettes; `Rscript run_tests.R` confirmed all suites
+still pass after the rename.
