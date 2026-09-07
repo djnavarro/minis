@@ -45,10 +45,17 @@
   }
   merged <- merged[order(merged[, ".join_id"]), colnames(merged) != ".join_id", drop = FALSE]
   if (isTRUE(keep)) {
-    keep_pos <- match(by, names(merged))
-    x_by <- paste0(by, suffix[1L])
+    # When `by` is named (differently-named join columns), merge()'s output
+    # collapses the joined column to *x*'s name (names(by)), not by's value
+    # (y's name) -- so looking columns up by `by` itself, as this used to
+    # do, never matches anything once `by` is named, and crashes below with
+    # "undefined columns selected". Both suffixed copies are derived from
+    # the x-side name either way, same as the already-same-named case.
+    by_x <- if (is.null(names(by))) by else names(by)
+    keep_pos <- match(by_x, names(merged))
+    x_by <- paste0(by_x, suffix[1L])
     colnames(merged)[keep_pos] <- x_by
-    merged[, paste0(by, suffix[2L])] <- merged[, x_by]
+    merged[, paste0(by_x, suffix[2L])] <- merged[, x_by]
   }
   rownames(merged) <- NULL
   merged

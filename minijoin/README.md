@@ -36,7 +36,10 @@ Common arguments across all four:
 - **`suffix`** (default `c(".x", ".y")`) is applied to overlapping
   non-join column names.
 - **`keep`** (left/right/full only) keeps both join columns, suffixed,
-  instead of collapsing them into one.
+  instead of collapsing them into one. Both suffixed copies are named
+  after `by`'s x-side name even when `by` renames the join column
+  (e.g. `by = c("band" = "artist")` with `keep = TRUE` produces
+  `band.x`/`band.y`, not `band`/`artist`).
 - **`na_matches`**: `"na"` (default) matches `NA` to `NA`, as dplyr/SQL
   joins do; `"never"` excludes `NA`-keyed rows from matching at all.
 - Row order always matches `x`'s original order (restored internally

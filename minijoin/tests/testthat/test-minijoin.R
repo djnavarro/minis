@@ -47,6 +47,13 @@ test_that("keep = TRUE preserves both join columns, suffixed", {
   expect_true(all(c("band.x", "band.y") %in% names(out)))
 })
 
+test_that("keep = TRUE works with a renamed `by` instead of crashing", {
+  albums2 <- data.frame(artist = c("Beatles", "Pink Floyd"), album = c("Abbey Road", "The Wall"))
+  out <- .join_left_join(bands, albums2, by = c("band" = "artist"), keep = TRUE)
+  expect_true(all(c("band.x", "band.y") %in% names(out)))
+  expect_equal(out$band.x, bands$band)
+})
+
 test_that("na_matches = 'never' excludes NA-keyed rows from matching", {
   x <- data.frame(id = c(1, NA), val = c("a", "b"))
   y <- data.frame(id = c(1, NA), val2 = c("A", "B"))
