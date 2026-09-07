@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>minis</title>
+<title>ministr – minis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,30 +26,65 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-ea5d96cbeb63a7c8b86b696ae6314387.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-ea5d96cbeb63a7c8b86b696ae6314387.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -259,7 +294,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">minis</span>
     </a>
   </div>
@@ -286,7 +321,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Home</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../ministr/index.html">ministr</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -300,7 +335,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Home</span></a>
   </div>
 </li>
@@ -315,67 +350,67 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minicli/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minicli/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minicli</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minimap/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minimap/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minimap</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minitrap/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minitrap/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minitrap</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minifilter/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minifilter/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minifilter</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minicase/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minicase/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minicase</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minijoin/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minijoin/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minijoin</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minitable/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minitable/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minitable</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minicondition/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minicondition/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minicondition</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minipivot/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minipivot/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minipivot</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./ministr/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../ministr/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">ministr</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minirx/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minirx/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minirx</span></a>
   </div>
 </li>
@@ -386,16 +421,31 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
+  <li><a href="#padding" id="toc-padding" class="nav-link" data-scroll-target="#padding">Padding</a></li>
+  <li><a href="#trimming-and-squishing-whitespace" id="toc-trimming-and-squishing-whitespace" class="nav-link" data-scroll-target="#trimming-and-squishing-whitespace">Trimming and squishing whitespace</a></li>
+  <li><a href="#substrings" id="toc-substrings" class="nav-link" data-scroll-target="#substrings">Substrings</a></li>
+  <li><a href="#length" id="toc-length" class="nav-link" data-scroll-target="#length">Length</a></li>
+  <li><a href="#case-conversion" id="toc-case-conversion" class="nav-link" data-scroll-target="#case-conversion">Case conversion</a></li>
+  <li><a href="#duplication" id="toc-duplication" class="nav-link" data-scroll-target="#duplication">Duplication</a></li>
+  <li><a href="#concatenation-and-na-propagation" id="toc-concatenation-and-na-propagation" class="nav-link" data-scroll-target="#concatenation-and-na-propagation">Concatenation and <code>NA</code> propagation</a></li>
+  <li><a href="#wrapping" id="toc-wrapping" class="nav-link" data-scroll-target="#wrapping">Wrapping</a></li>
+  <li><a href="#scope-no-locale-awareness" id="toc-scope-no-locale-awareness" class="nav-link" data-scroll-target="#scope-no-locale-awareness">Scope: no locale awareness</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../ministr/index.html">ministr</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">minis</h1>
+<h1 class="title">ministr</h1>
 </div>
 
 
@@ -412,83 +462,205 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>A problem I encounter frequently when writing R packages is that I’ll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does.</p>
-<p>The “minis” repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components (“minis”), each witten as a single <code>.R</code> file with its own drop-in test suite. When a package needs a little bit of <code>cli</code>-style formatting, or a little bit of <code>purrr</code>-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, I can grab the relevant mini and copy it straight into my package without reimplementing the solution over and over again. Admittedly, it is rarely a pure “drop-in” situation: every package has its own need, so I almost always end up adapting the mini to suit the context, but even so I find it helps me enormously.</p>
-<p>So I’ve started trying to collect these little snippets into a single place, making it easy for me to find them again rather than hunt around trying to remember where I solved this problem last time. The <a href="https://github.com/djnavarro/minis">repository README</a> outlines the full philosophy and usage instructions, if by some chance anyone else should care to reuse these solutions. Meanwhile, because each mini has its own worked vignette, this site exists to collect all these together (or alternatively, the README if a vignette doesn’t exist).</p>
-<p>These are the minis that currently exist:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 65%">
-<col style="width: 20%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Mini</th>
-<th>Purpose</th>
-<th>Docs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>minicli</code></td>
-<td>Minimal <code>cli</code>-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.</td>
-<td><a href="minicli/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minimap</code></td>
-<td>Minimal <code>purrr</code>-style <code>map()</code>/<code>map2()</code>/<code>imap()</code>/<code>walk()</code>/<code>iwalk()</code> and type-stable <code>map_dbl()</code>/<code>map_lgl()</code>/<code>map_chr()</code>.</td>
-<td><a href="minimap/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitrap</code></td>
-<td>Minimal <code>purrr</code>-style <code>safely()</code>/<code>quietly()</code> function adverbs.</td>
-<td><a href="minitrap/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minifilter</code></td>
-<td>Minimal <code>dplyr</code>-style <code>filter()</code>.</td>
-<td><a href="minifilter/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minicase</code></td>
-<td>Minimal <code>dplyr</code>-style <code>case_when()</code>.</td>
-<td><a href="minicase/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minijoin</code></td>
-<td>Minimal <code>dplyr</code>-style mutating joins, built on <code>merge()</code>.</td>
-<td><a href="minijoin/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitable</code></td>
-<td>Minimal <code>tibble</code>-style construction/coercion helpers.</td>
-<td><a href="minitable/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minicondition</code></td>
-<td>Minimal <code>rlang</code>-style classed conditions, plus <code>assert()</code>.</td>
-<td><a href="minicondition/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minipivot</code></td>
-<td>Minimal <code>tidyr</code>-style <code>pivot_longer()</code>/<code>pivot_wider()</code>.</td>
-<td><a href="minipivot/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>ministr</code></td>
-<td>Minimal <code>stringr</code>-style basic string manipulation (padding/trimming/case conversion/etc).</td>
-<td><a href="ministr/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minirx</code></td>
-<td>Minimal <code>stringr</code>-style regex pattern matching (detect/extract/match/replace/split/count/locate).</td>
-<td><a href="minirx/">Vignette</a></td>
-</tr>
-</tbody>
-</table>
+<p>The purpose of <strong>ministr</strong> is to provide a zero-dependency reimplementation of stringr’s basic string manipulation verbs from the <a href="https://stringr.tidyverse.org/"><strong>stringr</strong></a> package: padding, trimming, whitespace squishing, substrings, length, case conversion, duplication, concatenation, and wrapping. The <a href="https://github.com/djnavarro/minis/tree/main/ministr">README</a> provides scope notes; this page walks through each function on a small set of toy strings, including two behaviours worth knowing about before you rely on it: how <code>NA</code> is propagated through concatenation, and how title case is found without a Unicode-aware word-break algorithm. (For pattern-matching functions like <code>str_detect()</code>/ <code>str_replace()</code>, see the companion <a href="../minirx/"><strong>minirx</strong></a> vignette.)</p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/ministr/ministr.R"><strong>ministr.R</strong></a> script supplies eleven core functions:</p>
+<ul>
+<li><code>.str_pad(string, width, side, pad)</code> is used to pad a string to a fixed width.</li>
+<li><code>.str_trim(string, side)</code> is used to trim leading/trailing whitespace.</li>
+<li><code>.str_squish(string)</code> is used to trim and collapse internal whitespace runs to a single space.</li>
+<li><code>.str_sub(string, start, end)</code> is used to extract a substring by (possibly negative) character position.</li>
+<li><code>.str_length(string)</code> is used to count the characters in a string.</li>
+<li><code>.str_to_upper(string)</code> and <code>.str_to_lower(string)</code> convert case.</li>
+<li><code>.str_to_title(string)</code> converts to title case.</li>
+<li><code>.str_to_sentence(string)</code> converts to sentence case.</li>
+<li><code>.str_dup(string, times)</code> is used to repeat a string.</li>
+<li><code>.str_c(..., sep, collapse)</code> is used to concatenate strings, propagating <code>NA</code>.</li>
+<li><code>.str_wrap(string, width, indent, exdent)</code> is used to wrap a string to a target line width.</li>
+</ul>
+<p>It contains no internal helpers.</p>
+</section>
+<section id="padding" class="level2">
+<h2 class="anchored" data-anchor-id="padding">Padding</h2>
+<p>The <code>.str_pad()</code> function pads to a fixed width, left by default:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_pad</span>(<span class="fu">c</span>(<span class="st">"7"</span>, <span class="st">"70"</span>, <span class="st">"700"</span>), <span class="at">width =</span> <span class="dv">4</span>, <span class="at">pad =</span> <span class="st">"0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "0007" "0070" "0700"</code></pre>
+</div>
+</div>
+<p>Padding can go on the right, or on both sides at once (with any leftover padding placed on the right when the total isn’t evenly split):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_pad</span>(<span class="st">"hi"</span>, <span class="at">width =</span> <span class="dv">6</span>, <span class="at">side =</span> <span class="st">"right"</span>, <span class="at">pad =</span> <span class="st">"-"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "hi----"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_pad</span>(<span class="st">"hi"</span>, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">side =</span> <span class="st">"both"</span>, <span class="at">pad =</span> <span class="st">"-"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "--hi---"</code></pre>
+</div>
+</div>
+<p>A string already at least as wide as <code>width</code> is returned unchanged, and an <code>NA</code> input stays <code>NA</code> rather than being padded. The rest of this page reuses this small toy vector, mixing untrimmed and inconsistently cased strings with a missing value:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>names <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"  bilbo baggins"</span>, <span class="st">"FRODO"</span>, <span class="cn">NA</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_pad</span>(names, <span class="at">width =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "       bilbo baggins" "               FRODO" NA                    </code></pre>
+</div>
+</div>
+</section>
+<section id="trimming-and-squishing-whitespace" class="level2">
+<h2 class="anchored" data-anchor-id="trimming-and-squishing-whitespace">Trimming and squishing whitespace</h2>
+<p>The <code>.str_trim()</code> function trims both sides by default, or a single side on request:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_trim</span>(names[<span class="dv">1</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "bilbo baggins"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_trim</span>(names[<span class="dv">1</span>], <span class="at">side =</span> <span class="st">"left"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "bilbo baggins"</code></pre>
+</div>
+</div>
+<p>The <code>.str_squish()</code> function goes further, also collapsing any run of internal whitespace down to a single space:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_squish</span>(<span class="st">"  too   much   space  "</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "too much space"</code></pre>
+</div>
+</div>
+</section>
+<section id="substrings" class="level2">
+<h2 class="anchored" data-anchor-id="substrings">Substrings</h2>
+<p>The <code>.str_sub()</code> function extracts by character position, and accepts negative positions counting back from the end of the string, the same way <code>stringr::str_sub()</code> does:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_sub</span>(<span class="st">"hello world"</span>, <span class="dv">1</span>, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "hello"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_sub</span>(<span class="st">"hello world"</span>, <span class="sc">-</span><span class="dv">5</span>, <span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "world"</code></pre>
+</div>
+</div>
+<p>Positions past either end of the string are clamped rather than erroring, and a start after the end just gives an empty string:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_sub</span>(<span class="st">"hi"</span>, <span class="dv">1</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "hi"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_sub</span>(<span class="st">"hello"</span>, <span class="dv">4</span>, <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] ""</code></pre>
+</div>
+</div>
+</section>
+<section id="length" class="level2">
+<h2 class="anchored" data-anchor-id="length">Length</h2>
+<p>The <code>.str_length()</code> function counts characters, and an <code>NA</code> input gives an <code>NA</code> count rather than treating it as the two-character string <code>"NA"</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_length</span>(names)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 15  5 NA</code></pre>
+</div>
+</div>
+</section>
+<section id="case-conversion" class="level2">
+<h2 class="anchored" data-anchor-id="case-conversion">Case conversion</h2>
+<p>The <code>.str_to_upper()</code>/<code>.str_to_lower()</code> functions are plain upper/lower casing:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_to_upper</span>(<span class="st">"Bilbo"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "BILBO"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_to_lower</span>(<span class="st">"Bilbo"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "bilbo"</code></pre>
+</div>
+</div>
+<p>The <code>.str_to_title()</code> function lower-cases the whole string first, then upper-cases the first letter of each word:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_to_title</span>(<span class="st">"  bilbo baggins"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "  Bilbo Baggins"</code></pre>
+</div>
+</div>
+<p>The <code>.str_to_sentence()</code> function is similar, but only upper-cases the very first letter of the string – the rest is lower-cased regardless of word boundaries, since the whole input is treated as a single sentence rather than split on <code>.</code>/<code>!</code>/<code>?</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_to_sentence</span>(<span class="st">"BILBO BAGGINS the hobbit"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Bilbo baggins the hobbit"</code></pre>
+</div>
+</div>
+<p>Word starts for <code>.str_to_title()</code> are found with the ASCII regex <code>\\b</code>, not a Unicode-aware word-break algorithm. That’s a fine approximation for whitespace-delimited Latin text, but it isn’t a substitute for stringi’s locale-aware title casing if your strings involve other scripts.</p>
+</section>
+<section id="duplication" class="level2">
+<h2 class="anchored" data-anchor-id="duplication">Duplication</h2>
+<p>The <code>.str_dup()</code> function repeats each string, recycling <code>times</code> against <code>string</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_dup</span>(<span class="st">"ab"</span>, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "ababab"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_dup</span>(<span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>), <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "xx"   "yyyy"</code></pre>
+</div>
+</div>
+</section>
+<section id="concatenation-and-na-propagation" class="level2">
+<h2 class="anchored" data-anchor-id="concatenation-and-na-propagation">Concatenation and <code>NA</code> propagation</h2>
+<p>The <code>.str_c()</code> function behaves like <code>paste0()</code> with a separator, but an <code>NA</code> anywhere in the inputs to a given position makes that position’s result <code>NA</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_c</span>(<span class="st">"Mr. "</span>, names, <span class="at">sep =</span> <span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Mr.   bilbo baggins" "Mr. FRODO"           NA                   </code></pre>
+</div>
+</div>
+<p>Compare that with what base <code>paste0()</code> does with the same input – it coerces the missing name to the literal string <code>"NA"</code> instead of propagating the missing value:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">paste0</span>(<span class="st">"Mr. "</span>, names)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Mr.   bilbo baggins" "Mr. FRODO"           "Mr. NA"             </code></pre>
+</div>
+</div>
+<p>Supplying <code>collapse</code> joins everything into one string, and an <code>NA</code> anywhere in the collapsed inputs makes the whole collapsed result <code>NA</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_c</span>(<span class="fu">c</span>(<span class="st">"bilbo"</span>, <span class="st">"frodo"</span>), <span class="at">collapse =</span> <span class="st">", "</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "bilbo, frodo"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.str_c</span>(<span class="fu">c</span>(<span class="st">"bilbo"</span>, <span class="cn">NA</span>), <span class="at">collapse =</span> <span class="st">", "</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] NA</code></pre>
+</div>
+</div>
+</section>
+<section id="wrapping" class="level2">
+<h2 class="anchored" data-anchor-id="wrapping">Wrapping</h2>
+<p>The <code>.str_wrap()</code> function rewraps a string to a target line width, returning a single string per input with lines joined by <code>"\n"</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>wrapped <span class="ot">&lt;-</span> <span class="fu">.str_wrap</span>(</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bilbo Baggins was a very well-to-do hobbit who lived in a hole in the ground."</span>,</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">20</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(wrapped)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bilbo Baggins was a
+very well-to-do
+hobbit who lived in
+a hole in the
+ground.</code></pre>
+</div>
+</div>
+</section>
+<section id="scope-no-locale-awareness" class="level2">
+<h2 class="anchored" data-anchor-id="scope-no-locale-awareness">Scope: no locale awareness</h2>
+<p>None of these functions are locale-aware, unlike their <code>stringr</code> counterparts (which delegate to stringi/ICU under the hood). That’s a deliberate trade-off: it keeps this mini free of a regex-engine or ICU dependency, at the cost of correctness on non-Latin scripts and locale-specific casing rules (Turkish dotless <em>i</em>, for example). If your strings need that, this mini isn’t a substitute for <code>stringr</code> itself.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

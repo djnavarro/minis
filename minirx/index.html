@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>minis</title>
+<title>minirx – minis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,30 +26,65 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-ea5d96cbeb63a7c8b86b696ae6314387.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-25dec783d6e1d11f8e0bba9e4fbb47f4.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-eec68b17241c1efd3eae2de50d816e3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-ea5d96cbeb63a7c8b86b696ae6314387.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-2d1cd947831fac04525025690101ce81.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -259,7 +294,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">minis</span>
     </a>
   </div>
@@ -286,7 +321,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Home</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../minirx/index.html">minirx</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -300,7 +335,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Home</span></a>
   </div>
 </li>
@@ -315,67 +350,67 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minicli/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minicli/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minicli</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minimap/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minimap/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minimap</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minitrap/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minitrap/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minitrap</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minifilter/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minifilter/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minifilter</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minicase/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minicase/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minicase</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minijoin/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minijoin/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minijoin</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minitable/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minitable/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minitable</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minicondition/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minicondition/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minicondition</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minipivot/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minipivot/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minipivot</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./ministr/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../ministr/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">ministr</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./minirx/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../minirx/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">minirx</span></a>
   </div>
 </li>
@@ -386,16 +421,30 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
+  <li><a href="#detecting-matches" id="toc-detecting-matches" class="nav-link" data-scroll-target="#detecting-matches">Detecting matches</a></li>
+  <li><a href="#extracting-matches" id="toc-extracting-matches" class="nav-link" data-scroll-target="#extracting-matches">Extracting matches</a></li>
+  <li><a href="#matching-with-capture-groups" id="toc-matching-with-capture-groups" class="nav-link" data-scroll-target="#matching-with-capture-groups">Matching with capture groups</a></li>
+  <li><a href="#replacing-and-removing-matches" id="toc-replacing-and-removing-matches" class="nav-link" data-scroll-target="#replacing-and-removing-matches">Replacing and removing matches</a></li>
+  <li><a href="#splitting" id="toc-splitting" class="nav-link" data-scroll-target="#splitting">Splitting</a></li>
+  <li><a href="#counting-matches" id="toc-counting-matches" class="nav-link" data-scroll-target="#counting-matches">Counting matches</a></li>
+  <li><a href="#locating-matches" id="toc-locating-matches" class="nav-link" data-scroll-target="#locating-matches">Locating matches</a></li>
+  <li><a href="#scope-a-single-pcre-only-pattern" id="toc-scope-a-single-pcre-only-pattern" class="nav-link" data-scroll-target="#scope-a-single-pcre-only-pattern">Scope: a single, PCRE-only pattern</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../minirx/index.html">minirx</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">minis</h1>
+<h1 class="title">minirx</h1>
 </div>
 
 
@@ -412,83 +461,183 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>A problem I encounter frequently when writing R packages is that I’ll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does.</p>
-<p>The “minis” repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components (“minis”), each witten as a single <code>.R</code> file with its own drop-in test suite. When a package needs a little bit of <code>cli</code>-style formatting, or a little bit of <code>purrr</code>-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, I can grab the relevant mini and copy it straight into my package without reimplementing the solution over and over again. Admittedly, it is rarely a pure “drop-in” situation: every package has its own need, so I almost always end up adapting the mini to suit the context, but even so I find it helps me enormously.</p>
-<p>So I’ve started trying to collect these little snippets into a single place, making it easy for me to find them again rather than hunt around trying to remember where I solved this problem last time. The <a href="https://github.com/djnavarro/minis">repository README</a> outlines the full philosophy and usage instructions, if by some chance anyone else should care to reuse these solutions. Meanwhile, because each mini has its own worked vignette, this site exists to collect all these together (or alternatively, the README if a vignette doesn’t exist).</p>
-<p>These are the minis that currently exist:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 65%">
-<col style="width: 20%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Mini</th>
-<th>Purpose</th>
-<th>Docs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>minicli</code></td>
-<td>Minimal <code>cli</code>-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.</td>
-<td><a href="minicli/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minimap</code></td>
-<td>Minimal <code>purrr</code>-style <code>map()</code>/<code>map2()</code>/<code>imap()</code>/<code>walk()</code>/<code>iwalk()</code> and type-stable <code>map_dbl()</code>/<code>map_lgl()</code>/<code>map_chr()</code>.</td>
-<td><a href="minimap/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitrap</code></td>
-<td>Minimal <code>purrr</code>-style <code>safely()</code>/<code>quietly()</code> function adverbs.</td>
-<td><a href="minitrap/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minifilter</code></td>
-<td>Minimal <code>dplyr</code>-style <code>filter()</code>.</td>
-<td><a href="minifilter/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minicase</code></td>
-<td>Minimal <code>dplyr</code>-style <code>case_when()</code>.</td>
-<td><a href="minicase/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minijoin</code></td>
-<td>Minimal <code>dplyr</code>-style mutating joins, built on <code>merge()</code>.</td>
-<td><a href="minijoin/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minitable</code></td>
-<td>Minimal <code>tibble</code>-style construction/coercion helpers.</td>
-<td><a href="minitable/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>minicondition</code></td>
-<td>Minimal <code>rlang</code>-style classed conditions, plus <code>assert()</code>.</td>
-<td><a href="minicondition/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minipivot</code></td>
-<td>Minimal <code>tidyr</code>-style <code>pivot_longer()</code>/<code>pivot_wider()</code>.</td>
-<td><a href="minipivot/">Vignette</a></td>
-</tr>
-<tr class="even">
-<td><code>ministr</code></td>
-<td>Minimal <code>stringr</code>-style basic string manipulation (padding/trimming/case conversion/etc).</td>
-<td><a href="ministr/">Vignette</a></td>
-</tr>
-<tr class="odd">
-<td><code>minirx</code></td>
-<td>Minimal <code>stringr</code>-style regex pattern matching (detect/extract/match/replace/split/count/locate).</td>
-<td><a href="minirx/">Vignette</a></td>
-</tr>
-</tbody>
-</table>
+<p>The purpose of <strong>minirx</strong> is to provide a zero-dependency reimplementation of stringr’s regex-based pattern-matching verbs from the <a href="https://stringr.tidyverse.org/"><strong>stringr</strong></a> package: detect, extract, match, replace, remove, split, count, and locate. Every function takes a single PCRE pattern, applied via base R’s own <code>perl = TRUE</code> regex engine rather than stringr/stringi’s ICU engine. The <a href="https://github.com/djnavarro/minis/tree/main/minirx">README</a> provides scope notes; this page walks through each function on a small set of toy strings, including two base-R quirks this mini deliberately works around: <code>grepl()</code> silently turning a missing string into <code>FALSE</code> instead of <code>NA</code>, and <code>regmatches()</code> silently dropping non-matching elements instead of leaving a hole. (For non-regex string manipulation like padding/trimming/case conversion, see the companion <a href="../ministr/"><strong>ministr</strong></a> vignette.)</p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/minirx/minirx.R"><strong>minirx.R</strong></a> script supplies eleven core functions:</p>
+<ul>
+<li><code>.rx_detect(string, pattern, negate)</code> is used to detect whether a pattern matches.</li>
+<li><code>.rx_starts(string, pattern, negate)</code> and <code>.rx_ends(string, pattern, negate)</code> are used to detect whether a string starts/ends with a pattern.</li>
+<li><code>.rx_extract(string, pattern)</code> is used to extract the first match.</li>
+<li><code>.rx_extract_all(string, pattern)</code> is used to extract every match.</li>
+<li><code>.rx_match(string, pattern)</code> is used to extract the first match plus its capture groups, as a matrix.</li>
+<li><code>.rx_match_all(string, pattern)</code> is used to extract every match plus its capture groups, as a list of matrices.</li>
+<li><code>.rx_replace(string, pattern, replacement)</code> and <code>.rx_replace_all(string, pattern, replacement)</code> are used to replace the first/every match.</li>
+<li><code>.rx_remove(string, pattern)</code> and <code>.rx_remove_all(string, pattern)</code> are used to remove the first/every match.</li>
+<li><code>.rx_split(string, pattern)</code> is used to split a string on every match.</li>
+<li><code>.rx_count(string, pattern)</code> is used to count non-overlapping matches.</li>
+<li><code>.rx_locate(string, pattern)</code> and <code>.rx_locate_all(string, pattern)</code> are used to locate the position(s) of the first/every match.</li>
+</ul>
+<p>It contains no internal helpers.</p>
+</section>
+<section id="detecting-matches" class="level2">
+<h2 class="anchored" data-anchor-id="detecting-matches">Detecting matches</h2>
+<p>The <code>.rx_detect()</code> function reports whether a pattern matches anywhere in each string. A missing string reports <code>NA</code> rather than <code>FALSE</code>, unlike calling base <code>grepl()</code> directly:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>orders <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"order-123"</span>, <span class="st">"ORDER-456"</span>, <span class="st">"no id here"</span>, <span class="cn">NA</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_detect</span>(orders, <span class="st">"[0-9]+"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  TRUE  TRUE FALSE    NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grepl</span>(<span class="st">"[0-9]+"</span>, orders)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  TRUE  TRUE FALSE FALSE</code></pre>
+</div>
+</div>
+<p>The <code>negate</code> argument flips the result (still leaving <code>NA</code> alone), and <code>.rx_starts()</code>/<code>.rx_ends()</code> anchor the same check to the start or end of the string:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_detect</span>(orders, <span class="st">"[0-9]+"</span>, <span class="at">negate =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE FALSE  TRUE    NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_starts</span>(orders, <span class="st">"order"</span>, <span class="at">negate =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  TRUE FALSE FALSE    NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_ends</span>(orders, <span class="st">"[0-9]+"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  TRUE  TRUE FALSE    NA</code></pre>
+</div>
+</div>
+<p>Note that <code>.rx_starts()</code> treats case literally, the same way <code>stringr::str_starts()</code> does – <code>"ORDER-456"</code> doesn’t start with <code>"order"</code> above. Passing <code>(?i)</code> at the front of the pattern, PCRE’s inline case-insensitivity flag, switches that off:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_starts</span>(orders, <span class="st">"(?i)order"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  TRUE  TRUE FALSE    NA</code></pre>
+</div>
+</div>
+</section>
+<section id="extracting-matches" class="level2">
+<h2 class="anchored" data-anchor-id="extracting-matches">Extracting matches</h2>
+<p>The <code>.rx_extract()</code> function extracts the first match from each string, filling in <code>NA</code> where there’s no match rather than shortening the result – a fix relative to calling <code>regmatches(string, regexpr(pattern, string, perl = TRUE))</code> directly, which drops non-matching strings from the output entirely:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_extract</span>(orders, <span class="st">"[0-9]+"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "123" "456" NA    NA   </code></pre>
+</div>
+</div>
+<p>The <code>.rx_extract_all()</code> function returns every match per string, as a list:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_extract_all</span>(<span class="fu">c</span>(<span class="st">"a1 b2 c3"</span>, <span class="st">"no digits"</span>, <span class="cn">NA</span>), <span class="st">"[0-9]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+[1] "1" "2" "3"
+
+[[2]]
+character(0)
+
+[[3]]
+[1] NA</code></pre>
+</div>
+</div>
+</section>
+<section id="matching-with-capture-groups" class="level2">
+<h2 class="anchored" data-anchor-id="matching-with-capture-groups">Matching with capture groups</h2>
+<p>The <code>.rx_match()</code> function is like <code>.rx_extract()</code>, but also splits out each capture group into its own column:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_match</span>(orders, <span class="st">"([a-zA-Z]+)-([0-9]+)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1]        [,2]    [,3] 
+[1,] "order-123" "order" "123"
+[2,] "ORDER-456" "ORDER" "456"
+[3,] NA          NA      NA   
+[4,] NA          NA      NA   </code></pre>
+</div>
+</div>
+<p>The <code>.rx_match_all()</code> function does the same for every match in a string, returning one matrix per input:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_match_all</span>(<span class="fu">c</span>(<span class="st">"a1 b2"</span>, <span class="st">"none"</span>, <span class="cn">NA</span>), <span class="st">"([a-z])([0-9])"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+     [,1] [,2] [,3]
+[1,] "a1" "a"  "1" 
+[2,] "b2" "b"  "2" 
+
+[[2]]
+     [,1] [,2] [,3]
+
+[[3]]
+     [,1] [,2] [,3]
+[1,] NA   NA   NA  </code></pre>
+</div>
+</div>
+</section>
+<section id="replacing-and-removing-matches" class="level2">
+<h2 class="anchored" data-anchor-id="replacing-and-removing-matches">Replacing and removing matches</h2>
+<p>The <code>.rx_replace()</code>/<code>.rx_replace_all()</code> functions replace the first/every match, and <code>replacement</code> can refer to capture groups with <code>\1</code>, <code>\2</code>, and so on:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_replace_all</span>(<span class="st">"2024-01-02"</span>, <span class="st">"(</span><span class="sc">\\</span><span class="st">d+)-(</span><span class="sc">\\</span><span class="st">d+)-(</span><span class="sc">\\</span><span class="st">d+)"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">3/</span><span class="sc">\\</span><span class="st">2/</span><span class="sc">\\</span><span class="st">1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "02/01/2024"</code></pre>
+</div>
+</div>
+<p>The <code>.rx_remove()</code>/<code>.rx_remove_all()</code> functions are shorthand for replacing with <code>""</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_remove_all</span>(<span class="st">"order-123"</span>, <span class="st">"[0-9]"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "order-"</code></pre>
+</div>
+</div>
+</section>
+<section id="splitting" class="level2">
+<h2 class="anchored" data-anchor-id="splitting">Splitting</h2>
+<p>The <code>.rx_split()</code> function splits each string on every match of the pattern, keeping empty pieces rather than dropping them:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_split</span>(<span class="st">"a,b,,c"</span>, <span class="st">","</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+[1] "a" "b" ""  "c"</code></pre>
+</div>
+</div>
+</section>
+<section id="counting-matches" class="level2">
+<h2 class="anchored" data-anchor-id="counting-matches">Counting matches</h2>
+<p>The <code>.rx_count()</code> function counts non-overlapping matches per string. This one needs a real fix, not just a wrapper: base <code>gregexpr()</code> signals “no match” with a single <code>-1</code>, which – read naively as a length – looks like <em>one</em> match rather than zero:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_count</span>(<span class="fu">c</span>(<span class="st">"banana"</span>, <span class="st">"kiwi"</span>, <span class="st">""</span>, <span class="cn">NA</span>), <span class="st">"an"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  2  0  0 NA</code></pre>
+</div>
+</div>
+</section>
+<section id="locating-matches" class="level2">
+<h2 class="anchored" data-anchor-id="locating-matches">Locating matches</h2>
+<p>The <code>.rx_locate()</code>/<code>.rx_locate_all()</code> functions report the character positions (inclusive <code>start</code>/<code>end</code>) of the first/every match:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_locate</span>(orders, <span class="st">"[0-9]+"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     start end
+[1,]     7   9
+[2,]     7   9
+[3,]    NA  NA
+[4,]    NA  NA</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.rx_locate_all</span>(<span class="st">"a1a2a3"</span>, <span class="st">"a"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+     start end
+[1,]     1   1
+[2,]     3   3
+[3,]     5   5</code></pre>
+</div>
+</div>
+</section>
+<section id="scope-a-single-pcre-only-pattern" class="level2">
+<h2 class="anchored" data-anchor-id="scope-a-single-pcre-only-pattern">Scope: a single, PCRE-only pattern</h2>
+<p>Every function here takes exactly one pattern string, applied with <code>perl = TRUE</code>. There’s no support for stringr’s <code>fixed()</code>/<code>coll()</code>/ <code>boundary()</code> pattern-type wrappers, and no locale-aware collation – if a pattern needs to match a literal string that happens to contain regex metacharacters, escape it yourself (e.g.&nbsp;with <code>.rx_replace_all(x, "\\.", "_")</code> for a literal dot). If you need genuinely locale-sensitive matching, this mini isn’t a substitute for <code>stringr</code> itself.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
