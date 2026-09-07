@@ -43,3 +43,20 @@ test_that(".case_when() errors when a condition is not logical", {
 test_that(".case_when() errors on inconsistent recycling lengths", {
   expect_error(.case_when(c(TRUE, FALSE) ~ c("a", "b", "c")))
 })
+
+test_that(".case_when() errors on mismatched factor levels instead of silently producing NA", {
+  f1 <- factor(c("a", "b"), levels = c("a", "b"))
+  f2 <- factor(c("x", "y"), levels = c("x", "y"))
+  expect_error(
+    .case_when(c(TRUE, FALSE) ~ f1, c(FALSE, TRUE) ~ f2),
+    "Factor levels must match"
+  )
+})
+
+test_that(".case_when() combines factors that share the same levels", {
+  f1 <- factor(c("a", "b"), levels = c("a", "b"))
+  f2 <- factor(c("b", "a"), levels = c("a", "b"))
+  out <- .case_when(c(TRUE, FALSE) ~ f1, c(FALSE, TRUE) ~ f2)
+  expect_equal(as.character(out), c("a", "a"))
+  expect_equal(levels(out), c("a", "b"))
+})

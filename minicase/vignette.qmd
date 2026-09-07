@@ -117,6 +117,30 @@ with(fruits, .case_when(
 ))
 ```
 
+## Factors must share the same levels, not just the same class
+
+Values across formulas are also checked for type/class consistency.
+For factors specifically, sharing class `"factor"` isn't enough --
+the levels must match too, since assigning a factor label that isn't
+among an existing factor's levels would otherwise silently produce
+`NA` rather than raising a visible error:
+
+```{r}
+#| error: true
+f1 <- factor(c("a", "b"), levels = c("a", "b"))
+f2 <- factor(c("x", "y"), levels = c("x", "y"))
+.case_when(c(TRUE, FALSE) ~ f1, c(FALSE, TRUE) ~ f2)
+```
+
+Two factors with the same levels (in the same order) combine without
+any trouble:
+
+```{r}
+f3 <- factor(c("a", "b"), levels = c("a", "b"))
+f4 <- factor(c("b", "a"), levels = c("a", "b"))
+.case_when(c(TRUE, FALSE) ~ f3, c(FALSE, TRUE) ~ f4)
+```
+
 ## Scope: no `.default`/`.ptype`/`.size`
 
 The mini does not implement any of these arguments. The trailing `TRUE ~ "unknown"` formula in the previous example *is* the idiomatic way to get a default value, and is in fact very often used when writing code with the real `dplyr::case_when()` function. There was no need for this mini to implement dplyr's newer, separate `.default` argument as an alternative spelling of the same thing, and little to be gained by adding `.ptype`/`.size` to control the output type/length explicitly. If your use case needs those, a plain `TRUE ~ value` formula covers `.default`, and the output length/type simply follow from the conditions. If that still isn't sufficient, then it's likely you need the real version, not the mini.
