@@ -22,7 +22,7 @@ algorithm. (For pattern-matching functions like `str_detect()`/
 ## Functions
 
 The [**ministr.R**](https://github.com/djnavarro/minis/blob/main/ministr/ministr.R)
-script supplies eleven core functions:
+script supplies twelve core functions (grouped into eleven bullets below, since `.str_to_upper()`/`.str_to_lower()` share one):
 
 - `.str_pad(string, width, side, pad)` is used to pad a string to a
   fixed width.
