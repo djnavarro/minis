@@ -30,10 +30,9 @@ relevant mini and copy it straight into `R/`.
   mini itself thinks of it as a "core" function or an internal helper —
   once copied into a consuming package, everything from a mini is
   internal to that package anyway, so there's no reason to distinguish
-  the two in the name. A couple of single-function minis (`minifilter`,
-  `minicase`) skip the tag on their one exported function to avoid
-  stutter (`.filter`, `.case_when`, not `.filter_filter`), keeping the
-  tag only on their internal helpers.
+  the two in the name. A single-function mini (`minicase`) skips the
+  tag on its one exported function to avoid stutter (`.case_when`, not
+  `.case_case_when`), keeping the tag only on its internal helpers.
 - **Tested, but the tests don't ship.** Each mini has a `tests/testthat/`
   suite that lives in *this* repo for development purposes. Consumers of
   a mini just take the single source file — the tests use `testthat` and
