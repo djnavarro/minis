@@ -155,5 +155,42 @@
   }
   out <- lapply(out, function(x) if (is.null(x) || length(x) == 0) NA else x)
   new_row <- as.data.frame(out, check.names = FALSE)
+
+  # rbind.data.frame() matches columns by name, but its error for a
+  # mismatched column *set* ("numbers of columns of arguments do not
+  # match") is a low-level, unhelpful surprise -- check for that directly
+  # so a missing/extra/misspelled column name gets a message that actually
+  # says which column is the problem.
+  missing_cols <- setdiff(names(.data), names(new_row))
+  extra_cols <- setdiff(names(new_row), names(.data))
+  if (length(missing_cols) || length(extra_cols)) {
+    stop(
+      ".table_add_row(): new row's columns must exactly match `.data`'s. ",
+      if (length(missing_cols)) paste0("Missing: ", paste(missing_cols, collapse = ", "), ". ") else "",
+      if (length(extra_cols)) paste0("Unexpected: ", paste(extra_cols, collapse = ", "), ".") else ""
+    )
+  }
+  new_row <- new_row[names(.data)]
+
+  # rbind() otherwise silently upcasts an entire existing column's type to
+  # accommodate one incompatible new value (e.g. one character value turns
+  # a whole numeric column into character), with no warning at all -- catch
+  # that here instead of letting it through silently. Integer/double are
+  # treated as interchangeable, since combining them is ordinary and not
+  # surprising to anyone.
+  for (nm in names(.data)) {
+    old_type <- typeof(.data[[nm]])
+    new_type <- typeof(new_row[[nm]])
+    both_numeric <- old_type %in% c("integer", "double") && new_type %in% c("integer", "double")
+    if (!identical(old_type, new_type) && !both_numeric) {
+      stop(
+        ".table_add_row(): column `", nm, "` is `", old_type, "` in `.data` but `",
+        new_type, "` in the new row; rbind() would silently coerce the whole ",
+        "column to accommodate it. Convert the new value to `", old_type,
+        "` first if this is intentional."
+      )
+    }
+  }
+
   rbind(.data, new_row)
 }

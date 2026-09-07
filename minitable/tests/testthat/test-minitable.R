@@ -57,3 +57,27 @@ test_that(".table_add_row() supports cross-column references in the new row", {
   expect_equal(out$x, c(1, 2, 3))
   expect_equal(out$y, c(2, 4, 6))
 })
+
+test_that(".table_add_row() errors clearly on a missing or unexpected column, instead of an rbind-level error", {
+  df <- data.frame(x = 1:2, y = 3:4)
+  expect_error(.table_add_row(df, x = 5), "Missing: y")
+  expect_error(.table_add_row(df, x = 5, y = 6, z = 9), "Unexpected: z")
+})
+
+test_that(".table_add_row() works when named args are supplied out of order", {
+  df <- data.frame(x = 1:2, y = 3:4)
+  out <- .table_add_row(df, y = 6, x = 5)
+  expect_equal(out$x, c(1, 2, 5))
+  expect_equal(out$y, c(3, 4, 6))
+})
+
+test_that(".table_add_row() errors instead of silently upcasting an existing column's type", {
+  df <- data.frame(x = 1:2, y = c(10, 20))
+  expect_error(.table_add_row(df, x = "a", y = 30), "column `x`.*integer.*character")
+})
+
+test_that(".table_add_row() allows integer/double columns to mix without erroring", {
+  df <- data.frame(x = 1:2)
+  out <- .table_add_row(df, x = 3.5)
+  expect_equal(out$x, c(1, 2, 3.5))
+})
