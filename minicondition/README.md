@@ -16,7 +16,7 @@ directory. No `Imports`/`Suggests` entry needed.
 |---|---|---|
 | `.cond_abort(message, class = NULL)` | `abort()` | Signals a classed error |
 | `.cond_warn(message, class = NULL)` | `warn()` | Signals a classed warning |
-| `.cond_inform(message, class = NULL)` | `inform()` | Signals a classed message |
+| `.cond_inform(message, class = NULL)` | `inform()` | Signals a classed message; prints with a trailing newline like a plain `message()` call, but `conditionMessage()` on the caught condition is exactly `message`, with no newline appended -- same as `.cond_abort()`/`.cond_warn()` |
 | `.cond_assert(expr, message = "Assertion failed.", class = NULL)` | -- | Calls `.cond_abort()` if `expr` contains any `FALSE` or `NA` |
 
 ```r

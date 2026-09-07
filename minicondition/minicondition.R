@@ -70,10 +70,24 @@
 }
 
 #' Signal a classed message
+#'
+#' Prints with a trailing newline, like a plain `message()` call, but --
+#' unlike passing a pre-built condition straight to `message()` -- the
+#' newline is never part of the condition's own `message` field, so
+#' `conditionMessage()` on a caught `.cond_inform()` condition is exactly
+#' `message`, matching [.cond_abort()] and [.cond_warn()].
 #' @inheritParams .cond_abort
 #' @export
 .cond_inform <- function(message, class = NULL) {
-  message(.cond_condition(paste0(message, "\n"), class, "message"))
+  cond <- .cond_condition(message, class, "message")
+  withRestarts(
+    {
+      signalCondition(cond)
+      cat(conditionMessage(cond), "\n", sep = "", file = stderr())
+    },
+    muffleMessage = function() NULL
+  )
+  invisible(NULL)
 }
 
 #' Abort with a classed error if a condition doesn't hold

@@ -83,8 +83,15 @@ test_that(".cli_symbol errors cleanly on a vector name instead of an opaque R er
 })
 
 test_that("cli.num_colors = NA falls through to other detection instead of crashing", {
-  withr::local_options(cli.num_colors = NA, knitr.in.progress = TRUE)
-  expect_equal(.cli_col_red("x"), "x")
+  # cli.num_colors = NA is scoped tightly around the call under test (rather
+  # than for the whole test_that() block) because testthat's own "summary"
+  # reporter reads the same session-wide option to colourise its own dot/cross
+  # progress output between expectations -- leaving it set to NA while an
+  # expectation is being recorded would crash *that* unrelated cli-package
+  # codepath too.
+  withr::local_options(knitr.in.progress = TRUE)
+  result <- withr::with_options(list(cli.num_colors = NA), .cli_col_red("x"))
+  expect_equal(result, "x")
 })
 
 test_that("a numeric-looking string in cli.num_colors is compared numerically, not lexicographically", {
