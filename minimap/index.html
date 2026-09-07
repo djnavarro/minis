@@ -413,10 +413,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#core-functions" id="toc-core-functions" class="nav-link" data-scroll-target="#core-functions">Core functions</a></li>
   <li><a href="#internal-helpers" id="toc-internal-helpers" class="nav-link" data-scroll-target="#internal-helpers">Internal helpers</a></li>
   </ul></li>
-  <li><a href="#mmap_map" id="toc-mmap_map" class="nav-link" data-scroll-target="#mmap_map"><code>mmap_map()</code></a></li>
+  <li><a href="#iter_map" id="toc-iter_map" class="nav-link" data-scroll-target="#iter_map"><code>.iter_map()</code></a></li>
   <li><a href="#type-stable-variants" id="toc-type-stable-variants" class="nav-link" data-scroll-target="#type-stable-variants">Type-stable variants</a></li>
-  <li><a href="#mmap_map2-and-mmap_imap" id="toc-mmap_map2-and-mmap_imap" class="nav-link" data-scroll-target="#mmap_map2-and-mmap_imap"><code>mmap_map2()</code> and <code>mmap_imap()</code></a></li>
-  <li><a href="#mmap_walk-and-mmap_iwalk" id="toc-mmap_walk-and-mmap_iwalk" class="nav-link" data-scroll-target="#mmap_walk-and-mmap_iwalk"><code>mmap_walk()</code> and <code>mmap_iwalk()</code></a></li>
+  <li><a href="#iter_map2-and-.iter_imap" id="toc-iter_map2-and-.iter_imap" class="nav-link" data-scroll-target="#iter_map2-and-.iter_imap"><code>.iter_map2()</code> and <code>.iter_imap()</code></a></li>
+  <li><a href="#iter_walk-and-.iter_iwalk" id="toc-iter_walk-and-.iter_iwalk" class="nav-link" data-scroll-target="#iter_walk-and-.iter_iwalk"><code>.iter_walk()</code> and <code>.iter_iwalk()</code></a></li>
   </ul>
 </nav>
     </div>
@@ -443,32 +443,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minimap</code> provides <code>purrr</code>-style mapping functions – <code>mmap_map()</code>, <code>mmap_map2()</code>, <code>mmap_imap()</code>, <code>mmap_walk()</code>, <code>mmap_iwalk()</code>, and the type-stable <code>mmap_map_dbl()</code>/<code>mmap_map_lgl()</code>/<code>mmap_map_chr()</code> – built entirely on <code>lapply()</code>/<code>vapply()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minimap">README</a> for the full API reference and scope notes; this page walks through each one, starting from the basic case and building up to the two-input and side-effect variants.</p>
+<p><code>minimap</code> provides <code>purrr</code>-style mapping functions – <code>.iter_map()</code>, <code>.iter_map2()</code>, <code>.iter_imap()</code>, <code>.iter_walk()</code>, <code>.iter_iwalk()</code>, and the type-stable <code>.iter_map_dbl()</code>/<code>.iter_map_lgl()</code>/<code>.iter_map_chr()</code> – built entirely on <code>lapply()</code>/<code>vapply()</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minimap">README</a> for the full API reference and scope notes; this page walks through each one, starting from the basic case and building up to the two-input and side-effect variants.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <section id="core-functions" class="level3">
 <h3 class="anchored" data-anchor-id="core-functions">Core functions</h3>
 <ul>
-<li><code>mmap_map(.x, .f)</code> – apply <code>.f</code> to each element of <code>.x</code>, always returning a list, with names preserved.</li>
-<li><code>mmap_map_dbl()</code>/<code>mmap_map_lgl()</code>/<code>mmap_map_chr()</code> – like <code>mmap_map()</code>, but return an atomic vector of the named type instead of a list, via <code>vapply()</code>.</li>
-<li><code>mmap_map2(.x, .y, .f)</code> – apply <code>.f</code> to corresponding pairs of elements from two same-length lists/vectors.</li>
-<li><code>mmap_imap(.x, .f)</code> – apply <code>.f</code> to each element of <code>.x</code> together with its name.</li>
-<li><code>mmap_walk(.x, .f)</code> – like <code>mmap_map()</code>, but for side effects only: returns <code>.x</code> invisibly instead of the results.</li>
-<li><code>mmap_iwalk(.x, .f)</code> – like <code>mmap_imap()</code>, but for side effects only: returns <code>.x</code> invisibly instead of the results.</li>
+<li><code>.iter_map(.x, .f)</code> – apply <code>.f</code> to each element of <code>.x</code>, always returning a list, with names preserved.</li>
+<li><code>.iter_map_dbl()</code>/<code>.iter_map_lgl()</code>/<code>.iter_map_chr()</code> – like <code>.iter_map()</code>, but return an atomic vector of the named type instead of a list, via <code>vapply()</code>.</li>
+<li><code>.iter_map2(.x, .y, .f)</code> – apply <code>.f</code> to corresponding pairs of elements from two same-length lists/vectors.</li>
+<li><code>.iter_imap(.x, .f)</code> – apply <code>.f</code> to each element of <code>.x</code> together with its name.</li>
+<li><code>.iter_walk(.x, .f)</code> – like <code>.iter_map()</code>, but for side effects only: returns <code>.x</code> invisibly instead of the results.</li>
+<li><code>.iter_iwalk(.x, .f)</code> – like <code>.iter_imap()</code>, but for side effects only: returns <code>.x</code> invisibly instead of the results.</li>
 </ul>
 </section>
 <section id="internal-helpers" class="level3">
 <h3 class="anchored" data-anchor-id="internal-helpers">Internal helpers</h3>
 <ul>
-<li><code>.mmap_assert(expr, message)</code> – a small argument-checking helper built on base <code>stop()</code>, used to validate inputs like matching lengths or the presence of names.</li>
+<li><code>.iter_assert(expr, message)</code> – a small argument-checking helper built on base <code>stop()</code>, used to validate inputs like matching lengths or the presence of names.</li>
 </ul>
 </section>
 </section>
-<section id="mmap_map" class="level2">
-<h2 class="anchored" data-anchor-id="mmap_map"><code>mmap_map()</code></h2>
-<p><code>mmap_map()</code> is the workhorse of the mini: apply a function to each element of a list or atomic vector, and get back a list of results the same length, with any names from the input preserved on the output. It’s a thin wrapper around <code>lapply()</code>, so anything you already know about <code>lapply()</code>’s behaviour carries over directly:</p>
+<section id="iter_map" class="level2">
+<h2 class="anchored" data-anchor-id="iter_map"><code>.iter_map()</code></h2>
+<p><code>.iter_map()</code> is the workhorse of the mini: apply a function to each element of a list or atomic vector, and get back a list of results the same length, with any names from the input preserved on the output. It’s a thin wrapper around <code>lapply()</code>, so anything you already know about <code>lapply()</code>’s behaviour carries over directly:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) x <span class="sc">+</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) x <span class="sc">+</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
 [1] 2
@@ -481,7 +481,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(x) x <span class="sc">*</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(x) x <span class="sc">*</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$a
 [1] 10
@@ -490,9 +490,9 @@ $b
 [1] 20</code></pre>
 </div>
 </div>
-<p>Because the return type is always a list, <code>mmap_map()</code> is safe to use even when <code>.f</code> returns different types or lengths for different elements:</p>
+<p>Because the return type is always a list, <code>.iter_map()</code> is safe to use even when <code>.f</code> returns different types or lengths for different elements:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">2</span>) <span class="fu">c</span>(x, x) <span class="cf">else</span> x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">2</span>) <span class="fu">c</span>(x, x) <span class="cf">else</span> x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
 [1] 1
@@ -507,21 +507,21 @@ $b
 </section>
 <section id="type-stable-variants" class="level2">
 <h2 class="anchored" data-anchor-id="type-stable-variants">Type-stable variants</h2>
-<p>Often you know in advance that every element of the result will be a single number, logical, or string – in which case getting a list back is inconvenient. <code>mmap_map_dbl()</code>, <code>mmap_map_lgl()</code>, and <code>mmap_map_chr()</code> cover that case: they behave like <code>mmap_map()</code>, but return an atomic vector of the named type via <code>vapply()</code>, which also means they <em>validate</em> that every call to <code>.f</code> really does produce a length-1 value of the expected type:</p>
+<p>Often you know in advance that every element of the result will be a single number, logical, or string – in which case getting a list back is inconvenient. <code>.iter_map_dbl()</code>, <code>.iter_map_lgl()</code>, and <code>.iter_map_chr()</code> cover that case: they behave like <code>.iter_map()</code>, but return an atomic vector of the named type via <code>vapply()</code>, which also means they <em>validate</em> that every call to <code>.f</code> really does produce a length-1 value of the expected type:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) x <span class="sc">+</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) x <span class="sc">+</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2 3 4</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map_lgl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="cf">function</span>(x) x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map_lgl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="cf">function</span>(x) x <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] FALSE  TRUE FALSE  TRUE FALSE</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map_chr</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(x) <span class="fu">sprintf</span>(<span class="st">"value is %s"</span>, x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map_chr</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(x) <span class="fu">sprintf</span>(<span class="st">"value is %s"</span>, x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           a            b 
 "value is 1" "value is 2" </code></pre>
@@ -529,7 +529,7 @@ $b
 </div>
 <p>If <code>.f</code> breaks that promise – by returning a vector of length 2 instead of 1, say – the call errors immediately rather than silently producing a malformed or recycled result:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(x, x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(x, x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-error">
 <pre><code>Error in `vapply()`:
 ! values must be length 1,
@@ -537,11 +537,11 @@ $b
 </div>
 </div>
 </section>
-<section id="mmap_map2-and-mmap_imap" class="level2">
-<h2 class="anchored" data-anchor-id="mmap_map2-and-mmap_imap"><code>mmap_map2()</code> and <code>mmap_imap()</code></h2>
-<p>Sometimes one input isn’t enough. <code>mmap_map2()</code> walks two same-length vectors in parallel, calling <code>.f</code> with one element from each:</p>
+<section id="iter_map2-and-.iter_imap" class="level2">
+<h2 class="anchored" data-anchor-id="iter_map2-and-.iter_imap"><code>.iter_map2()</code> and <code>.iter_imap()</code></h2>
+<p>Sometimes one input isn’t enough. <code>.iter_map2()</code> walks two same-length vectors in parallel, calling <code>.f</code> with one element from each:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>, <span class="cf">function</span>(x, y) x <span class="sc">+</span> y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>, <span class="cf">function</span>(x, y) x <span class="sc">+</span> y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
 [1] 5
@@ -555,15 +555,15 @@ $b
 </div>
 <p>Passing vectors of mismatched length is a deliberate error rather than silent recycling:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_map2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="cf">function</span>(x, y) x <span class="sc">+</span> y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_map2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="cf">function</span>(x, y) x <span class="sc">+</span> y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-error">
 <pre><code>Error:
 ! `.x` and `.y` must have the same length</code></pre>
 </div>
 </div>
-<p><code>mmap_imap()</code> covers a related but different need: walking a single named vector together with its own names, rather than a second vector. <code>.f</code> is called with the element first, then its name:</p>
+<p><code>.iter_imap()</code> covers a related but different need: walking a single named vector together with its own names, rather than a second vector. <code>.f</code> is called with the element first, then its name:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_imap</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(val, name) <span class="fu">paste0</span>(name, <span class="st">"="</span>, val))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_imap</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(val, name) <span class="fu">paste0</span>(name, <span class="st">"="</span>, val))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$a
 [1] "a=1"
@@ -572,20 +572,20 @@ $b
 [1] "b=2"</code></pre>
 </div>
 </div>
-<p><code>.x</code> must actually be named for <code>mmap_imap()</code> to make sense, and that’s enforced:</p>
+<p><code>.x</code> must actually be named for <code>.iter_imap()</code> to make sense, and that’s enforced:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_imap</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(val, name) <span class="fu">paste0</span>(name, <span class="st">"="</span>, val))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_imap</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(val, name) <span class="fu">paste0</span>(name, <span class="st">"="</span>, val))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-error">
 <pre><code>Error:
 ! `.x` must be named</code></pre>
 </div>
 </div>
 </section>
-<section id="mmap_walk-and-mmap_iwalk" class="level2">
-<h2 class="anchored" data-anchor-id="mmap_walk-and-mmap_iwalk"><code>mmap_walk()</code> and <code>mmap_iwalk()</code></h2>
-<p><code>mmap_map()</code> and <code>mmap_imap()</code> are for when you want the <em>results</em>. <code>mmap_walk()</code> and <code>mmap_iwalk()</code> are their side-effect-only counterparts: same iteration behaviour, but the return value is <code>.x</code> itself, returned invisibly, so they compose neatly at the end of a pipeline without cluttering the console with the results of every call to <code>.f</code>:</p>
+<section id="iter_walk-and-.iter_iwalk" class="level2">
+<h2 class="anchored" data-anchor-id="iter_walk-and-.iter_iwalk"><code>.iter_walk()</code> and <code>.iter_iwalk()</code></h2>
+<p><code>.iter_map()</code> and <code>.iter_imap()</code> are for when you want the <em>results</em>. <code>.iter_walk()</code> and <code>.iter_iwalk()</code> are their side-effect-only counterparts: same iteration behaviour, but the return value is <code>.x</code> itself, returned invisibly, so they compose neatly at the end of a pipeline without cluttering the console with the results of every call to <code>.f</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_walk</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="fu">cat</span>(<span class="st">"value:"</span>, x, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_walk</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="fu">cat</span>(<span class="st">"value:"</span>, x, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>value: 1 
 value: 2 
@@ -593,15 +593,15 @@ value: 3 </code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mmap_iwalk</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(val, name) <span class="fu">cat</span>(name, <span class="st">"-&gt;"</span>, val, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.iter_iwalk</span>(<span class="fu">c</span>(<span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">2</span>), <span class="cf">function</span>(val, name) <span class="fu">cat</span>(name, <span class="st">"-&gt;"</span>, val, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>a -&gt; 1 
 b -&gt; 2 </code></pre>
 </div>
 </div>
-<p>Because the input is returned invisibly, <code>mmap_walk()</code>/<code>mmap_iwalk()</code> can be dropped into the middle of a longer expression purely for their printing side effect, without changing what the expression evaluates to:</p>
+<p>Because the input is returned invisibly, <code>.iter_walk()</code>/<code>.iter_iwalk()</code> can be dropped into the middle of a longer expression purely for their printing side effect, without changing what the expression evaluates to:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">mmap_walk</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="fu">cat</span>(<span class="st">"processing"</span>, x, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">.iter_walk</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(x) <span class="fu">cat</span>(<span class="st">"processing"</span>, x, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>processing 1 
 processing 2 

@@ -446,21 +446,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <p>There are currently four core functions:</p>
 <ul>
-<li><code>mtable_tibble(...)</code> – build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.</li>
-<li><code>mtable_as_tibble(x, ...)</code> – coerce <code>x</code> to a plain data frame via <code>as.data.frame()</code>, preserving literal (non-syntactic) column names.</li>
-<li><code>mtable_rownames_to_column(.data, var)</code> – move <code>.data</code>’s row names into an explicit column named <code>var</code>; a no-op if the row names are just the default sequential ones.</li>
-<li><code>mtable_add_row(.data, ...)</code> – append a single row to <code>.data</code>, with the same cross-column-reference support as <code>mtable_tibble()</code>.</li>
+<li><code>.table_tibble(...)</code> – build a data frame column by column, sequentially, so later columns can refer to earlier ones by name.</li>
+<li><code>.table_as_tibble(x, ...)</code> – coerce <code>x</code> to a plain data frame via <code>as.data.frame()</code>, preserving literal (non-syntactic) column names.</li>
+<li><code>.table_rownames_to_column(.data, var)</code> – move <code>.data</code>’s row names into an explicit column named <code>var</code>; a no-op if the row names are just the default sequential ones.</li>
+<li><code>.table_add_row(.data, ...)</code> – append a single row to <code>.data</code>, with the same cross-column-reference support as <code>.table_tibble()</code>.</li>
 </ul>
 <p>Additionally <code>minitable</code> has one internal helper:</p>
 <ul>
-<li><code>.mtable_drop_dup_list()</code> is used by both <code>mtable_tibble()</code> and <code>mtable_add_row()</code> to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below).</li>
+<li><code>.table_drop_dup_list()</code> is used by both <code>.table_tibble()</code> and <code>.table_add_row()</code> to resolve what a column reference means when a name is reused more than once while constructing columns in sequence (see below).</li>
 </ul>
 </section>
 <section id="sequential-cross-referencing-construction" class="level2">
 <h2 class="anchored" data-anchor-id="sequential-cross-referencing-construction">Sequential, cross-referencing construction</h2>
-<p>Building a data frame with <code>data.frame()</code> directly requires every column to already exist as a complete vector before the call – you can’t refer to a column you’re building in the same call. Like <code>tibble::tibble()</code>, <code>mtable_tibble()</code> lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:</p>
+<p>Building a data frame with <code>data.frame()</code> directly requires every column to already exist as a complete vector before the call – you can’t refer to a column you’re building in the same call. Like <code>tibble::tibble()</code>, <code>.table_tibble()</code> lifts that restriction: later columns can refer to earlier ones by name, because each column expression is evaluated in order, in an environment built up from the columns already constructed:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mtable_tibble</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">b =</span> a <span class="sc">*</span> <span class="dv">2</span>, <span class="at">c =</span> a <span class="sc">+</span> b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_tibble</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">b =</span> a <span class="sc">*</span> <span class="dv">2</span>, <span class="at">c =</span> a <span class="sc">+</span> b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  a b c
 1 1 2 3
@@ -474,7 +474,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="unnamed-arguments-are-named-after-their-deparsed-expression">Unnamed arguments are named after their deparsed expression</h2>
 <p>Just as in <code>tibble::tibble()</code>, an argument with no <code>name =</code> is named after its own source expression, converted to a string:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mtable_tibble</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_tibble</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  1:3 sqrt(1:3)
 1   1  1.000000
@@ -482,22 +482,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3   3  1.732051</code></pre>
 </div>
 </div>
-<p>This is mostly useful for quick, throwaway construction; naming columns explicitly (<code>mtable_tibble(x = 1:3, y = sqrt(1:3))</code>) is more readable for anything that will be used again later.</p>
+<p>This is mostly useful for quick, throwaway construction; naming columns explicitly (<code>.table_tibble(x = 1:3, y = sqrt(1:3))</code>) is more readable for anything that will be used again later.</p>
 </section>
 <section id="minimalist-coercion" class="level2">
 <h2 class="anchored" data-anchor-id="minimalist-coercion">Minimalist coercion</h2>
 <p>There’s no tibble class or special printing here – it’s just <code>as.data.frame()</code> with <code>check.names = FALSE</code>, so a literal, non-syntactic column name (like <code>"1:3"</code> from the previous section) survives unchanged instead of being sanitised by <code>make.names()</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mtable_as_tibble</span>(<span class="fu">list</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">b =</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_as_tibble</span>(<span class="fu">list</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">b =</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  a b
 1 1 x
 2 2 y</code></pre>
 </div>
 </div>
-<p>The difference from calling <code>as.data.frame()</code> directly shows up with a name that isn’t a syntactically valid R identifier, like the <code>"1:3"</code> name <code>mtable_tibble()</code> generated automatically two sections ago:</p>
+<p>The difference from calling <code>as.data.frame()</code> directly shows up with a name that isn’t a syntactically valid R identifier, like the <code>"1:3"</code> name <code>.table_tibble()</code> generated automatically two sections ago:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">mtable_as_tibble</span>(<span class="fu">list</span>(<span class="st">`</span><span class="at">1:3</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">.table_as_tibble</span>(<span class="fu">list</span>(<span class="st">`</span><span class="at">1:3</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "1:3"</code></pre>
 </div>
@@ -506,14 +506,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>[1] "X1.3"</code></pre>
 </div>
 </div>
-<p><code>as.data.frame()</code>’s default <code>check.names = TRUE</code> rewrites <code>"1:3"</code> into the syntactically valid <code>"X1.3"</code>; <code>mtable_as_tibble()</code> passes <code>check.names = FALSE</code> through instead, so the literal name survives.</p>
+<p><code>as.data.frame()</code>’s default <code>check.names = TRUE</code> rewrites <code>"1:3"</code> into the syntactically valid <code>"X1.3"</code>; <code>.table_as_tibble()</code> passes <code>check.names = FALSE</code> through instead, so the literal name survives.</p>
 </section>
 <section id="rowname-to-column-conversion" class="level2">
 <h2 class="anchored" data-anchor-id="rowname-to-column-conversion">Rowname to column conversion</h2>
 <p>A data frame with only the default sequential row names (<code>"1"</code>, <code>"2"</code>, …) is returned unchanged – there’s nothing meaningful to move into a column:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtable_rownames_to_column</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">var =</span> <span class="st">"id"</span>),</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.table_rownames_to_column</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">var =</span> <span class="st">"id"</span>),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -522,7 +522,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Real (non-default) row names do get moved into a new column, placed first:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mtable_rownames_to_column</span>(<span class="fu">head</span>(mtcars, <span class="dv">3</span>), <span class="at">var =</span> <span class="st">"model"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_rownames_to_column</span>(<span class="fu">head</span>(mtcars, <span class="dv">3</span>), <span class="at">var =</span> <span class="st">"model"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          model  mpg cyl disp  hp drat    wt  qsec vs am gear carb
 1     Mazda RX4 21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
@@ -533,16 +533,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="adding-rows" class="level2">
 <h2 class="anchored" data-anchor-id="adding-rows">Adding rows</h2>
-<p>Appending a row with <code>mtable_add_row()</code> supports the same sequential evaluation as <code>mtable_tibble()</code>, so a later value in the new row can refer to an earlier one: either a column already in <code>.data</code>, or one that is added in the same call.</p>
+<p>Appending a row with <code>.table_add_row()</code> supports the same sequential evaluation as <code>.table_tibble()</code>, so a later value in the new row can refer to an earlier one: either a column already in <code>.data</code>, or one that is added in the same call.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">mtable_tibble</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">b =</span> a <span class="sc">*</span> <span class="dv">10</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">.table_tibble</span>(<span class="at">a =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">b =</span> a <span class="sc">*</span> <span class="dv">10</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  a  b
 1 1 10
 2 2 20</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mtable_add_row</span>(df, <span class="at">a =</span> <span class="dv">3</span>, <span class="at">b =</span> a <span class="sc">*</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.table_add_row</span>(df, <span class="at">a =</span> <span class="dv">3</span>, <span class="at">b =</span> a <span class="sc">*</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  a  b
 1 1 10
@@ -550,7 +550,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 3 3 30</code></pre>
 </div>
 </div>
-<p>Here <code>a * 10</code> in the new row refers to the <code>a = 3</code> just supplied in that same call, not to the existing column <code>a</code> in <code>df</code> – the most recently constructed value for a given name always wins, which is what <code>.mtable_drop_dup_list()</code> is for internally.</p>
+<p>Here <code>a * 10</code> in the new row refers to the <code>a = 3</code> just supplied in that same call, not to the existing column <code>a</code> in <code>df</code> – the most recently constructed value for a given name always wins, which is what <code>.table_drop_dup_list()</code> is for internally.</p>
 </section>
 <section id="scope-data-frame-dropping-still-exists" class="level2">
 <h2 class="anchored" data-anchor-id="scope-data-frame-dropping-still-exists">Scope: data frame dropping still exists</h2>

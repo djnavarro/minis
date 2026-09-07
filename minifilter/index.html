@@ -440,16 +440,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minifilter</code> provides a single function, <code>mfilter_filter()</code>, a minimal reimplementation of <code>dplyr::filter()</code>: it keeps rows of a data frame where all of a set of unquoted conditions are <code>TRUE</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a> for scope notes; this page walks through its behaviour on a small toy data frame, including two behaviours worth knowing about before you rely on it: how missing values are handled, and what happens with no conditions at all.</p>
+<p><code>minifilter</code> provides a single function, <code>.filter()</code>, a minimal reimplementation of <code>dplyr::filter()</code>: it keeps rows of a data frame where all of a set of unquoted conditions are <code>TRUE</code>. See the <a href="https://github.com/djnavarro/minis/tree/main/minifilter">README</a> for scope notes; this page walks through its behaviour on a small toy data frame, including two behaviours worth knowing about before you rely on it: how missing values are handled, and what happens with no conditions at all.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <p>There is a single core function to this mini:</p>
 <ul>
-<li><code>mfilter_filter(.data, ...)</code> – keep rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
+<li><code>.filter(.data, ...)</code> – keep rows of <code>.data</code> where every condition in <code>...</code> evaluates to <code>TRUE</code>. Conditions are evaluated in the scope of <code>.data</code>, so columns can be referred to by bare name.</li>
 </ul>
 <p>There is also one internal helper:</p>
 <ul>
-<li><code>.mfilter_dotdotdot()</code> captures the unevaluated <code>...</code> conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.</li>
+<li><code>.filter_dotdotdot()</code> captures the unevaluated <code>...</code> conditions so each one can be evaluated against the data frame individually, rather than evaluated eagerly against the caller’s environment.</li>
 </ul>
 </section>
 <section id="a-minimal-data-set" class="level2">
@@ -473,9 +473,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="a-single-condition" class="level2">
 <h2 class="anchored" data-anchor-id="a-single-condition">A single condition</h2>
-<p>Columns are referred to by bare name, evaluated in the scope of the data frame – there’s no need to write <code>fruits$in_stock</code> or wrap the call in <code>with()</code>, as you would for <a href="../minicase/"><code>minicase</code></a>’s <code>mcase_case_when()</code>:</p>
+<p>Columns are referred to by bare name, evaluated in the scope of the data frame – there’s no need to write <code>fruits$in_stock</code> or wrap the call in <code>with()</code>, as you would for <a href="../minicase/"><code>minicase</code></a>’s <code>.case_when()</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mfilter_filter</span>(fruits, in_stock)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, in_stock)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        name price in_stock
 1      apple   1.2     TRUE
@@ -489,7 +489,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="multiple-conditions-combine-with-and">Multiple conditions combine with AND</h2>
 <p>Passing more than one condition is equivalent to combining them with <code>&amp;</code>, so a row is kept only if every condition holds. This is often more readable than a single expression joined with <code>&amp;&amp;</code>/<code>&amp;</code>, especially as the number of conditions grows:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mfilter_filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    name price in_stock
 1  apple   1.2     TRUE
@@ -499,7 +499,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>That’s equivalent to writing the conditions out explicitly and combining them yourself:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mfilter_filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.filter</span>(fruits, in_stock, price <span class="sc">&lt;</span> <span class="dv">4</span>),</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  fruits[fruits<span class="sc">$</span>in_stock <span class="sc">&amp;</span> fruits<span class="sc">$</span>price <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(fruits<span class="sc">$</span>price), ]</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -509,9 +509,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="na-conditions-drop-the-row" class="level2">
 <h2 class="anchored" data-anchor-id="na-conditions-drop-the-row"><code>NA</code> conditions drop the row</h2>
-<p><code>date</code> has a missing <code>price</code>, so any condition involving <code>price</code> is <code>NA</code> for that row rather than <code>TRUE</code>/<code>FALSE</code>. <code>mfilter_filter()</code> treats <code>NA</code> the same way <code>dplyr::filter()</code> does: as “not proven to be kept”, so the row is dropped rather than kept by default or raising an error:</p>
+<p><code>date</code> has a missing <code>price</code>, so any condition involving <code>price</code> is <code>NA</code> for that row rather than <code>TRUE</code>/<code>FALSE</code>. <code>.filter()</code> treats <code>NA</code> the same way <code>dplyr::filter()</code> does: as “not proven to be kept”, so the row is dropped rather than kept by default or raising an error:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mfilter_filter</span>(fruits, price <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.filter</span>(fruits, price <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        name price in_stock
 1      apple   1.2     TRUE
@@ -533,9 +533,9 @@ NA       &lt;NA&gt;    NA       NA
 </section>
 <section id="no-conditions-returns-the-data-frame-unchanged" class="level2">
 <h2 class="anchored" data-anchor-id="no-conditions-returns-the-data-frame-unchanged">No conditions returns the data frame unchanged</h2>
-<p>Calling <code>mfilter_filter()</code> with no conditions at all is a legitimate, supported no-op – useful when conditions are built up programmatically and might end up empty:</p>
+<p>Calling <code>.filter()</code> with no conditions at all is a legitimate, supported no-op – useful when conditions are built up programmatically and might end up empty:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">mfilter_filter</span>(fruits), fruits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">.filter</span>(fruits), fruits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
 </div>

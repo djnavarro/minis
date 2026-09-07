@@ -440,20 +440,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>minicase</code> provides a single function, <code>mcase_case_when()</code>, a minimal reimplementation of <code>dplyr::case_when()</code>: vectorised if/else across a sequence of <code>condition ~ value</code> formulas, first match wins. See the <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> for scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/">minifilter vignette</a>, building up to how missing values and default values interact.</p>
+<p><code>minicase</code> provides a single function, <code>.case_when()</code>, a minimal reimplementation of <code>dplyr::case_when()</code>: vectorised if/else across a sequence of <code>condition ~ value</code> formulas, first match wins. See the <a href="https://github.com/djnavarro/minis/tree/main/minicase">README</a> for scope notes; this page walks through it on the same toy fruits data frame used in the <a href="../minifilter/">minifilter vignette</a>, building up to how missing values and default values interact.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <p>There is one core function:</p>
 <ul>
-<li><code>mcase_case_when(...)</code> – given a sequence of <code>condition ~ value</code> formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is <code>TRUE</code> at each position, and <code>NA</code> wherever no condition matched.</li>
+<li><code>.case_when(...)</code> – given a sequence of <code>condition ~ value</code> formulas, return a vector the same length as the (recycled) conditions/values, taking the value from the first formula whose condition is <code>TRUE</code> at each position, and <code>NA</code> wherever no condition matched.</li>
 </ul>
-<p>It is supported by five internal helpers, all supporting <code>mcase_case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:</p>
+<p>It is supported by five internal helpers, all supporting <code>.case_when()</code>’s recycling and type-consistency checks – there’s no need to call any of them directly. The helpers are these:</p>
 <ul>
-<li><code>.mcase_validate_length()</code></li>
-<li><code>.mcase_replace_with()</code></li>
-<li><code>.mcase_check_length()</code></li>
-<li><code>.mcase_check_type()</code></li>
-<li><code>.mcase_check_class()</code></li>
+<li><code>.case_validate_length()</code></li>
+<li><code>.case_replace_with()</code></li>
+<li><code>.case_check_length()</code></li>
+<li><code>.case_check_type()</code></li>
+<li><code>.case_check_class()</code></li>
 </ul>
 </section>
 <section id="a-minimal-data-set" class="level2">
@@ -479,7 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="no-data-masking">No data-masking</h2>
 <p>There is no data-masking in this mini: you must reference columns with <code>$</code>, or wrap in <code>with()</code>. Unlike <code>dplyr::case_when()</code>, conditions and values are evaluated in the <em>caller’s</em> environment, not the data frame’s – so bare column names don’t resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in <code>with(data, ...)</code> which temporarily makes the data frame’s columns available as bare names for the duration of the call:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"mid"</span>,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"pricey"</span></span>
@@ -491,8 +491,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Referring to columns via <code>fruits$price</code> directly, without <code>with()</code>, works exactly the same way – <code>with()</code> is a convenience, not a requirement:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"cheap"</span>, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not cheap"</span>)),</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mcase_case_when</span>(fruits<span class="sc">$</span>price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"cheap"</span>, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not cheap"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"cheap"</span>, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not cheap"</span>)),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.case_when</span>(fruits<span class="sc">$</span>price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"cheap"</span>, <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not cheap"</span>)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
@@ -503,7 +503,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="first-match-wins">First match wins</h2>
 <p>Formulas are checked in order, and the first <code>TRUE</code> condition for each position determines its value, even if a later condition would also match. <code>cherry</code> (price 3.00) is a good illustration: it fails <code>price &lt; 3</code>, but matches <code>price &gt;= 3</code>, so it’s classified as <code>"pricey"</code> above. Conditions can combine several tests with <code>&amp;</code>, which is useful for layering more specific rules ahead of more general ones:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  in_stock <span class="sc">&amp;</span> price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap and in stock"</span>,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  in_stock             <span class="sc">~</span> <span class="st">"in stock"</span>,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span>                 <span class="sc">~</span> <span class="st">"out of stock or unknown price"</span></span>
@@ -520,7 +520,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="unmatched-positions-are-na">Unmatched positions are <code>NA</code></h2>
 <p><code>date</code> has a missing price, so every condition involving <code>price</code> evaluates to <code>NA</code> for that row – neither <code>TRUE</code> nor <code>FALSE</code> – and <code>date</code> itself gets <code>NA</code> in the result, since there’s no condition it definitively satisfies:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"mid"</span>,</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"pricey"</span></span>
@@ -531,7 +531,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Add a <code>TRUE ~ ...</code> formula at the end as a catch-all default, the same way you would in <code>dplyr</code>, and every remaining position – including ones where every prior condition was <code>NA</code> rather than <code>FALSE</code> – picks up that value instead:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">mcase_case_when</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(fruits, <span class="fu">.case_when</span>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">1</span>  <span class="sc">~</span> <span class="st">"cheap"</span>,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&lt;</span> <span class="dv">3</span>  <span class="sc">~</span> <span class="st">"mid"</span>,</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  price <span class="sc">&gt;=</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"pricey"</span>,</span>
