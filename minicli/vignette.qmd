@@ -7,31 +7,31 @@ title: "minicli"
 source(file.path("minicli", "minicli.R"))
 ```
 
-The purpose of **minicli** is to provide a zero-dependency stand-in for the small slice of [**cli**](https://cli.r-lib.org/) that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and bulleted list. The [README](https://github.com/djnavarro/minis/tree/main/minicli) provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.
+The purpose of **minicli** is to provide a zero-dependency stand-in for the small slice of [**cli**](https://cli.r-lib.org/) that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and a bulleted list. The [README](https://github.com/djnavarro/minis/tree/main/minicli) provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.
 
 ## Functions
 
 The [**minicli.R**](https://github.com/djnavarro/minis/blob/main/minicli/minicli.R) script supplies the following as its core functions: 
 
 - `.cli_alert_success()`/`_danger()`/`_warning()`/`_info()` are used to print a message with a coloured symbol prefix.
-- `.cli_symbol(name)` looks up a single symbol by name, returning its unicode glyph or an ascii fallback depending on what's safe to print.
+- `.cli_symbol(name)` looks up a single symbol by name, returning its unicode glyph or an ASCII fallback depending on what's safe to print.
 - `.cli_rule(title = NULL)`  prints a horizontal divider spanning the console width, optionally with a centred title.
 - `.cli_bullets(items)` prints a simple bulleted list, one entry per line.
 - `.cli_col_black()`/`_red()`/`_green()`/`_yellow()`/`_blue()`/
-  `_magenta()`/`_cyan()`/`_white()`/`_grey()` are used to generate output in the particular colour, which they achieve by wrapping a string in an ANSI colour code.
-- `.cli_style_bold()`/`_dim()`/`_italic()`/`_underline()` are used to generat outout in a particular style, which they achieve by wrapping a string in an ANSI style code.
+  `_magenta()`/`_cyan()`/`_white()`/`_grey()` are used to generate output in a particular colour, which they achieve by wrapping a string in an ANSI colour code.
+- `.cli_style_bold()`/`_dim()`/`_italic()`/`_underline()` are used to generate output in a particular style, which they achieve by wrapping a string in an ANSI style code.
 
 There are also a collection of internal helper functions:
 
 - `.cli_ansi_enabled()` is used to decide whether it's currently safe to emit ANSI escape codes, which it does by checking `cli.num_colors`, `NO_COLOR`, whether knitr/Quarto is rendering, whether output is being captured, whether it's running in Positron's or RStudio's Console pane, and whether stdout is a real terminal.
-- `.cli_positron_console_with_color()`/ `.cli_rstudio_console_with_color()` are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.
+- `.cli_positron_console_with_color()`/`.cli_rstudio_console_with_color()` are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.
 - `.cli_unicode_enabled()` is used to decide whether it's currently safe to print unicode symbols, by checking `cli.unicode` and then the session locale.
 - `.cli_ansi_style(code)` is a function factory that builds one of the `.cli_col_*()`/`.cli_style_*()` functions from a raw SGR code.
 - `.cli_alert(symbol_name, color_fn, text, ...)` is the shared implementation behind the four `.cli_alert_*()` functions.
 
 ## Capability detection
 
-Every colour/symbol decision in `minicli` runs through `.cli_ansi_enabled()` and `.cli_unicode_enabled()`, so the same code looks right whether it's running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling `getOption("knitr.in.progress")`. As a consequence, ANSI colour is automatically disabled automatically on this. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.
+Every colour/symbol decision in `minicli` runs through `.cli_ansi_enabled()` and `.cli_unicode_enabled()`, so the same code looks right whether it's running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling `getOption("knitr.in.progress")`. As a consequence, ANSI colour is automatically disabled here. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.
 
 ## Alerts
 

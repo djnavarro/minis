@@ -51,7 +51,7 @@ fruits
 
 ## No data-masking
 
-There is no data-masking in this mini: you must reference columns with `$`, or wrap in `with()`. Unlike `dplyr::case_when()`, conditions and values are evaluated in the *caller's* environment, not the data frame's -- so bare column names don't resolve on their own. The idiomatic way around that mirrored here from base R, is to wrap the whole call in `with(data, ...)` which temporarily makes the data frame's columns available as bare names for the duration of the call:
+There is no data-masking in this mini: you must reference columns with `$`, or wrap in `with()`. Unlike `dplyr::case_when()`, conditions and values are evaluated in the *caller's* environment, not the data frame's -- so bare column names don't resolve on their own. The idiomatic way around that, mirrored here from base R, is to wrap the whole call in `with(data, ...)`, which temporarily makes the data frame's columns available as bare names for the duration of the call:
 
 ```{r}
 with(fruits, .case_when(
@@ -119,4 +119,4 @@ with(fruits, .case_when(
 
 ## Scope: no `.default`/`.ptype`/`.size`
 
-The mini does not implement any of these arguments. The trailing `TRUE ~ "unknown"` formula in the previous example *is* the idiomatic way to get a default value (and indeed is very often used in when writing code with the real `dplyr::case_when()` function). I simply decided there was no need for this mini to implement dplyr's newer, separate `.default` argument as an alternative spelling of the same thing, nor did I think there was much to be gained by adding `.ptype`/ `.size` to control the output type/length explicitly. If your use case needs those, a plain `TRUE ~ value` formula covers `.default`, and the output length/type simply follow from whatever the conditions. If that still isn't sufficient, then it's likely you need the real version not the mini. 
+The mini does not implement any of these arguments. The trailing `TRUE ~ "unknown"` formula in the previous example *is* the idiomatic way to get a default value, and is in fact very often used when writing code with the real `dplyr::case_when()` function. There was no need for this mini to implement dplyr's newer, separate `.default` argument as an alternative spelling of the same thing, and little to be gained by adding `.ptype`/`.size` to control the output type/length explicitly. If your use case needs those, a plain `TRUE ~ value` formula covers `.default`, and the output length/type simply follow from the conditions. If that still isn't sufficient, then it's likely you need the real version, not the mini.

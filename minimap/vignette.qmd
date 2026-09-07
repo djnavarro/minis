@@ -7,7 +7,7 @@ title: "minimap"
 source(file.path("minimap", "minimap.R"))
 ```
 
-The purpose of **minimap** is to provide zero-dependency mapping functions analogous to those supplied by the [**purrr**](https://purrr.tidyverse.org/) package. Each function iterates over a collection of inputs, applying a user-supplied to each of the inputs. The [README](https://github.com/djnavarro/minis/tree/main/minimap) provides full API reference and scope notes; this page walks through the functionality supplied, providing a short tutorial that starts from the basic case and building up to the two-input and side-effect variants.
+The purpose of **minimap** is to provide zero-dependency mapping functions analogous to those supplied by the [**purrr**](https://purrr.tidyverse.org/) package. Each function iterates over a collection of inputs, applying a user-supplied function to each of the inputs. The [README](https://github.com/djnavarro/minis/tree/main/minimap) provides full API reference and scope notes; this page walks through the functionality supplied, providing a short tutorial that starts from the basic case and building up to the two-input and side-effect variants.
 
 ## Functions
 

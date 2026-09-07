@@ -7,14 +7,14 @@ title: "minitrap"
 source(file.path("minitrap", "minitrap.R"))
 ```
 
-The purpose of  **minitrap** is to provide zero-dependency versions of two [**purrr**](https://purrr.tidyverse.org/) adverbs that are used to "trap" one or more aspects of the output of another function. Like all adverb functions they take one function as input, and return a modified function as the output. The [README](https://github.com/djnavarro/minis/tree/main/minitrap) provides the full API reference and scope notes; this page provides a short tutorial that shows how to use the functions, and how they compose together.
+The purpose of **minitrap** is to provide zero-dependency versions of two [**purrr**](https://purrr.tidyverse.org/) adverbs that are used to "trap" one or more aspects of the output of another function. Like all adverb functions they take one function as input, and return a modified function as the output. The [README](https://github.com/djnavarro/minis/tree/main/minitrap) provides the full API reference and scope notes; this page provides a short tutorial that shows how to use the functions, and how they compose together.
 
 ## Functions
 
 The [**minitrap.R**](https://github.com/djnavarro/minis/blob/main/minitrap/minitrap.R) script supplies two functions:
 
-- `.trap_safely(.f)`: This function wraps `.f` so that a call which would normally produce an error will instead return a list containing two elements named `result` and `error`. Exactly one of these two elements will be `NULL`, depending on whether the unmodified function would error when called the same way.
-- `.trap_quietly(.f)`: This function wraps `.f` so that printed all output, warnings, and messages are silently captured instead of shown. The modified function returns a four element named list, with components for `result`, `output`, `warnings`, and `messages`.  
+- `.trap_safely(.f)` is used to wrap `.f` so that a call which would normally produce an error instead returns a list containing two elements named `result` and `error`, with exactly one of the two set to `NULL` depending on whether the unmodified function would have errored when called the same way.
+- `.trap_quietly(.f)` is used to wrap `.f` so that all printed output, warnings, and messages are silently captured instead of shown, returning a four-element named list with components `result`, `output`, `warnings`, and `messages`.
 
 It contains no internal helpers.
 
@@ -34,7 +34,7 @@ instead, and `result` set to the calculated logarithm.
 safe_log(10)
 ```
 
-This is particularly useful when mapping a function over many inputs and some of them are expected to fail -- rather than the whole iteration aborting on the first error, each element's outcome (success or failure) is captured individually. Combining `.trap_safely()` with [**`minimap`**](../minimap/)'s `.iter_map()` is a convenient way to illustrate exactly that pattern. 
+This is particularly useful when mapping a function over many inputs and some of them are expected to fail -- rather than the whole iteration aborting on the first error, each element's outcome (success or failure) is captured individually. Combining `.trap_safely()` with [**minimap**](../minimap/)'s `.iter_map()` is a convenient way to illustrate exactly that pattern.
 
 ```{r}
 #| include: false
@@ -48,7 +48,7 @@ mixed_list |>
   .iter_map_lgl(\(r) is.null(r$error))
 ```
 
-As one would expect, this output shows that `sqrt(4)` succeeds, `sqrt("a")` errors, and `sqrt(9)` succeeds. The error that would normally be produced at the second step does not stop execution, and instead is captured and recorded. (Note that **minitrap** does not itself depend on **minimap**: this page sources that script to show the two minis operating together)
+As one would expect, this output shows that `sqrt(4)` succeeds, `sqrt("a")` errors, and `sqrt(9)` succeeds. The error that would normally be produced at the second step does not stop execution, and instead is captured and recorded. (Note that **minitrap** does not itself depend on **minimap**: this page sources that script to show the two minis operating together.)
 
 ## `.trap_quietly()`
 
