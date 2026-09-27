@@ -2,7 +2,7 @@
 title: "minis"
 ---
 
-A problem I encounter frequently when writing R packages is that I'll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does. 
+A problem I encounter frequently when writing R packages is that I'll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, `sessioncheck` cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., `ggplot2` is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does. 
 
 The "minis" repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components ("minis"), each witten as a single `.R` file with its own drop-in test suite. When a package needs a little bit of `cli`-style
 formatting, or a little bit of `purrr`-style mapping, or some other
