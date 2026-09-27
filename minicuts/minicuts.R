@@ -48,8 +48,9 @@
 
 # Resolves `exclude` (`NULL`/logical vector/predicate function) into a
 # logical vector the same length as `x`, `TRUE` where that element is
-# excluded from the quantile calculation. `NA` in the resolved vector
-# is treated as "not excluded".
+# excluded from the bin calculation (quantile breaks for
+# `.cut_quantile()`, bin geometry for `.cut_evenly()`). `NA` in the
+# resolved vector is treated as "not excluded".
 #' @noRd
 .cuts_resolve_exclude <- function(x, exclude) {
   if (is.null(exclude)) return(rep(FALSE, length(x)))
@@ -144,11 +145,12 @@
 }
 
 # Resolves `labeller` (`NULL`/function/character vector) into the
-# character vector of `n_bins` quantile-bin labels. `n_bins`/`breaks`
-# here are already post-fallback (i.e. the actual bin count/cutpoints
-# used, not necessarily what the caller originally requested) -- see
-# `?.cut_quantile`'s `@details` for why a character-vector `labeller`
-# is checked against this `n_bins`, not the requested one.
+# character vector of `n_bins` bin labels, shared by `.cut_quantile()`
+# and `.cut_evenly()`. `n_bins`/`breaks` here are already post-fallback
+# (i.e. the actual bin count/cutpoints used, not necessarily what the
+# caller originally requested) -- see `?.cut_quantile`'s `@details` for
+# why a character-vector `labeller` is checked against this `n_bins`,
+# not the requested one.
 #' @noRd
 .cuts_resolve_labels <- function(labeller, n_bins, breaks) {
   if (is.null(labeller)) return(paste0("Q", 1:n_bins))
@@ -158,7 +160,7 @@
   if (!is.character(labels) || length(labels) != n_bins) {
     stop(
       sprintf(
-        "`labeller` must produce %d label%s (the number of quantile bins actually used), not %d.",
+        "`labeller` must produce %d label%s (the number of bins actually used), not %d.",
         n_bins, if (n_bins == 1) "" else "s", length(labels)
       ),
       call. = FALSE

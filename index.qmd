@@ -27,6 +27,6 @@ These are the minis that currently exist:
 | `minipivot` | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`. | [Vignette](minipivot/) |
 | `ministr` | Minimal `stringr`-style basic string manipulation (padding/trimming/case conversion/etc). | [Vignette](ministr/) |
 | `minirx` | Minimal `stringr`-style regex pattern matching (detect/extract/match/replace/split/count/locate). | [Vignette](minirx/) |
-| `minicuts` | Minimal `santoku`-style cutting into quantile bins or equal-width bins. | [Vignette](minicuts/) |
+| `minicuts` | Minimal `erplots`-style `cut_quantile()` and `santoku`-style `cut_evenly()`. | [Vignette](minicuts/) |
 
 : {tbl-colwidths="[15,65,20]"}
