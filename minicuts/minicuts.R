@@ -1,26 +1,36 @@
 # minicuts.R
 #
-# Reimplements the quantile-based cutting from djnavarro/erplots's
-# `cut_quantile()`/`cut_exposure_quantile()` (R/utils-helpers.R) as a
-# single, more general function, `.cut_quantile()`. Ties handling
-# (`ties`/`seed`), `quantile_type` passthrough, the flexible `labeller`
-# hook, and graceful fallback when `x` doesn't have enough resolution
-# for the requested number of bins are all ported directly.
-# `cut_exposure_quantile()`'s pharmacometrics-specific `is_placebo`/
-# `"Placebo"` handling is generalized into a domain-neutral `exclude`
-# argument: values matched by `exclude` are left out of the quantile
-# *calculation* (so they don't skew break points) but still get
-# assigned their own factor level in the output, rather than being
-# dropped or set to `NA`.
+# Two ways to cut a numeric vector into bins: `.cut_quantile()` (fixed
+# group size, boundaries determined by the data) and `.cut_evenly()`
+# (fixed bin geometry, group sizes determined by the data).
+#
+# `.cut_quantile()` reimplements the quantile-based cutting from
+# djnavarro/erplots's `cut_quantile()`/`cut_exposure_quantile()`
+# (R/utils-helpers.R). Ties handling (`ties`/`seed`), `quantile_type`
+# passthrough, the flexible `labeller` hook, and graceful fallback when
+# `x` doesn't have enough resolution for the requested number of bins
+# are all ported directly. `cut_exposure_quantile()`'s
+# pharmacometrics-specific `is_placebo`/`"Placebo"` handling is
+# generalized into a domain-neutral `exclude` argument: values matched
+# by `exclude` are left out of the quantile *calculation* (so they
+# don't skew break points) but still get assigned their own factor
+# level in the output, rather than being dropped or set to `NA`.
+#
+# `.cut_evenly()` covers the two related equal-width cutting rules from
+# santoku's `chop_evenly()` (fixed number of bins, width derived from
+# `range(x)`) and `chop_width()` (fixed bin width, number of bins
+# derived from the data) in one function with mutually exclusive
+# `n_bins`/`width` arguments, since both are the same underlying
+# fixed-geometry cutting logic. It shares `exclude`/`exclude_label`/
+# `labeller` with `.cut_quantile()` for a consistent feel across the
+# mini, but drops `ties = "split-even"` (no "equal group size" goal to
+# chase when bins are fixed by geometry rather than by data-driven
+# quantiles) and, consequently, `seed`.
 #
 # Deliberately excluded relative to the source material:
 #  - santoku-style general interval chopping (arbitrary breaks, `left`/
 #    `close_end`, non-numeric `x`, weighted quantiles) -- if that
 #    generality is what's needed, use santoku itself.
-#  - `cut_evenly()`-style equal-width cutting: a different cutting rule
-#    (fixed bin width vs. fixed group size), deferred to a possible
-#    future addition to this mini rather than bundled in from the
-#    start.
 #
 # Deliberate fix relative to the erplots source: `rlang::abort()`/
 # `rlang::warn()` and `withr::with_seed()` are replaced with base
@@ -28,13 +38,13 @@
 # (`.cuts_with_seed()`), to keep this mini at zero runtime
 # dependencies.
 #
-# All functions are dot-prefixed. The single user-facing function
-# keeps its own descriptive name bare (`.cut_quantile()`) rather than
-# stuttering under a mechanically-derived tag; internal helpers use the
-# mini-specific tag `.cuts_` -- there's no separate exported-vs-
-# internal naming split, since every function here is meant to be
-# treated as an implementation detail once copied into a consuming
-# package.
+# All functions are dot-prefixed. Both user-facing functions keep their
+# own descriptive names bare (`.cut_quantile()`/`.cut_evenly()`) rather
+# than stuttering under a mechanically-derived tag; internal helpers
+# use the mini-specific tag `.cuts_` -- there's no separate
+# exported-vs-internal naming split, since every function here is
+# meant to be treated as an implementation detail once copied into a
+# consuming package.
 
 # Resolves `exclude` (`NULL`/logical vector/predicate function) into a
 # logical vector the same length as `x`, `TRUE` where that element is
@@ -304,5 +314,152 @@
   attr(result, "breaks") <- breaks
   attr(result, "ties") <- ties
   attr(result, "quantile_type") <- quantile_type
+  result
+}
+
+#' Cut a numeric vector into fixed-geometry bins
+#'
+#' Assigns each element of a numeric vector to a bin of fixed width,
+#' either a fixed *number* of bins spanning `range(x)` (`n_bins`), or a
+#' fixed bin *width* with the number of bins following from the data
+#' (`width`) -- santoku's `chop_evenly()`/`chop_width()`, respectively,
+#' unified into one function since both compute breaks the same way
+#' once a width and a starting point are known.
+#'
+#' @param x A numeric vector.
+#' @param n_bins Number of equal-width bins to create, spanning
+#'   `range(x)` (after removing missing/`exclude`d values). Exactly one
+#'   of `n_bins`/`width` must be supplied.
+#' @param width Width of each bin. Positive builds bins upward from
+#'   `start` (default `min(x)`); negative builds them downward from
+#'   `start` (default `max(x)`), enough of them to cover `range(x)`.
+#'   Exactly one of `n_bins`/`width` must be supplied.
+#' @param start Only used together with `width`: the shared edge of the
+#'   first bin (upward) or last bin (downward). `NULL` (the default)
+#'   uses `min(x)`/`max(x)` as appropriate, which guarantees every
+#'   non-missing, non-excluded value of `x` falls in some bin. An
+#'   explicit `start` that doesn't reach one edge of `range(x)` leaves
+#'   values beyond it uncovered -- see `@details`.
+#' @param exclude,exclude_label As in [.cut_quantile()]: values matched
+#'   by `exclude` are left out of the bin-geometry calculation (so they
+#'   don't affect `range(x)`-derived defaults) but still appear in the
+#'   result under their own `exclude_label` level, rather than being
+#'   dropped or set to `NA`.
+#' @param ties Controls how values falling exactly on a bin boundary
+#'   are assigned. `"upward"` (the default) is equivalent to [cut()]
+#'   with `right = TRUE`; `"downward"` is equivalent to `right = FALSE`.
+#'   Unlike [.cut_quantile()], there is no `"split-even"` option (bin
+#'   geometry here is fixed, not derived from equal group sizes) and so
+#'   no `seed` argument either.
+#' @param labeller As in [.cut_quantile()]: `NULL` (the default) labels
+#'   bins `"Q1"`, `"Q2"`, etc.; a function is called as
+#'   `labeller(n_bins, breaks)`; a character vector of length `n_bins`
+#'   (the actual, post-computation bin count) is used directly.
+#'
+#' @returns A factor with `"breaks"`, `"ties"`, and `"width"`
+#'   attributes recording the bin cutpoints actually used, `ties`, and
+#'   the bin width actually used (as supplied, or as derived from
+#'   `n_bins`). Has `n_bins` levels, or `n_bins + 1` (the extra one
+#'   being `exclude_label`) when `exclude` is not `NULL`.
+#'
+#' @details In `width` mode, if `start` is supplied explicitly and
+#'   doesn't reach one edge of `range(x)` (e.g. `start` greater than
+#'   `min(x)` with a positive `width`), values beyond that edge aren't
+#'   covered by any bin. Rather than silently extending the outermost
+#'   bin to include them (as santoku's `chop()` does by default), those
+#'   values are coded `NA`, with a warning -- consistent with
+#'   [cut()]'s own out-of-range behaviour.
+#'
+#' @examples
+#' x <- runif(100, 0, 10)
+#' .cut_evenly(x, n_bins = 5)
+#' .cut_evenly(x, width = 2)
+#' .cut_evenly(x, width = 2, start = 0)
+#' .cut_evenly(x, width = -2)
+#'
+#' @export
+.cut_evenly <- function(x, n_bins = NULL, width = NULL, start = NULL,
+                         exclude = NULL, exclude_label = "Excluded",
+                         ties = c("upward", "downward"), labeller = NULL) {
+  ties <- match.arg(ties)
+  if (!is.numeric(x)) {
+    stop("`x` must be numeric.", call. = FALSE)
+  }
+  if (is.null(n_bins) == is.null(width)) {
+    stop("Exactly one of `n_bins` or `width` must be supplied.", call. = FALSE)
+  }
+  if (!is.null(n_bins) && !is.null(start)) {
+    stop("`start` is only used together with `width`, not `n_bins`.", call. = FALSE)
+  }
+
+  excluded <- .cuts_resolve_exclude(x, exclude)
+  in_calc <- !excluded & !is.na(x)
+  calc_x <- x[in_calc]
+
+  if (length(calc_x) < 1) {
+    stop("Cannot compute bins: found no non-missing, non-excluded values.", call. = FALSE)
+  }
+
+  if (!is.null(n_bins)) {
+    if (length(n_bins) != 1 || !is.numeric(n_bins) || n_bins < 1) {
+      stop("`n_bins` must be a single number greater than or equal to 1.", call. = FALSE)
+    }
+    lo <- min(calc_x)
+    hi <- max(calc_x)
+    if (lo == hi) {
+      stop(
+        "Cannot compute evenly spaced bins: all non-missing, non-excluded values of `x` are equal.",
+        call. = FALSE
+      )
+    }
+    width_used <- (hi - lo) / n_bins
+    breaks <- lo + (0:n_bins) * width_used
+  } else {
+    if (length(width) != 1 || !is.numeric(width) || width == 0) {
+      stop("`width` must be a single nonzero number.", call. = FALSE)
+    }
+    width_used <- width
+
+    if (width > 0) {
+      anchor <- if (is.null(start)) min(calc_x) else start
+      n_bins <- max(1, ceiling((max(calc_x) - anchor) / width))
+      breaks <- anchor + (0:n_bins) * width
+      out_of_range <- calc_x < anchor
+    } else {
+      anchor <- if (is.null(start)) max(calc_x) else start
+      n_bins <- max(1, ceiling((anchor - min(calc_x)) / abs(width)))
+      breaks <- anchor - (n_bins:0) * abs(width)
+      out_of_range <- calc_x > anchor
+    }
+
+    if (any(out_of_range)) {
+      warning(
+        "Some non-missing, non-excluded values of `x` fall outside the bins implied by `start`/`width` and are coded NA.",
+        call. = FALSE
+      )
+    }
+  }
+
+  raw_bin_num <- switch(
+    ties,
+    upward = as.numeric(cut(calc_x, breaks, labels = 1:n_bins, include.lowest = TRUE)),
+    downward = as.numeric(cut(calc_x, breaks, labels = 1:n_bins, right = FALSE, include.lowest = TRUE))
+  )
+  bin_num <- rep(NA_real_, length(x))
+  bin_num[in_calc] <- raw_bin_num
+
+  labels <- .cuts_resolve_labels(labeller, n_bins, breaks)
+
+  if (is.null(exclude)) {
+    code <- ifelse(is.na(x), NA_real_, bin_num)
+    result <- factor(code, levels = 1:n_bins, labels = labels)
+  } else {
+    code <- ifelse(is.na(x), NA_real_, ifelse(excluded, 0, bin_num))
+    result <- factor(code, levels = 0:n_bins, labels = c(exclude_label, labels))
+  }
+
+  attr(result, "breaks") <- breaks
+  attr(result, "ties") <- ties
+  attr(result, "width") <- width_used
   result
 }

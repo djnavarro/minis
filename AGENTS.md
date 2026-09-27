@@ -60,7 +60,7 @@ minis/
 | `minipivot` | none (bare `.pivot_longer`/`.pivot_wider`) | `tidyr`'s `pivot_longer()`/`pivot_wider()` (own reimplementation) | Reshape a data frame between long and wide layouts |
 | `ministr` | `.str_` | `stringr`'s basic manipulation functions (own reimplementation, no regex/ICU) | `.str_pad`/`.str_trim`/`.str_squish`/`.str_sub`/`.str_length`/`.str_to_upper`/`.str_to_lower`/`.str_to_title`/`.str_to_sentence`/`.str_dup`/`.str_c`/`.str_wrap` |
 | `minirx` | `.rx_` | `stringr`'s regex pattern-matching functions (own reimplementation, base R PCRE via `perl=TRUE`, no ICU) | `.rx_detect`/`.rx_starts`/`.rx_ends`/`.rx_extract`/`.rx_extract_all`/`.rx_match`/`.rx_match_all`/`.rx_replace`/`.rx_replace_all`/`.rx_remove`/`.rx_remove_all`/`.rx_split`/`.rx_count`/`.rx_locate`/`.rx_locate_all` |
-| `minicuts` | none (bare `.cut_quantile`; internal helpers use `.cuts_`) | `djnavarro/erplots`'s `cut_quantile()`/`cut_exposure_quantile()`, inspired by `santoku`'s `chop_quantiles()`/`chop_equally()` | Cut a numeric vector into quantile bins, with tie-breaking control and a generic `exclude` argument generalizing `cut_exposure_quantile()`'s placebo handling |
+| `minicuts` | none (bare `.cut_quantile`/`.cut_evenly`; internal helpers use `.cuts_`) | `djnavarro/erplots`'s `cut_quantile()`/`cut_exposure_quantile()`, inspired by `santoku`'s `chop_quantiles()`/`chop_equally()`/`chop_evenly()`/`chop_width()` | Cut a numeric vector into quantile bins (`.cut_quantile()`) or fixed-geometry bins (`.cut_evenly()`, unifying santoku's `chop_evenly()`/`chop_width()`), both sharing a generic `exclude` argument generalizing `cut_exposure_quantile()`'s placebo handling |
 
 ### Design philosophy
 

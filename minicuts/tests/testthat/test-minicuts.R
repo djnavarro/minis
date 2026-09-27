@@ -142,3 +142,105 @@ test_that("exclude must resolve to a logical vector the same length as x", {
   expect_error(.cut_quantile(1:10, exclude = c(TRUE, FALSE)), "exclude")
   expect_error(.cut_quantile(1:10, exclude = function(x) x[1:5] == 0), "exclude")
 })
+
+test_that("n_bins mode spans range(x) with n_bins equal-width bins", {
+  x <- 0:100
+  result <- .cut_evenly(x, n_bins = 5)
+
+  expect_equal(nlevels(result), 5)
+  expect_equal(unname(attr(result, "breaks")), seq(0, 100, by = 20))
+  expect_equal(attr(result, "width"), 20)
+  expect_false(anyNA(result))
+})
+
+test_that("width mode derives the number of bins from the data, anchored at min(x) by default", {
+  x <- 1:10
+  result <- .cut_evenly(x, width = 2)
+
+  expect_equal(unname(attr(result, "breaks")), seq(1, 11, by = 2))
+  expect_equal(attr(result, "width"), 2)
+  expect_false(anyNA(result))
+})
+
+test_that("width mode respects an explicit start", {
+  x <- 1:10
+  result <- .cut_evenly(x, width = 2, start = 0)
+  expect_equal(unname(attr(result, "breaks")), seq(0, 10, by = 2))
+  expect_false(anyNA(result))
+})
+
+test_that("negative width builds bins downward from start (default max(x))", {
+  x <- 1:9
+  result <- .cut_evenly(x, width = -2)
+
+  expect_equal(unname(attr(result, "breaks")), seq(1, 9, by = 2))
+  expect_equal(attr(result, "width"), -2)
+  expect_false(anyNA(result))
+})
+
+test_that("values outside the bins implied by an explicit start are NA with a warning", {
+  x <- c(-5, 1:10)
+  expect_warning(result <- .cut_evenly(x, width = 2, start = 0), "outside")
+  expect_true(is.na(result[1]))
+  expect_false(anyNA(result[-1]))
+})
+
+test_that("ties = 'upward'/'downward' match cut()'s right = TRUE/FALSE for evenly cut bins", {
+  x <- c(0, 2, 4, 6, 8, 10)
+  breaks <- seq(0, 10, by = 2)
+
+  up <- .cut_evenly(x, width = 2, ties = "upward")
+  down <- .cut_evenly(x, width = 2, ties = "downward")
+
+  expect_equal(as.integer(up), as.integer(cut(x, breaks, labels = 1:5, include.lowest = TRUE)))
+  expect_equal(as.integer(down), as.integer(cut(x, breaks, labels = 1:5, right = FALSE, include.lowest = TRUE)))
+})
+
+test_that("exactly one of n_bins/width must be supplied", {
+  expect_error(.cut_evenly(1:10), "Exactly one")
+  expect_error(.cut_evenly(1:10, n_bins = 4, width = 2), "Exactly one")
+})
+
+test_that("start without width is rejected", {
+  expect_error(.cut_evenly(1:10, n_bins = 4, start = 0), "start")
+})
+
+test_that("n_bins mode errors when x has zero range", {
+  expect_error(.cut_evenly(rep(5, 10), n_bins = 4), "are equal")
+})
+
+test_that("x must be numeric, and n_bins/width must be valid single numbers", {
+  expect_error(.cut_evenly(letters[1:5], n_bins = 2), "numeric")
+  expect_error(.cut_evenly(1:10, n_bins = 0), "n_bins")
+  expect_error(.cut_evenly(1:10, width = 0), "width")
+})
+
+test_that("NA in x propagates to NA in the result", {
+  x <- c(1:9, NA)
+  result <- .cut_evenly(x, n_bins = 3)
+  expect_true(is.na(result[10]))
+  expect_equal(sum(is.na(result)), 1)
+})
+
+test_that("exclude keeps values out of the range calculation but labels them", {
+  x <- c(rep(0, 5), 1:20)
+  result <- .cut_evenly(x, n_bins = 4, exclude = function(x) x == 0, exclude_label = "None")
+
+  expect_equal(levels(result), c("None", paste0("Q", 1:4)))
+  expect_true(all(result[x == 0] == "None"))
+  expect_equal(unname(attr(result, "breaks")), seq(1, 20, length.out = 5))
+})
+
+test_that("exclude = NULL never introduces an extra level", {
+  result <- .cut_evenly(1:40, n_bins = 4)
+  expect_equal(nlevels(result), 4)
+})
+
+test_that("labeller works the same way as for .cut_quantile()", {
+  x <- 1:20
+  by_fn <- .cut_evenly(x, n_bins = 4, labeller = function(n_bins, breaks) paste0("Bin ", 1:n_bins))
+  expect_equal(levels(by_fn), paste0("Bin ", 1:4))
+
+  by_chr <- .cut_evenly(x, n_bins = 4, labeller = c("Low", "Mid-low", "Mid-high", "High"))
+  expect_equal(levels(by_chr), c("Low", "Mid-low", "Mid-high", "High"))
+})
