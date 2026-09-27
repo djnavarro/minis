@@ -1,0 +1,198 @@
+---
+title: "minicuts"
+---
+
+```{r}
+#| include: false
+source(file.path("minicuts", "minicuts.R"))
+```
+
+The purpose of **minicuts** is to provide a zero-dependency
+reimplementation of `cut_quantile()`/`cut_exposure_quantile()` from
+[**erplots**](https://github.com/djnavarro/erplots), generalised into
+`.cut_quantile()`, alongside a second function, `.cut_evenly()`,
+inspired by the `chop_evenly()`/`chop_width()` pair from
+[**santoku**](https://github.com/hughjonesd/santoku). Together they
+cover the two common ways of cutting a numeric vector into bins: fixed
+group size with data-dependent boundaries (`.cut_quantile()`), or
+fixed bin geometry with a data-dependent group size
+(`.cut_evenly()`). The [README](https://github.com/djnavarro/minis/tree/main/minicuts)
+provides scope notes; this page walks through both functions on a
+small simulated exposure variable, including tie-breaking, custom
+labels, and the `exclude` argument the two functions share.
+
+## Functions
+
+The [**minicuts.R**](https://github.com/djnavarro/minis/blob/main/minicuts/minicuts.R)
+script supplies two core functions:
+
+- `.cut_quantile(x, n_bins = 4, ties = "upward", ...)` is used to cut
+  `x` into `n_bins` quantile bins, each holding (approximately) the
+  same number of values. The remaining arguments control tie-break
+  reproducibility (`seed`), the quantile algorithm (`quantile_type`),
+  custom labels (`labeller`), and how excluded values are labelled
+  (`exclude`/`exclude_label`).
+- `.cut_evenly(x, n_bins = NULL, width = NULL, ties = "upward", ...)`
+  is used to cut `x` into equal-width bins, either a fixed number of
+  them spanning `range(x)` (`n_bins`) or a fixed width with however
+  many bins the data needs (`width`). The remaining arguments control
+  the bin anchor (`start`), custom labels (`labeller`), and how
+  excluded values are labelled (`exclude`/`exclude_label`).
+
+They're supported by five internal helpers, shared by both functions
+-- there's no need to call any of them directly. The helpers are
+these:
+
+- `.cuts_resolve_exclude()`
+- `.cuts_bin_num()`
+- `.cuts_resolve_ties()`
+- `.cuts_with_seed()`
+- `.cuts_resolve_labels()`
+
+## A minimal data set
+
+A stand-in for a drug exposure variable from a clinical trial: some
+patients received a placebo (exposure exactly `0`), the rest a range
+of doses.
+
+```{r}
+set.seed(2984)
+exposure <- c(rep(0, 12), round(rexp(48, rate = 1 / 20), 1))
+head(exposure, 15)
+```
+
+## Quantile bins with `.cut_quantile()`
+
+By default, `.cut_quantile()` cuts `x` into four bins labelled
+`"Q1"`-`"Q4"`, each holding a quarter of the values:
+
+```{r}
+table(.cut_quantile(exposure))
+```
+
+Because the placebo zeroes are exact ties clustered at the low end,
+they all land in `Q1` here, and the lowest break point is pulled down
+to `0` as a result -- something the `exclude` argument (below) exists
+to fix.
+
+## Custom labels
+
+The `labeller` argument accepts either a plain character vector or a
+function of `n_bins` and the computed `breaks`:
+
+```{r}
+.cut_quantile(exposure, labeller = c("Low", "Mid-low", "Mid-high", "High")) |>
+  table()
+
+.cut_quantile(exposure, labeller = function(n_bins, breaks) {
+  sprintf("Q%d (>%.1f)", 1:n_bins, breaks[-length(breaks)])
+}) |>
+  table()
+```
+
+## Ties at a quantile boundary
+
+Repeated values sitting exactly on a quantile break point are common
+with skewed or rounded data. The `ties` argument controls which bin
+they land in:
+
+```{r}
+tied <- c(1, 2, 3, 4, 4, 4, 4, 5, 6, 7)
+.cut_quantile(tied, n_bins = 2, ties = "upward")
+.cut_quantile(tied, n_bins = 2, ties = "downward")
+```
+
+The `"split-even"` option instead divides a tied group between its two
+candidate bins, aiming for equal bin sizes rather than sending every
+tied value the same way. It's random, so it takes a `seed` to be
+reproducible:
+
+```{r}
+.cut_quantile(tied, n_bins = 2, ties = "split-even", seed = 6017)
+```
+
+## Keeping placebo patients separate: `exclude`
+
+Passing a predicate to `exclude` removes the matching values from the
+quantile calculation entirely, so they no longer distort the break
+points, but keeps them visible in the result under their own label
+rather than dropping them or coding them `NA`:
+
+```{r}
+result <- .cut_quantile(exposure, exclude = function(x) x == 0, exclude_label = "Placebo")
+table(result)
+attr(result, "breaks")
+```
+
+The breaks are now computed purely from the 48 non-placebo doses, and
+the quantile bins split that group into four roughly equal quarters,
+with `"Placebo"` as a fifth, separate level.
+
+## Equal-width bins with `.cut_evenly()`
+
+Where `.cut_quantile()` fixes the group size and lets the bin edges
+follow from the data, `.cut_evenly()` does the opposite: it fixes the
+bin geometry and lets the group sizes follow from the data. Giving it
+`n_bins` spans `range(x)` with that many equal-width bins:
+
+```{r}
+doses <- exposure[exposure > 0]
+table(.cut_evenly(doses, n_bins = 4))
+attr(.cut_evenly(doses, n_bins = 4), "breaks")
+```
+
+Giving it `width` instead fixes the bin width and works out how many
+bins are needed to cover the data, anchored at `min(x)` by default:
+
+```{r}
+table(.cut_evenly(doses, width = 10))
+```
+
+## Anchoring bins with `start`
+
+An explicit `start` moves that anchor. Here, bins are anchored at `0`
+rather than `min(doses)`, so the bin edges land on round numbers:
+
+```{r}
+table(.cut_evenly(doses, width = 10, start = 0))
+```
+
+A negative `width` builds bins downward from `start` (`max(x)` by
+default) instead of upward from it:
+
+```{r}
+table(.cut_evenly(doses, width = -10))
+```
+
+## Values outside the bins become `NA`
+
+If `start` is set explicitly and doesn't reach one edge of `range(x)`,
+some values fall outside every bin. `.cut_evenly()` codes those `NA`
+and warns, rather than silently widening the outermost bin to cover
+them:
+
+```{r}
+#| warning: true
+result <- .cut_evenly(doses, width = 10, start = 5)
+sum(is.na(result))
+```
+
+## `exclude` and `labeller` work the same way for both functions
+
+The placebo patients can be kept separate here too, and custom labels
+work identically to `.cut_quantile()`:
+
+```{r}
+.cut_evenly(exposure, n_bins = 4, exclude = function(x) x == 0, exclude_label = "Placebo") |>
+  table()
+```
+
+## What's deliberately missing
+
+There's no `ties = "split-even"` option for `.cut_evenly()`, and
+consequently no `seed` argument either -- there's no "equal group
+size" goal to chase when the bins themselves are fixed by geometry
+rather than derived from data-dependent quantiles. Neither function
+supports santoku's full generality: arbitrary breaks, non-numeric `x`
+such as dates, or weighted quantiles. If that generality is needed,
+reach for santoku itself.

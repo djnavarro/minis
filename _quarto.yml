@@ -47,6 +47,8 @@ website:
             text: ministr
           - href: minirx/vignette.qmd
             text: minirx
+          - href: minicuts/vignette.qmd
+            text: minicuts
 
 format:
   html:
