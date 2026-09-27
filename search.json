@@ -363,80 +363,233 @@
     ]
   },
   {
-    "objectID": "minicondition/index.html",
-    "href": "minicondition/index.html",
-    "title": "minicondition",
+    "objectID": "minicuts/index.html",
+    "href": "minicuts/index.html",
+    "title": "minicuts",
     "section": "",
-    "text": "The purpose of minicondition is to provide a zero-dependency reimplementation of a small slice of the rlang package: thin wrappers around base R’s own condition system that signal a classed condition, catchable specifically by that class. The README provides the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for minicondition over plain stop()/warning()/message().",
+    "text": "The purpose of minicuts is to provide a zero-dependency reimplementation of cut_quantile()/cut_exposure_quantile() from erplots, generalised into .cut_quantile(), alongside a second function, .cut_evenly(), inspired by the chop_evenly()/chop_width() pair from santoku. Together they cover the two common ways of cutting a numeric vector into bins: fixed group size with data-dependent boundaries (.cut_quantile()), or fixed bin geometry with a data-dependent group size (.cut_evenly()). The README provides scope notes; this page walks through both functions on a small simulated exposure variable, including tie-breaking, custom labels, and the exclude argument the two functions share.",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
     ]
   },
   {
-    "objectID": "minicondition/index.html#functions",
-    "href": "minicondition/index.html#functions",
-    "title": "minicondition",
+    "objectID": "minicuts/index.html#functions",
+    "href": "minicuts/index.html#functions",
+    "title": "minicuts",
     "section": "Functions",
-    "text": "Functions\nThe minicondition.R script supplies four core functions:\n\n.cond_abort(message, class = NULL) is used to signal a classed error.\n.cond_warn(message, class = NULL) is used to signal a classed warning.\n.cond_inform(message, class = NULL) is used to signal a classed message.\n.cond_assert(expr, message, class = NULL) is used to call .cond_abort() if expr isn’t entirely TRUE; NA counts as a failure.\n\nThere is also one internal helper:\n\n.cond_condition() builds the classed condition object that .cond_abort()/_warn()/_inform() each hand off to base stop()/warning()/message().",
+    "text": "Functions\nThe minicuts.R script supplies two core functions:\n\n.cut_quantile(x, n_bins = 4, ties = \"upward\", ...) is used to cut x into n_bins quantile bins, each holding (approximately) the same number of values. The remaining arguments control tie-break reproducibility (seed), the quantile algorithm (quantile_type), custom labels (labeller), and how excluded values are labelled (exclude/exclude_label).\n.cut_evenly(x, n_bins = NULL, width = NULL, ties = \"upward\", ...) is used to cut x into equal-width bins, either a fixed number of them spanning range(x) (n_bins) or a fixed width with however many bins the data needs (width). The remaining arguments control the bin anchor (start), custom labels (labeller), and how excluded values are labelled (exclude/exclude_label).\n\nThey’re supported by five internal helpers, shared by both functions – there’s no need to call any of them directly. The helpers are these:\n\n.cuts_resolve_exclude()\n.cuts_bin_num()\n.cuts_resolve_ties()\n.cuts_with_seed()\n.cuts_resolve_labels()",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
     ]
   },
   {
-    "objectID": "minicondition/index.html#why-classes-matter",
-    "href": "minicondition/index.html#why-classes-matter",
-    "title": "minicondition",
-    "section": "Why classes matter",
-    "text": "Why classes matter\nA plain stop(\"bad input\") produces a condition of class c(\"simpleError\", \"error\", \"condition\") – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to this specific kind of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. The .cond_abort() function solves that by adding an extra class on top of \"error\", so tryCatch() can dispatch on it directly:\n\ntryCatch(\n  .cond_abort(\"bad input\", class = \"mypkg_invalid_input\"),\n  mypkg_invalid_input = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: bad input\n\n\nNote that .cond_abort() uses base stop() internally, not rlang::abort() – but the mechanics of catching by class are identical either way. The tryCatch()/withCallingHandlers() functions dispatch on a condition object’s class attribute, regardless of what function signalled it:\n\ne &lt;- tryCatch(.cond_abort(\"x\", class = \"mypkg_invalid_input\"), error = function(e) e)\nclass(e)\n\n[1] \"mypkg_invalid_input\" \"error\"               \"condition\"",
+    "objectID": "minicuts/index.html#a-minimal-data-set",
+    "href": "minicuts/index.html#a-minimal-data-set",
+    "title": "minicuts",
+    "section": "A minimal data set",
+    "text": "A minimal data set\nA stand-in for a drug exposure variable from a clinical trial: some patients received a placebo (exposure exactly 0), the rest a range of doses.\n\nset.seed(2984)\nexposure &lt;- c(rep(0, 12), round(rexp(48, rate = 1 / 20), 1))\nhead(exposure, 15)\n\n [1]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  6.6 29.6  1.0",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
     ]
   },
   {
-    "objectID": "minicondition/index.html#unmatched-handlers-fall-through-error-still-catches-it",
-    "href": "minicondition/index.html#unmatched-handlers-fall-through-error-still-catches-it",
-    "title": "minicondition",
-    "section": "Unmatched handlers fall through; error still catches it",
-    "text": "Unmatched handlers fall through; error still catches it\nA handler for an unrelated class simply doesn’t match – tryCatch() tries each handler in order and uses the first one whose class matches. Since the condition is still, underneath the custom class, an ordinary error (see the class(e) output above), a generic error handler still catches it as a fallback if nothing more specific matches first:\n\ntryCatch(\n  .cond_abort(\"bad input\", class = \"mypkg_invalid_input\"),\n  mypkg_other_class = function(e) message(\"this handler never runs\"),\n  error = function(e) message(\"caught generically as a plain error: \", conditionMessage(e))\n)\n\ncaught generically as a plain error: bad input\n\n\nThis is the same layering rlang conditions use: a custom class sits in addition to the base error/warning/message class, not instead of it, so code that only knows about the generic type still works.",
+    "objectID": "minicuts/index.html#quantile-bins-with-.cut_quantile",
+    "href": "minicuts/index.html#quantile-bins-with-.cut_quantile",
+    "title": "minicuts",
+    "section": "Quantile bins with .cut_quantile()",
+    "text": "Quantile bins with .cut_quantile()\nBy default, .cut_quantile() cuts x into four bins labelled \"Q1\"-\"Q4\", each holding a quarter of the values:\n\ntable(.cut_quantile(exposure))\n\n\nQ1 Q2 Q3 Q4 \n15 15 15 15 \n\n\nBecause the placebo zeroes are exact ties clustered at the low end, they all land in Q1 here, and the lowest break point is pulled down to 0 as a result – something the exclude argument (below) exists to fix.",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
     ]
   },
   {
-    "objectID": "minicondition/index.html#warnings-and-messages-work-the-same-way",
-    "href": "minicondition/index.html#warnings-and-messages-work-the-same-way",
-    "title": "minicondition",
-    "section": "Warnings and messages work the same way",
-    "text": "Warnings and messages work the same way\nThe .cond_warn() function signals a classed warning, catchable via withCallingHandlers() (warnings, unlike errors, don’t unwind the call stack, so catching them with tryCatch() would abandon whatever code was about to run after the warning – withCallingHandlers() lets the handler run and then hand control back):\n\nwithCallingHandlers(\n  .cond_warn(\"using a fallback default\", class = \"mypkg_fallback_used\"),\n  mypkg_fallback_used = function(w) {\n    message(\"caught warning: \", conditionMessage(w))\n    invokeRestart(\"muffleWarning\")\n  }\n)\n\ncaught warning: using a fallback default\n\n\nThe invokeRestart(\"muffleWarning\") call suppresses the warning from also being printed by R’s default warning handler – without it, the warning would print a second time after the custom handler runs.\nThe .cond_inform() function signals a classed message – uncaught, it just prints like an ordinary message() call, since messages are typically meant to be seen unless something specifically wants to intercept them:\n\n.cond_inform(\"starting up\", class = \"mypkg_startup\")\n\nstarting up",
+    "objectID": "minicuts/index.html#custom-labels",
+    "href": "minicuts/index.html#custom-labels",
+    "title": "minicuts",
+    "section": "Custom labels",
+    "text": "Custom labels\nThe labeller argument accepts either a plain character vector or a function of n_bins and the computed breaks:\n\n.cut_quantile(exposure, labeller = c(\"Low\", \"Mid-low\", \"Mid-high\", \"High\")) |&gt;\n  table()\n\n\n     Low  Mid-low Mid-high     High \n      15       15       15       15 \n\n.cut_quantile(exposure, labeller = function(n_bins, breaks) {\n  sprintf(\"Q%d (&gt;%.1f)\", 1:n_bins, breaks[-length(breaks)])\n}) |&gt;\n  table()\n\n\n Q1 (&gt;0.0)  Q2 (&gt;1.2)  Q3 (&gt;5.9) Q4 (&gt;18.6) \n        15         15         15         15",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
     ]
   },
   {
-    "objectID": "minicondition/index.html#cond_assert-abort-if-a-condition-doesnt-hold",
-    "href": "minicondition/index.html#cond_assert-abort-if-a-condition-doesnt-hold",
-    "title": "minicondition",
-    "section": ".cond_assert(): abort if a condition doesn’t hold",
-    "text": ".cond_assert(): abort if a condition doesn’t hold\nThe .cond_assert() function is .cond_abort() plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely TRUE. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:\n\nx &lt;- 5\n.cond_assert(x &gt; 0, \"x must be positive.\")\n\nA failing one raises a classed error, catchable the same way as .cond_abort() – which makes sense, since that’s exactly what it calls internally:\n\ntryCatch(\n  .cond_assert(x &gt; 0 && x &lt; 3, \"x must be between 0 and 3.\", class = \"mypkg_range_error\"),\n  mypkg_range_error = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: x must be between 0 and 3.",
+    "objectID": "minicuts/index.html#ties-at-a-quantile-boundary",
+    "href": "minicuts/index.html#ties-at-a-quantile-boundary",
+    "title": "minicuts",
+    "section": "Ties at a quantile boundary",
+    "text": "Ties at a quantile boundary\nRepeated values sitting exactly on a quantile break point are common with skewed or rounded data. The ties argument controls which bin they land in:\n\ntied &lt;- c(1, 2, 3, 4, 4, 4, 4, 5, 6, 7)\n.cut_quantile(tied, n_bins = 2, ties = \"upward\")\n\n [1] Q1 Q1 Q1 Q1 Q1 Q1 Q1 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] upward\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2\n\n.cut_quantile(tied, n_bins = 2, ties = \"downward\")\n\n [1] Q1 Q1 Q1 Q2 Q2 Q2 Q2 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] downward\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2\n\n\nThe \"split-even\" option instead divides a tied group between its two candidate bins, aiming for equal bin sizes rather than sending every tied value the same way. It’s random, so it takes a seed to be reproducible:\n\n.cut_quantile(tied, n_bins = 2, ties = \"split-even\", seed = 6017)\n\n [1] Q1 Q1 Q1 Q2 Q1 Q1 Q2 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] split-even\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
     ]
   },
   {
-    "objectID": "minicondition/index.html#na-counts-as-a-failure-not-a-crash",
-    "href": "minicondition/index.html#na-counts-as-a-failure-not-a-crash",
-    "title": "minicondition",
-    "section": "NA counts as a failure, not a crash",
-    "text": "NA counts as a failure, not a crash\nThe .cond_assert() function accepts a vector, not just a single logical value, and checks that every element is TRUE. That raises a subtlety: what should happen if the vector contains NA? This is a deliberate fix relative to the source this was adapted from: a naive if (any(expr == FALSE)) errors outright when expr contains NA (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. It checks anyNA(expr) explicitly first instead, so a vector containing NA fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:\n\ny &lt;- c(TRUE, TRUE, NA)\n.cond_assert(y, \"y must not contain NA.\", class = \"mypkg_na_error\")\n\nError:\n! y must not contain NA.",
+    "objectID": "minicuts/index.html#keeping-placebo-patients-separate-exclude",
+    "href": "minicuts/index.html#keeping-placebo-patients-separate-exclude",
+    "title": "minicuts",
+    "section": "Keeping placebo patients separate: exclude",
+    "text": "Keeping placebo patients separate: exclude\nPassing a predicate to exclude removes the matching values from the quantile calculation entirely, so they no longer distort the break points, but keeps them visible in the result under their own label rather than dropping them or coding them NA:\n\nresult &lt;- .cut_quantile(exposure, exclude = function(x) x == 0, exclude_label = \"Placebo\")\ntable(result)\n\nresult\nPlacebo      Q1      Q2      Q3      Q4 \n     12      12      12      12      12 \n\nattr(result, \"breaks\")\n\n    0%    25%    50%    75%   100% \n 0.300  4.175  9.850 23.550 53.200 \n\n\nThe breaks are now computed purely from the 48 non-placebo doses, and the quantile bins split that group into four roughly equal quarters, with \"Placebo\" as a fifth, separate level.",
     "crumbs": [
       "Minis",
-      "minicondition"
+      "minicuts"
+    ]
+  },
+  {
+    "objectID": "minicuts/index.html#equal-width-bins-with-.cut_evenly",
+    "href": "minicuts/index.html#equal-width-bins-with-.cut_evenly",
+    "title": "minicuts",
+    "section": "Equal-width bins with .cut_evenly()",
+    "text": "Equal-width bins with .cut_evenly()\nWhere .cut_quantile() fixes the group size and lets the bin edges follow from the data, .cut_evenly() does the opposite: it fixes the bin geometry and lets the group sizes follow from the data. Giving it n_bins spans range(x) with that many equal-width bins:\n\ndoses &lt;- exposure[exposure &gt; 0]\ntable(.cut_evenly(doses, n_bins = 4))\n\n\nQ1 Q2 Q3 Q4 \n30  8  7  3 \n\nattr(.cut_evenly(doses, n_bins = 4), \"breaks\")\n\n[1]  0.300 13.525 26.750 39.975 53.200\n\n\nGiving it width instead fixes the bin width and works out how many bins are needed to cover the data, anchored at min(x) by default:\n\ntable(.cut_evenly(doses, width = 10))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n25  9  7  4  2  1",
+    "crumbs": [
+      "Minis",
+      "minicuts"
+    ]
+  },
+  {
+    "objectID": "minicuts/index.html#anchoring-bins-with-start",
+    "href": "minicuts/index.html#anchoring-bins-with-start",
+    "title": "minicuts",
+    "section": "Anchoring bins with start",
+    "text": "Anchoring bins with start\nAn explicit start moves that anchor. Here, bins are anchored at 0 rather than min(doses), so the bin edges land on round numbers:\n\ntable(.cut_evenly(doses, width = 10, start = 0))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n24  9  8  4  2  1 \n\n\nA negative width builds bins downward from start (max(x) by default) instead of upward from it:\n\ntable(.cut_evenly(doses, width = -10))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n10 20  6  9  1  2",
+    "crumbs": [
+      "Minis",
+      "minicuts"
+    ]
+  },
+  {
+    "objectID": "minicuts/index.html#values-outside-the-bins-become-na",
+    "href": "minicuts/index.html#values-outside-the-bins-become-na",
+    "title": "minicuts",
+    "section": "Values outside the bins become NA",
+    "text": "Values outside the bins become NA\nIf start is set explicitly and doesn’t reach one edge of range(x), some values fall outside every bin. .cut_evenly() codes those NA and warns, rather than silently widening the outermost bin to cover them:\n\nresult &lt;- .cut_evenly(doses, width = 10, start = 5)\n\nWarning: Some non-missing, non-excluded values of `x` fall outside the bins\nimplied by `start`/`width` and are coded NA.\n\nsum(is.na(result))\n\n[1] 14",
+    "crumbs": [
+      "Minis",
+      "minicuts"
+    ]
+  },
+  {
+    "objectID": "minicuts/index.html#exclude-and-labeller-work-the-same-way-for-both-functions",
+    "href": "minicuts/index.html#exclude-and-labeller-work-the-same-way-for-both-functions",
+    "title": "minicuts",
+    "section": "exclude and labeller work the same way for both functions",
+    "text": "exclude and labeller work the same way for both functions\nThe placebo patients can be kept separate here too, and custom labels work identically to .cut_quantile():\n\n.cut_evenly(exposure, n_bins = 4, exclude = function(x) x == 0, exclude_label = \"Placebo\") |&gt;\n  table()\n\n\nPlacebo      Q1      Q2      Q3      Q4 \n     12      30       8       7       3",
+    "crumbs": [
+      "Minis",
+      "minicuts"
+    ]
+  },
+  {
+    "objectID": "minicuts/index.html#whats-deliberately-missing",
+    "href": "minicuts/index.html#whats-deliberately-missing",
+    "title": "minicuts",
+    "section": "What’s deliberately missing",
+    "text": "What’s deliberately missing\nThere’s no ties = \"split-even\" option for .cut_evenly(), and consequently no seed argument either – there’s no “equal group size” goal to chase when the bins themselves are fixed by geometry rather than derived from data-dependent quantiles. Neither function supports santoku’s full generality: arbitrary breaks, non-numeric x such as dates, or weighted quantiles. If that generality is needed, reach for santoku itself.",
+    "crumbs": [
+      "Minis",
+      "minicuts"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html",
+    "href": "minicli/index.html",
+    "title": "minicli",
+    "section": "",
+    "text": "The purpose of minicli is to provide a zero-dependency stand-in for the small slice of cli that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and a bulleted list. The README provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#functions",
+    "href": "minicli/index.html#functions",
+    "title": "minicli",
+    "section": "Functions",
+    "text": "Functions\nThe minicli.R script supplies the following as its core functions:\n\n.cli_alert_success()/_danger()/_warning()/_info() are used to print a message with a coloured symbol prefix.\n.cli_symbol(name) looks up a single symbol by name, returning its unicode glyph or an ASCII fallback depending on what’s safe to print.\n.cli_rule(title = NULL) prints a horizontal divider spanning the console width, optionally with a centred title.\n.cli_bullets(items) prints a simple bulleted list, one entry per line.\n.cli_col_black()/_red()/_green()/_yellow()/_blue()/ _magenta()/_cyan()/_white()/_grey() are used to generate output in a particular colour, which they achieve by wrapping a string in an ANSI colour code.\n.cli_style_bold()/_dim()/_italic()/_underline() are used to generate output in a particular style, which they achieve by wrapping a string in an ANSI style code.\n\nThere are also a collection of internal helper functions:\n\n.cli_ansi_enabled() is used to decide whether it’s currently safe to emit ANSI escape codes, which it does by checking cli.num_colors, NO_COLOR, whether knitr/Quarto is rendering, whether output is being captured, whether it’s running in Positron’s or RStudio’s Console pane, and whether stdout is a real terminal.\n.cli_positron_console_with_color()/.cli_rstudio_console_with_color() are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.\n.cli_unicode_enabled() is used to decide whether it’s currently safe to print unicode symbols, by checking cli.unicode and then the session locale.\n.cli_ansi_style(code) is a function factory that builds one of the .cli_col_*()/.cli_style_*() functions from a raw SGR code.\n.cli_alert(symbol_name, color_fn, text, ...) is the shared implementation behind the four .cli_alert_*() functions.",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#capability-detection",
+    "href": "minicli/index.html#capability-detection",
+    "title": "minicli",
+    "section": "Capability detection",
+    "text": "Capability detection\nEvery colour/symbol decision in minicli runs through .cli_ansi_enabled() and .cli_unicode_enabled(), so the same code looks right whether it’s running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling getOption(\"knitr.in.progress\"). As a consequence, ANSI colour is automatically disabled here. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#alerts",
+    "href": "minicli/index.html#alerts",
+    "title": "minicli",
+    "section": "Alerts",
+    "text": "Alerts\nThe .cli_alert_success()/_danger()/_warning()/_info() functions are the ones you are likely to reach for most often in a package: each one is a thin wrapper around message() with a symbol prefix, meant for the kind of status line a script prints while it works. Extra ... arguments are passed through sprintf(), so the first argument can be a format string:\n\n.cli_alert_success(\"Wrote %d files to %s\", 3, \"output/\")\n\n✔ Wrote 3 files to output/\n\n\n\n.cli_alert_warning(\"Skipped %d rows with missing values\", 12)\n\n⚠ Skipped 12 rows with missing values\n\n\n\n.cli_alert_danger(\"Failed to connect to %s\", \"database\")\n\n✖ Failed to connect to database\n\n\n\n.cli_alert_info(\"Using default configuration\")\n\nℹ Using default configuration\n\n\nIf no arguments are passed through ... to format with, the text is used as-is. That is, no sprintf() call is made, so a literal % in the message is safe:\n\n.cli_alert_info(\"Discount: 10% off\")\n\nℹ Discount: 10% off",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#symbols",
+    "href": "minicli/index.html#symbols",
+    "title": "minicli",
+    "section": "Symbols",
+    "text": "Symbols\nEach alert’s prefix comes from .cli_symbol(), which looks up a named symbol and returns either its unicode glyph or an ASCII fallback, depending on .cli_unicode_enabled(). It’s also useful on its own, for building custom messages that follow the same convention as the built-in alerts:\n\n.cli_symbol(\"tick\")\n\n[1] \"✔\"\n\n.cli_symbol(\"cross\")\n\n[1] \"✖\"\n\n.cli_symbol(\"arrow_right\")\n\n[1] \"→\"\n\n\nAn unrecognised name is an error rather than a silent NA:\n\n.cli_symbol(\"star\")\n\nError:\n! Unknown symbol: star",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#rule",
+    "href": "minicli/index.html#rule",
+    "title": "minicli",
+    "section": "Rule",
+    "text": "Rule\nThe .cli_rule() function prints a horizontal divider, useful for separating sections of console output. When called with no arguments, it spans the full console width:\n\n.cli_rule()\n\n────────────────────────────────────────────────────────────────────────────────\n\n\nIf a title is passed, the text appears centred within the rule instead:\n\n.cli_rule(\"Summary\")\n\n─────────────────────────────────── Summary ────────────────────────────────────",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#bullets",
+    "href": "minicli/index.html#bullets",
+    "title": "minicli",
+    "section": "Bullets",
+    "text": "Bullets\nThe .cli_bullets() function prints a simple bulleted list, one entry per line, which is handy for summarising a small set of results:\n\n.cli_bullets(c(\"one\", \"two\", \"three\"))\n\n• one\n• two\n• three",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "minicli/index.html#colours-and-styles",
+    "href": "minicli/index.html#colours-and-styles",
+    "title": "minicli",
+    "section": "Colours and styles",
+    "text": "Colours and styles\nUnder the hood, each alert calls one of the .cli_col_*() functions to colour its symbol. Those functions, along with the .cli_style_*() family, are also exported directly in case you would like to apply colouring or styling to arbitrary text. Both wrap their input in an ANSI escape code and its matching reset code, and both return the text unchanged whenever .cli_ansi_enabled() is FALSE, as is the case for this page.\n\nidentical(.cli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(.cli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE\n\n\nColours and styles nest freely, since each wrapper’s reset code is emitted immediately after its own content rather than at the very end of the whole string:\n\n.cli_style_bold(.cli_col_red(\"bold and red\"))\n\n[1] \"bold and red\"\n\n\nOutside of a Quarto render – in an interactive terminal session, for instance – that same call would print bold red text rather than the plain string shown here.",
+    "crumbs": [
+      "Minis",
+      "minicli"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "minis",
+    "section": "",
+    "text": "A problem I encounter frequently when writing R packages is that I’ll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does.\nThe “minis” repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components (“minis”), each witten as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, I can grab the relevant mini and copy it straight into my package without reimplementing the solution over and over again. Admittedly, it is rarely a pure “drop-in” situation: every package has its own need, so I almost always end up adapting the mini to suit the context, but even so I find it helps me enormously.\nSo I’ve started trying to collect these little snippets into a single place, making it easy for me to find them again rather than hunt around trying to remember where I solved this problem last time. The repository README outlines the full philosophy and usage instructions, if by some chance anyone else should care to reuse these solutions. Meanwhile, because each mini has its own worked vignette, this site exists to collect all these together (or alternatively, the README if a vignette doesn’t exist).\nThese are the minis that currently exist:\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminiverb\nMinimal dplyr-style one-table verbs: filter()/select()/mutate()/arrange()/summarise(), with a shared .by grouping argument.\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nVignette\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nVignette\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nVignette\n\n\nminipivot\nMinimal tidyr-style pivot_longer()/pivot_wider().\nVignette\n\n\nministr\nMinimal stringr-style basic string manipulation (padding/trimming/case conversion/etc).\nVignette\n\n\nminirx\nMinimal stringr-style regex pattern matching (detect/extract/match/replace/split/count/locate).\nVignette\n\n\nminicuts\nMinimal erplots-style cut_quantile() and santoku-style cut_evenly().\nVignette",
+    "crumbs": [
+      "Home"
     ]
   },
   {
@@ -528,101 +681,80 @@
     ]
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "minis",
+    "objectID": "minicondition/index.html",
+    "href": "minicondition/index.html",
+    "title": "minicondition",
     "section": "",
-    "text": "A problem I encounter frequently when writing R packages is that I’ll find myself wanting to use a tiny slice of the functionality supplied by another package, but cannot justify taking a dependency on that package. Sometimes this happens because the tool I am writing needs to be a strict zero-dependency package (e.g., by design, sessioncheck cannot take dependencies). Sometimes it happens because the package that supplies the functionality is a very heavy dependency (e.g., ggplot2 is a complicated package that in turn depends on many other packages) but all I need is a tiny slice of what it does.\nThe “minis” repository is my own personal, partial solution to the problem. It is a collection of small, standalone, zero-dependency R components (“minis”), each witten as a single .R file with its own drop-in test suite. When a package needs a little bit of cli-style formatting, or a little bit of purrr-style mapping, or some other small convenience, but taking on the full dependency isn’t worth it, I can grab the relevant mini and copy it straight into my package without reimplementing the solution over and over again. Admittedly, it is rarely a pure “drop-in” situation: every package has its own need, so I almost always end up adapting the mini to suit the context, but even so I find it helps me enormously.\nSo I’ve started trying to collect these little snippets into a single place, making it easy for me to find them again rather than hunt around trying to remember where I solved this problem last time. The repository README outlines the full philosophy and usage instructions, if by some chance anyone else should care to reuse these solutions. Meanwhile, because each mini has its own worked vignette, this site exists to collect all these together (or alternatively, the README if a vignette doesn’t exist).\nThese are the minis that currently exist:\n\n\n\n\n\n\n\n\nMini\nPurpose\nDocs\n\n\n\n\nminicli\nMinimal cli-style coloured alerts/symbols/rules, with automatic fallback to plain text when ANSI/unicode isn’t safe.\nVignette\n\n\nminimap\nMinimal purrr-style map()/map2()/imap()/walk()/iwalk() and type-stable map_dbl()/map_lgl()/map_chr().\nVignette\n\n\nminitrap\nMinimal purrr-style safely()/quietly() function adverbs.\nVignette\n\n\nminiverb\nMinimal dplyr-style one-table verbs: filter()/select()/mutate()/arrange()/summarise(), with a shared .by grouping argument.\nVignette\n\n\nminicase\nMinimal dplyr-style case_when().\nVignette\n\n\nminijoin\nMinimal dplyr-style mutating joins, built on merge().\nVignette\n\n\nminitable\nMinimal tibble-style construction/coercion helpers.\nVignette\n\n\nminicondition\nMinimal rlang-style classed conditions, plus assert().\nVignette\n\n\nminipivot\nMinimal tidyr-style pivot_longer()/pivot_wider().\nVignette\n\n\nministr\nMinimal stringr-style basic string manipulation (padding/trimming/case conversion/etc).\nVignette\n\n\nminirx\nMinimal stringr-style regex pattern matching (detect/extract/match/replace/split/count/locate).\nVignette",
-    "crumbs": [
-      "Home"
-    ]
-  },
-  {
-    "objectID": "minicli/index.html",
-    "href": "minicli/index.html",
-    "title": "minicli",
-    "section": "",
-    "text": "The purpose of minicli is to provide a zero-dependency stand-in for the small slice of cli that most packages actually use: coloured alert messages, unicode symbols with an ASCII fallback, horizontal rules for headers, and a bulleted list. The README provides the full API reference and capability-detection details; this page walks through each piece and builds up to how they combine.",
+    "text": "The purpose of minicondition is to provide a zero-dependency reimplementation of a small slice of the rlang package: thin wrappers around base R’s own condition system that signal a classed condition, catchable specifically by that class. The README provides the rlang-parity notes; this page focuses mostly on the catch-by-class behaviour, since that’s the main reason to reach for minicondition over plain stop()/warning()/message().",
     "crumbs": [
       "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
-    "objectID": "minicli/index.html#functions",
-    "href": "minicli/index.html#functions",
-    "title": "minicli",
+    "objectID": "minicondition/index.html#functions",
+    "href": "minicondition/index.html#functions",
+    "title": "minicondition",
     "section": "Functions",
-    "text": "Functions\nThe minicli.R script supplies the following as its core functions:\n\n.cli_alert_success()/_danger()/_warning()/_info() are used to print a message with a coloured symbol prefix.\n.cli_symbol(name) looks up a single symbol by name, returning its unicode glyph or an ASCII fallback depending on what’s safe to print.\n.cli_rule(title = NULL) prints a horizontal divider spanning the console width, optionally with a centred title.\n.cli_bullets(items) prints a simple bulleted list, one entry per line.\n.cli_col_black()/_red()/_green()/_yellow()/_blue()/ _magenta()/_cyan()/_white()/_grey() are used to generate output in a particular colour, which they achieve by wrapping a string in an ANSI colour code.\n.cli_style_bold()/_dim()/_italic()/_underline() are used to generate output in a particular style, which they achieve by wrapping a string in an ANSI style code.\n\nThere are also a collection of internal helper functions:\n\n.cli_ansi_enabled() is used to decide whether it’s currently safe to emit ANSI escape codes, which it does by checking cli.num_colors, NO_COLOR, whether knitr/Quarto is rendering, whether output is being captured, whether it’s running in Positron’s or RStudio’s Console pane, and whether stdout is a real terminal.\n.cli_positron_console_with_color()/.cli_rstudio_console_with_color() are used to recognise Positron and RStudio console panes explicitly, since neither is a real tty but both support ANSI colour.\n.cli_unicode_enabled() is used to decide whether it’s currently safe to print unicode symbols, by checking cli.unicode and then the session locale.\n.cli_ansi_style(code) is a function factory that builds one of the .cli_col_*()/.cli_style_*() functions from a raw SGR code.\n.cli_alert(symbol_name, color_fn, text, ...) is the shared implementation behind the four .cli_alert_*() functions.",
+    "text": "Functions\nThe minicondition.R script supplies four core functions:\n\n.cond_abort(message, class = NULL) is used to signal a classed error.\n.cond_warn(message, class = NULL) is used to signal a classed warning.\n.cond_inform(message, class = NULL) is used to signal a classed message.\n.cond_assert(expr, message, class = NULL) is used to call .cond_abort() if expr isn’t entirely TRUE; NA counts as a failure.\n\nThere is also one internal helper:\n\n.cond_condition() builds the classed condition object that .cond_abort()/_warn()/_inform() each hand off to base stop()/warning()/message().",
     "crumbs": [
       "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
-    "objectID": "minicli/index.html#capability-detection",
-    "href": "minicli/index.html#capability-detection",
-    "title": "minicli",
-    "section": "Capability detection",
-    "text": "Capability detection\nEvery colour/symbol decision in minicli runs through .cli_ansi_enabled() and .cli_unicode_enabled(), so the same code looks right whether it’s running in an interactive terminal that supports unicode and colour, the console in Positron or RStudio which support colour, a plain terminal that supports neither, or a Quarto or R markdown render. Quarto/knitr renders are detected as a non-terminal by calling getOption(\"knitr.in.progress\"). As a consequence, ANSI colour is automatically disabled here. That means the alerts below print in plain text with their symbol prefix, exactly as they would be in a captured log or a non-interactive session. Importantly, they do not display the ANSI colour codes as literal text on the page.",
+    "objectID": "minicondition/index.html#why-classes-matter",
+    "href": "minicondition/index.html#why-classes-matter",
+    "title": "minicondition",
+    "section": "Why classes matter",
+    "text": "Why classes matter\nA plain stop(\"bad input\") produces a condition of class c(\"simpleError\", \"error\", \"condition\") – generic, and indistinguishable from any other error at the point where it’s caught. That’s fine for a one-off script, but it’s a problem inside a package: callers who want to react to this specific kind of failure (retry, fall back to a default, show a custom message) have no reliable way to distinguish it from every other error your code might raise. The .cond_abort() function solves that by adding an extra class on top of \"error\", so tryCatch() can dispatch on it directly:\n\ntryCatch(\n  .cond_abort(\"bad input\", class = \"mypkg_invalid_input\"),\n  mypkg_invalid_input = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: bad input\n\n\nNote that .cond_abort() uses base stop() internally, not rlang::abort() – but the mechanics of catching by class are identical either way. The tryCatch()/withCallingHandlers() functions dispatch on a condition object’s class attribute, regardless of what function signalled it:\n\ne &lt;- tryCatch(.cond_abort(\"x\", class = \"mypkg_invalid_input\"), error = function(e) e)\nclass(e)\n\n[1] \"mypkg_invalid_input\" \"error\"               \"condition\"",
     "crumbs": [
       "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
-    "objectID": "minicli/index.html#alerts",
-    "href": "minicli/index.html#alerts",
-    "title": "minicli",
-    "section": "Alerts",
-    "text": "Alerts\nThe .cli_alert_success()/_danger()/_warning()/_info() functions are the ones you are likely to reach for most often in a package: each one is a thin wrapper around message() with a symbol prefix, meant for the kind of status line a script prints while it works. Extra ... arguments are passed through sprintf(), so the first argument can be a format string:\n\n.cli_alert_success(\"Wrote %d files to %s\", 3, \"output/\")\n\n✔ Wrote 3 files to output/\n\n\n\n.cli_alert_warning(\"Skipped %d rows with missing values\", 12)\n\n⚠ Skipped 12 rows with missing values\n\n\n\n.cli_alert_danger(\"Failed to connect to %s\", \"database\")\n\n✖ Failed to connect to database\n\n\n\n.cli_alert_info(\"Using default configuration\")\n\nℹ Using default configuration\n\n\nIf no arguments are passed through ... to format with, the text is used as-is. That is, no sprintf() call is made, so a literal % in the message is safe:\n\n.cli_alert_info(\"Discount: 10% off\")\n\nℹ Discount: 10% off",
+    "objectID": "minicondition/index.html#unmatched-handlers-fall-through-error-still-catches-it",
+    "href": "minicondition/index.html#unmatched-handlers-fall-through-error-still-catches-it",
+    "title": "minicondition",
+    "section": "Unmatched handlers fall through; error still catches it",
+    "text": "Unmatched handlers fall through; error still catches it\nA handler for an unrelated class simply doesn’t match – tryCatch() tries each handler in order and uses the first one whose class matches. Since the condition is still, underneath the custom class, an ordinary error (see the class(e) output above), a generic error handler still catches it as a fallback if nothing more specific matches first:\n\ntryCatch(\n  .cond_abort(\"bad input\", class = \"mypkg_invalid_input\"),\n  mypkg_other_class = function(e) message(\"this handler never runs\"),\n  error = function(e) message(\"caught generically as a plain error: \", conditionMessage(e))\n)\n\ncaught generically as a plain error: bad input\n\n\nThis is the same layering rlang conditions use: a custom class sits in addition to the base error/warning/message class, not instead of it, so code that only knows about the generic type still works.",
     "crumbs": [
       "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
-    "objectID": "minicli/index.html#symbols",
-    "href": "minicli/index.html#symbols",
-    "title": "minicli",
-    "section": "Symbols",
-    "text": "Symbols\nEach alert’s prefix comes from .cli_symbol(), which looks up a named symbol and returns either its unicode glyph or an ASCII fallback, depending on .cli_unicode_enabled(). It’s also useful on its own, for building custom messages that follow the same convention as the built-in alerts:\n\n.cli_symbol(\"tick\")\n\n[1] \"✔\"\n\n.cli_symbol(\"cross\")\n\n[1] \"✖\"\n\n.cli_symbol(\"arrow_right\")\n\n[1] \"→\"\n\n\nAn unrecognised name is an error rather than a silent NA:\n\n.cli_symbol(\"star\")\n\nError:\n! Unknown symbol: star",
+    "objectID": "minicondition/index.html#warnings-and-messages-work-the-same-way",
+    "href": "minicondition/index.html#warnings-and-messages-work-the-same-way",
+    "title": "minicondition",
+    "section": "Warnings and messages work the same way",
+    "text": "Warnings and messages work the same way\nThe .cond_warn() function signals a classed warning, catchable via withCallingHandlers() (warnings, unlike errors, don’t unwind the call stack, so catching them with tryCatch() would abandon whatever code was about to run after the warning – withCallingHandlers() lets the handler run and then hand control back):\n\nwithCallingHandlers(\n  .cond_warn(\"using a fallback default\", class = \"mypkg_fallback_used\"),\n  mypkg_fallback_used = function(w) {\n    message(\"caught warning: \", conditionMessage(w))\n    invokeRestart(\"muffleWarning\")\n  }\n)\n\ncaught warning: using a fallback default\n\n\nThe invokeRestart(\"muffleWarning\") call suppresses the warning from also being printed by R’s default warning handler – without it, the warning would print a second time after the custom handler runs.\nThe .cond_inform() function signals a classed message – uncaught, it just prints like an ordinary message() call, since messages are typically meant to be seen unless something specifically wants to intercept them:\n\n.cond_inform(\"starting up\", class = \"mypkg_startup\")\n\nstarting up",
     "crumbs": [
       "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
-    "objectID": "minicli/index.html#rule",
-    "href": "minicli/index.html#rule",
-    "title": "minicli",
-    "section": "Rule",
-    "text": "Rule\nThe .cli_rule() function prints a horizontal divider, useful for separating sections of console output. When called with no arguments, it spans the full console width:\n\n.cli_rule()\n\n────────────────────────────────────────────────────────────────────────────────\n\n\nIf a title is passed, the text appears centred within the rule instead:\n\n.cli_rule(\"Summary\")\n\n─────────────────────────────────── Summary ────────────────────────────────────",
+    "objectID": "minicondition/index.html#cond_assert-abort-if-a-condition-doesnt-hold",
+    "href": "minicondition/index.html#cond_assert-abort-if-a-condition-doesnt-hold",
+    "title": "minicondition",
+    "section": ".cond_assert(): abort if a condition doesn’t hold",
+    "text": ".cond_assert(): abort if a condition doesn’t hold\nThe .cond_assert() function is .cond_abort() plus a check: pass it a logical expression, and it aborts (with the same classed-error mechanics as above) only if that expression isn’t entirely TRUE. A passing assertion is silent, so it’s safe to sprinkle through code as a precondition check without cluttering normal output:\n\nx &lt;- 5\n.cond_assert(x &gt; 0, \"x must be positive.\")\n\nA failing one raises a classed error, catchable the same way as .cond_abort() – which makes sense, since that’s exactly what it calls internally:\n\ntryCatch(\n  .cond_assert(x &gt; 0 && x &lt; 3, \"x must be between 0 and 3.\", class = \"mypkg_range_error\"),\n  mypkg_range_error = function(e) message(\"caught: \", conditionMessage(e))\n)\n\ncaught: x must be between 0 and 3.",
     "crumbs": [
       "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
-    "objectID": "minicli/index.html#bullets",
-    "href": "minicli/index.html#bullets",
-    "title": "minicli",
-    "section": "Bullets",
-    "text": "Bullets\nThe .cli_bullets() function prints a simple bulleted list, one entry per line, which is handy for summarising a small set of results:\n\n.cli_bullets(c(\"one\", \"two\", \"three\"))\n\n• one\n• two\n• three",
+    "objectID": "minicondition/index.html#na-counts-as-a-failure-not-a-crash",
+    "href": "minicondition/index.html#na-counts-as-a-failure-not-a-crash",
+    "title": "minicondition",
+    "section": "NA counts as a failure, not a crash",
+    "text": "NA counts as a failure, not a crash\nThe .cond_assert() function accepts a vector, not just a single logical value, and checks that every element is TRUE. That raises a subtlety: what should happen if the vector contains NA? This is a deliberate fix relative to the source this was adapted from: a naive if (any(expr == FALSE)) errors outright when expr contains NA (“missing value where TRUE/FALSE needed”), which would crash the assertion check itself rather than raising the intended, informative assertion error. It checks anyNA(expr) explicitly first instead, so a vector containing NA fails the assertion cleanly, with the message you asked for, instead of an unrelated low-level error:\n\ny &lt;- c(TRUE, TRUE, NA)\n.cond_assert(y, \"y must not contain NA.\", class = \"mypkg_na_error\")\n\nError:\n! y must not contain NA.",
     "crumbs": [
       "Minis",
-      "minicli"
-    ]
-  },
-  {
-    "objectID": "minicli/index.html#colours-and-styles",
-    "href": "minicli/index.html#colours-and-styles",
-    "title": "minicli",
-    "section": "Colours and styles",
-    "text": "Colours and styles\nUnder the hood, each alert calls one of the .cli_col_*() functions to colour its symbol. Those functions, along with the .cli_style_*() family, are also exported directly in case you would like to apply colouring or styling to arbitrary text. Both wrap their input in an ANSI escape code and its matching reset code, and both return the text unchanged whenever .cli_ansi_enabled() is FALSE, as is the case for this page.\n\nidentical(.cli_col_red(\"danger\"), \"danger\")\n\n[1] TRUE\n\nidentical(.cli_style_bold(\"emphasis\"), \"emphasis\")\n\n[1] TRUE\n\n\nColours and styles nest freely, since each wrapper’s reset code is emitted immediately after its own content rather than at the very end of the whole string:\n\n.cli_style_bold(.cli_col_red(\"bold and red\"))\n\n[1] \"bold and red\"\n\n\nOutside of a Quarto render – in an interactive terminal session, for instance – that same call would print bold red text rather than the plain string shown here.",
-    "crumbs": [
-      "Minis",
-      "minicli"
+      "minicondition"
     ]
   },
   {
