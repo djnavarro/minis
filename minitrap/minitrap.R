@@ -1,4 +1,5 @@
 ## minitrap.R -------------------------------------------------------------
+## stamp: 51b413a4 (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of purrr's `safely()` and
 ## `quietly()` function adverbs: wrap a function so that instead of

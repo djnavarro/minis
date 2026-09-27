@@ -1,4 +1,5 @@
 ## minijoin.R -------------------------------------------------------------
+## stamp: 2e7655a5 (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of dplyr's mutating joins
 ## (`inner_join()`, `left_join()`, `right_join()`, `full_join()`), built

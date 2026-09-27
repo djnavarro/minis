@@ -1,50 +1,51 @@
-# minicuts.R
-#
-# Two ways to cut a numeric vector into bins: `.cut_quantile()` (fixed
-# group size, boundaries determined by the data) and `.cut_evenly()`
-# (fixed bin geometry, group sizes determined by the data).
-#
-# `.cut_quantile()` reimplements the quantile-based cutting from
-# djnavarro/erplots's `cut_quantile()`/`cut_exposure_quantile()`
-# (R/utils-helpers.R). Ties handling (`ties`/`seed`), `quantile_type`
-# passthrough, the flexible `labeller` hook, and graceful fallback when
-# `x` doesn't have enough resolution for the requested number of bins
-# are all ported directly. `cut_exposure_quantile()`'s
-# pharmacometrics-specific `is_placebo`/`"Placebo"` handling is
-# generalized into a domain-neutral `exclude` argument: values matched
-# by `exclude` are left out of the quantile *calculation* (so they
-# don't skew break points) but still get assigned their own factor
-# level in the output, rather than being dropped or set to `NA`.
-#
-# `.cut_evenly()` covers the two related equal-width cutting rules from
-# santoku's `chop_evenly()` (fixed number of bins, width derived from
-# `range(x)`) and `chop_width()` (fixed bin width, number of bins
-# derived from the data) in one function with mutually exclusive
-# `n_bins`/`width` arguments, since both are the same underlying
-# fixed-geometry cutting logic. It shares `exclude`/`exclude_label`/
-# `labeller` with `.cut_quantile()` for a consistent feel across the
-# mini, but drops `ties = "split-even"` (no "equal group size" goal to
-# chase when bins are fixed by geometry rather than by data-driven
-# quantiles) and, consequently, `seed`.
-#
-# Deliberately excluded relative to the source material:
-#  - santoku-style general interval chopping (arbitrary breaks, `left`/
-#    `close_end`, non-numeric `x`, weighted quantiles) -- if that
-#    generality is what's needed, use santoku itself.
-#
-# Deliberate fix relative to the erplots source: `rlang::abort()`/
-# `rlang::warn()` and `withr::with_seed()` are replaced with base
-# `stop()`/`warning()` and a manual RNG-state save/restore
-# (`.cuts_with_seed()`), to keep this mini at zero runtime
-# dependencies.
-#
-# All functions are dot-prefixed. Both user-facing functions keep their
-# own descriptive names bare (`.cut_quantile()`/`.cut_evenly()`) rather
-# than stuttering under a mechanically-derived tag; internal helpers
-# use the mini-specific tag `.cuts_` -- there's no separate
-# exported-vs-internal naming split, since every function here is
-# meant to be treated as an implementation detail once copied into a
-# consuming package.
+## minicuts.R -------------------------------------------------------------
+## stamp: 33edeb5f (2026-09-27)
+##
+## Two ways to cut a numeric vector into bins: `.cut_quantile()` (fixed
+## group size, boundaries determined by the data) and `.cut_evenly()`
+## (fixed bin geometry, group sizes determined by the data).
+##
+## `.cut_quantile()` reimplements the quantile-based cutting from
+## djnavarro/erplots's `cut_quantile()`/`cut_exposure_quantile()`
+## (R/utils-helpers.R). Ties handling (`ties`/`seed`), `quantile_type`
+## passthrough, the flexible `labeller` hook, and graceful fallback when
+## `x` doesn't have enough resolution for the requested number of bins
+## are all ported directly. `cut_exposure_quantile()`'s
+## pharmacometrics-specific `is_placebo`/`"Placebo"` handling is
+## generalized into a domain-neutral `exclude` argument: values matched
+## by `exclude` are left out of the quantile *calculation* (so they
+## don't skew break points) but still get assigned their own factor
+## level in the output, rather than being dropped or set to `NA`.
+##
+## `.cut_evenly()` covers the two related equal-width cutting rules from
+## santoku's `chop_evenly()` (fixed number of bins, width derived from
+## `range(x)`) and `chop_width()` (fixed bin width, number of bins
+## derived from the data) in one function with mutually exclusive
+## `n_bins`/`width` arguments, since both are the same underlying
+## fixed-geometry cutting logic. It shares `exclude`/`exclude_label`/
+## `labeller` with `.cut_quantile()` for a consistent feel across the
+## mini, but drops `ties = "split-even"` (no "equal group size" goal to
+## chase when bins are fixed by geometry rather than by data-driven
+## quantiles) and, consequently, `seed`.
+##
+## Deliberately excluded relative to the source material:
+##  - santoku-style general interval chopping (arbitrary breaks, `left`/
+##    `close_end`, non-numeric `x`, weighted quantiles) -- if that
+##    generality is what's needed, use santoku itself.
+##
+## Deliberate fix relative to the erplots source: `rlang::abort()`/
+## `rlang::warn()` and `withr::with_seed()` are replaced with base
+## `stop()`/`warning()` and a manual RNG-state save/restore
+## (`.cuts_with_seed()`), to keep this mini at zero runtime
+## dependencies.
+##
+## All functions are dot-prefixed. Both user-facing functions keep their
+## own descriptive names bare (`.cut_quantile()`/`.cut_evenly()`) rather
+## than stuttering under a mechanically-derived tag; internal helpers
+## use the mini-specific tag `.cuts_` -- there's no separate
+## exported-vs-internal naming split, since every function here is
+## meant to be treated as an implementation detail once copied into a
+## consuming package.
 
 # Resolves `exclude` (`NULL`/logical vector/predicate function) into a
 # logical vector the same length as `x`, `TRUE` where that element is

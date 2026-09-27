@@ -1,4 +1,5 @@
 ## minipivot.R -------------------------------------------------------------
+## stamp: 424e458d (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of tidyr's `pivot_longer()`
 ## and `pivot_wider()`: reshape a data frame between "long" and "wide"

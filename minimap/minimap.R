@@ -1,4 +1,5 @@
 ## minimap.R -------------------------------------------------------------
+## stamp: b1800bbd (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of purrr's core mapping
 ## functions: map(), map2(), imap(), walk(), iwalk(), and the type-stable

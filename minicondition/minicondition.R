@@ -1,4 +1,5 @@
 ## minicondition.R -------------------------------------------------------------
+## stamp: 42b387fd (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of rlang's `abort()`,
 ## `warn()`, and `inform()`: signal a classed condition (an error,

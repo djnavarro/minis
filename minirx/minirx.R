@@ -1,4 +1,5 @@
 ## minirx.R -------------------------------------------------------------
+## stamp: 1b63d288 (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of stringr's regex-based
 ## pattern-matching verbs -- detect, extract, match, replace, remove,

@@ -42,6 +42,8 @@ relevant mini and copy it straight into `R/`.
   [minis site](https://djnavarro.github.io/minis/) (once published).
   It's purely additive — the plain README above is what every mini is
   required to have.
+- **Every mini carries its own version stamp.** See "Version stamps"
+  below.
 
 ## Available minis
 
@@ -70,6 +72,34 @@ relevant mini and copy it straight into `R/`.
    functions you actually use, or leave them unexported and call with
    `:::` internally — either is fine since there's no dependency to
    declare either way.
+5. Keep the `## stamp: <hash> (<date>)` comment near the top of the
+   file intact when you copy it. Later, to check whether your copy is
+   stale, compare that line against the same file in this repo (see
+   "Version stamps" below) — no git access to this repo required.
+
+## Version stamps
+
+Every `<mini>/<mini>.R` file carries a `## stamp: <hash> (<date>)`
+comment on line 2, right below its title line. The hash is a content
+fingerprint of the file (excluding the stamp line itself); the date
+only changes when the hash does, so it reflects the last time the
+mini's actual behaviour changed rather than the last time anything ran.
+
+Because the stamp lives inside the file itself, it survives being
+vendored by a plain copy/paste — there's no separate "vendoring tool"
+step to skip. A consumer who copied a mini can later compare their
+copy's stamp against the current one in this repo to see, at a glance,
+whether the file they have has since been updated.
+
+The stamp is maintained automatically, never by hand:
+
+```r
+Rscript stamp_minis.R          # update stamps in place
+Rscript stamp_minis.R --check  # verify only, exit 1 if stale (used in CI)
+```
+
+CI runs `--check` on every push/PR, so a mini whose `.R` file changed
+without its stamp being refreshed fails the build.
 
 ## Running the test suites
 

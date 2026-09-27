@@ -442,3 +442,85 @@ substitute for exercising the edge cases its own tests don't cover,
 especially for logic (factor levels, `merge()`'s column-collapsing,
 `.by`'s group order) whose surprising behaviour lives in a dependency
 (base R's own semantics) rather than in the mini's own code.
+
+## Version stamps: content hash embedded in the file itself, not a hand-maintained number
+
+Motivating problem: a consumer who copies a mini's `.R` file has no way
+to later notice that this repo has since fixed a bug in it -- the repo's
+own git history is no help, since the consumer's copy isn't a git
+checkout of this repo. A lightweight, no-install way to signal "this
+file has changed since you copied it" was wanted, without violating the
+zero-runtime-dependency rule (whatever the mechanism is, it can't
+require the mini itself to depend on anything at runtime).
+
+Two designs were considered and rejected before landing on the one
+implemented:
+
+- **Hand-maintained semantic version number.** Rejected before writing
+  any code: it relies entirely on a human remembering to bump the
+  number on every substantive edit, with nothing in the existing
+  tooling (`run_tests.R`, CI) able to catch a missed bump -- the exact
+  "did someone remember" failure mode this repo's other conventions
+  (e.g. the dot-prefix naming rule) are already designed to avoid.
+- **Git commit SHA as the version identifier.** More appealing than a
+  hand-typed number since it requires no human discipline, but it has a
+  chicken-and-egg problem: a commit's SHA is a hash of the commit's
+  *content*, so a file cannot embed the SHA of the commit that
+  introduces its own current state without circularity. (Stamping the
+  *previous* commit's SHA was a possible workaround but was dropped
+  once the content-hash alternative below turned out to sidestep the
+  problem entirely, with no lag.)
+
+Chose instead: a content hash (`tools::md5sum()`, truncated to 8 hex
+characters -- base R only, no new dependency for the repo-level
+tooling) computed over the mini's own file content, paired with a date
+that only changes when the hash does (so the date reflects the last
+real behavioural change, not the last time any script happened to
+run). Both are written into a `## stamp: <hash> (<date>)` comment
+maintained automatically by a new root-level `stamp_minis.R` script,
+never hand-edited. `Rscript stamp_minis.R --check` (read-only, exits 1
+listing any stale file) was wired into `test.yaml` alongside
+`run_tests.R`, so a PR that edits a mini's `.R` file without
+re-stamping it fails CI -- closing the "did someone remember" gap the
+same way `run_tests.R` already closes it for behavioural regressions.
+
+A second concern, raised before implementation: even a fully-automated
+*vendoring tool* that inserted this stamp when copying a mini out could
+still be bypassed by a consumer who just runs `cp` or downloads the raw
+file instead of using the tool. Resolved by not building a separate
+vendoring tool at all -- the stamp is written into the mini's source
+file *in this repo*, at commit time, so it is already present in the
+canonical copy before anyone downloads or pastes it. Vendoring and
+plain file-copying become the same operation, so there is nothing left
+to bypass. (What this doesn't solve, and can't be solved by file design
+alone, is whether a consumer ever bothers to *check* their copy's stamp
+against this repo's current one later -- that remains an opt-in step
+the consumer has to take, same as any dependency-freshness check.)
+
+Implementing the migration surfaced a real bug worth recording: an
+initial version of the script always emitted a plain `# stamp: ...`
+line. Reviewing the first pass of stamped files surfaced an unrelated,
+pre-existing inconsistency -- eleven of the twelve minis use `##` for
+their entire top-of-file title/prose header block (switching to a
+plain `#` only once section dividers and inline code comments start),
+while `minicuts.R`, the most recently added mini, used a bare `#`
+throughout, including that header block. Decided to fix the outlier
+(`minicuts.R`'s header converted to `##`, matching the other eleven)
+rather than leave the mismatch, and to make every mini's stamp line use
+`##` accordingly. Converting `minicuts.R`'s header naively (blanket-
+prepending `#` to every existing line, including the already-inserted
+`# stamp: ...` line) turned that line into `## stamp: ...`, which the
+script's single-`#`-only detection regex no longer recognised as a
+stamp at all -- so it inserted a *second*, new stamp line rather than
+replacing the first, producing a visible duplicate. Fixed by decoupling
+stamp *detection* from the marker character (the regex accepts either
+`#` or `##`) from stamp *emission* (always `##`), and by comparing a
+freshly reconstructed target line (marker + hash + date) against the
+verbatim original line -- rather than reusing whatever marker the
+original line happened to have -- so a marker-only migration correctly
+triggers a rewrite while leaving an unrelated file's hash and date
+untouched. Verified across all twelve minis: the eleven pre-existing
+files kept identical hashes/dates (only their marker changed from `#`
+to `##`), `minicuts.R` got a new hash/date (its content genuinely
+changed), `stamp_minis.R --check` passed cleanly afterward, and the
+full `Rscript run_tests.R` suite still passed throughout.

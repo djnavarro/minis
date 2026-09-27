@@ -1,4 +1,5 @@
 ## miniverb.R ----------------------------------------------------------------
+## stamp: a3e4b120 (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of five dplyr one-table
 ## verbs -- `filter()`, `select()`, `mutate()`, `arrange()`, `summarise()`

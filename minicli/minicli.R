@@ -1,4 +1,5 @@
 ## minicli.R -----------------------------------------------------------
+## stamp: c5cbe35a (2026-09-27)
 ##
 ## A minimal, dependency-free stand-in for the parts of {cli} most
 ## packages actually use: coloured/styled text, unicode-with-ascii-

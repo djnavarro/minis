@@ -1,4 +1,5 @@
 ## ministr.R -----------------------------------------------------------------
+## stamp: 1c3b138a (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of stringr's basic string
 ## manipulation verbs -- padding, trimming, whitespace squishing,

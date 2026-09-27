@@ -1,4 +1,5 @@
 ## minitable.R -------------------------------------------------------------
+## stamp: 122e11d0 (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of a few tibble
 ## construction/coercion helpers: `tibble()`, `as_tibble()`,

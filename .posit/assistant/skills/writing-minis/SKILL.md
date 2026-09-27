@@ -87,6 +87,36 @@ keep on functions — they document "main function" vs. "plumbing helper"
 independent of the naming scheme, useful if a consumer later runs
 roxygen2 over their copy.
 
+**Header lines use `##`, everything else uses `#`.** The title line
+(`## <name>.R -----...`, dashes filling out to roughly 75 columns) and
+every prose line through the naming-convention note all start with
+`##`. Once the file moves past that block into section dividers,
+inline comments, and roxygen tags (`#'`/`#' @noRd`), drop to a plain
+single `#`. This isn't just cosmetic: it's what lets a reader (or a
+script) tell "top-of-file documentation" apart from "in-code comment"
+at a glance. Line 2 of that `##` block is always a `## stamp: <hash>
+(<date>)` line — see "Version stamp" below; don't write or edit it by
+hand.
+
+## Version stamp
+
+Every mini's `.R` file carries an automatically-maintained `## stamp:
+<hash> (<date>)` comment on line 2 (right below the title line). It's
+a content fingerprint (hash excludes the stamp line itself; date only
+changes when the hash does) that lets a consumer who vendored the file
+compare their copy against the current one in this repo without git
+access — see the root `README.md`'s "Version stamps" section for the
+consumer-facing explanation.
+
+- Maintained by `Rscript stamp_minis.R` (repo root) — never hand-edit
+  this line, and don't hand-copy a hash from another file.
+- After editing any mini's `.R` file, run `Rscript stamp_minis.R`
+  before committing (alongside `Rscript run_tests.R`). CI verifies this
+  with `Rscript stamp_minis.R --check`, which fails the build if a
+  mini's source changed without its stamp being refreshed.
+- A brand-new mini's `.R` file doesn't need a stamp added by hand
+  either — running `stamp_minis.R` once inserts it.
+
 **Zero runtime dependencies, always.** If the material being ported
 isn't already dependency-free, that's a sign real rework is needed (as
 with `minitable`, whose source forwarded `...` through an rlang-enabled
@@ -146,6 +176,9 @@ writing-vignettes skill.
 - Run one mini's suite: `testthat::test_dir("<name>/tests/testthat")`.
 - Run every mini's suite (do this before considering any edit done):
   `Rscript run_tests.R` from the repo root.
+- Also run `Rscript stamp_minis.R` before considering any edit to a
+  mini's `.R` file done — CI's `--check` mode will otherwise fail the
+  build. See "Version stamp" above.
 - `testthat`/`withr` are dev dependencies of *this repo only* — never
   add them (or anything else) to a mini's own runtime dependencies.
 

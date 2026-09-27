@@ -1,4 +1,5 @@
 ## minicase.R -------------------------------------------------------------
+## stamp: b9ce928e (2026-09-27)
 ##
 ## A minimal, dependency-free reimplementation of dplyr's `case_when()`:
 ## vectorised if/else via a sequence of two-sided formulas.
