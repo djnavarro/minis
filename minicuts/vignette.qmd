@@ -26,13 +26,18 @@ labels, and the `exclude` argument the two functions share.
 The [**minicuts.R**](https://github.com/djnavarro/minis/blob/main/minicuts/minicuts.R)
 script supplies two core functions:
 
-- `.cut_quantile(x, n_bins = 4, exclude = NULL, exclude_label = "Excluded", ties = "upward", seed = NULL, quantile_type = 7, labeller = NULL)`
-  is used to cut `x` into `n_bins` quantile bins, each holding
-  (approximately) the same number of values.
-- `.cut_evenly(x, n_bins = NULL, width = NULL, start = NULL, exclude = NULL, exclude_label = "Excluded", ties = "upward", labeller = NULL)`
+- `.cut_quantile(x, n_bins = 4, ties = "upward", ...)` is used to cut
+  `x` into `n_bins` quantile bins, each holding (approximately) the
+  same number of values. The remaining arguments control tie-break
+  reproducibility (`seed`), the quantile algorithm (`quantile_type`),
+  custom labels (`labeller`), and how excluded values are labelled
+  (`exclude`/`exclude_label`).
+- `.cut_evenly(x, n_bins = NULL, width = NULL, ties = "upward", ...)`
   is used to cut `x` into equal-width bins, either a fixed number of
   them spanning `range(x)` (`n_bins`) or a fixed width with however
-  many bins the data needs (`width`).
+  many bins the data needs (`width`). The remaining arguments control
+  the bin anchor (`start`), custom labels (`labeller`), and how
+  excluded values are labelled (`exclude`/`exclude_label`).
 
 They're supported by five internal helpers, shared by both functions
 -- there's no need to call any of them directly. The helpers are
