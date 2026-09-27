@@ -58,6 +58,7 @@ relevant mini and copy it straight into `R/`.
 | [`minipivot`](minipivot/) | Minimal `tidyr`-style `pivot_longer()`/`pivot_wider()`, reshaping a data frame between long and wide layouts. |
 | [`ministr`](ministr/) | Minimal `stringr`-style basic string manipulation (`str_pad`/`str_trim`/`str_squish`/`str_sub`/`str_length`/case conversion/`str_dup`/`str_c`/`str_wrap`), built on base R string primitives. |
 | [`minirx`](minirx/) | Minimal `stringr`-style regex pattern matching (`str_detect`/`str_extract`/`str_match`/`str_replace`/`str_remove`/`str_split`/`str_count`/`str_locate`), built on base R's PCRE engine (`perl = TRUE`). |
+| [`minicuts`](minicuts/) | Minimal `santoku`-style `cut_quantile()`, cutting a numeric vector into quantile bins, with tie-breaking control and a generic `exclude` argument for values that get their own label instead of joining the quantile calculation. |
 
 ## Using a mini
 
