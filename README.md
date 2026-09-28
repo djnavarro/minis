@@ -69,9 +69,8 @@ relevant mini and copy it straight into `R/`.
 3. Optionally rename the file and/or the function prefix if it clashes
    with something in your codebase.
 4. Add `@export` roxygen tags / `NAMESPACE` entries as needed for the
-   functions you actually use, or leave them unexported and call with
-   `:::` internally — either is fine since there's no dependency to
-   declare either way.
+   functions you actually use, or leave them unexported — either is fine 
+   since there's no dependency to declare either way.
 5. Keep the `## stamp: <hash> (<date>)` comment near the top of the
    file intact when you copy it. Later, to check whether your copy is
    stale, compare that line against the same file in this repo (see
