@@ -28,5 +28,6 @@ These are the minis that currently exist:
 | `ministr` | Minimal `stringr`-style basic string manipulation (padding/trimming/case conversion/etc). | [Vignette](ministr/) |
 | `minirx` | Minimal `stringr`-style regex pattern matching (detect/extract/match/replace/split/count/locate). | [Vignette](minirx/) |
 | `minicuts` | Minimal `erplots`-style `cut_quantile()` and `santoku`-style `cut_evenly()`. | [Vignette](minicuts/) |
+| `miniseed` | Minimal `withr`-style RNG-seed management: `with_seed()`/`with_preserve_seed()`/`local_seed()`/`local_preserve_seed()`. | [Vignette](miniseed/) |
 
 : {tbl-colwidths="[15,65,20]"}

@@ -49,6 +49,8 @@ website:
             text: minirx
           - href: minicuts/vignette.qmd
             text: minicuts
+          - href: miniseed/vignette.qmd
+            text: miniseed
 
 format:
   html:

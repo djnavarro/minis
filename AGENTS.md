@@ -61,6 +61,7 @@ minis/
 | `ministr` | `.str_` | `stringr`'s basic manipulation functions (own reimplementation, no regex/ICU) | `.str_pad`/`.str_trim`/`.str_squish`/`.str_sub`/`.str_length`/`.str_to_upper`/`.str_to_lower`/`.str_to_title`/`.str_to_sentence`/`.str_dup`/`.str_c`/`.str_wrap` |
 | `minirx` | `.rx_` | `stringr`'s regex pattern-matching functions (own reimplementation, base R PCRE via `perl=TRUE`, no ICU) | `.rx_detect`/`.rx_starts`/`.rx_ends`/`.rx_extract`/`.rx_extract_all`/`.rx_match`/`.rx_match_all`/`.rx_replace`/`.rx_replace_all`/`.rx_remove`/`.rx_remove_all`/`.rx_split`/`.rx_count`/`.rx_locate`/`.rx_locate_all` |
 | `minicuts` | none (bare `.cut_quantile`/`.cut_evenly`; internal helpers use `.cuts_`) | `djnavarro/erplots`'s `cut_quantile()`/`cut_exposure_quantile()`, inspired by `santoku`'s `chop_quantiles()`/`chop_equally()`/`chop_evenly()`/`chop_width()` | Cut a numeric vector into quantile bins (`.cut_quantile()`) or fixed-geometry bins (`.cut_evenly()`, unifying santoku's `chop_evenly()`/`chop_width()`), both sharing a generic `exclude` argument generalizing `cut_exposure_quantile()`'s placebo handling |
+| `miniseed` | `.seed_` | `withr`'s `with_seed()`/`with_preserve_seed()`/`local_seed()`/`local_preserve_seed()` | Seed the RNG (or not) around a block of code (`with_*`) or for the rest of the calling function (`local_*`), restoring the prior RNG state on exit either way |
 
 ### Design philosophy
 

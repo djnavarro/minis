@@ -1,0 +1,187 @@
+---
+title: "miniseed"
+---
+
+```{r}
+#| include: false
+source(file.path("miniseed", "miniseed.R"))
+```
+
+The purpose of **miniseed** is to provide a zero-dependency
+reimplementation of the RNG-seed-management slice of
+[**withr**](https://withr.r-lib.org/): `with_seed()`,
+`with_preserve_seed()`, `local_seed()`, and `local_preserve_seed()`.
+The [README](https://github.com/djnavarro/minis/tree/main/miniseed)
+provides scope notes and the full API; this page walks through why
+these functions exist, and puts the block-wrapping `with_*` pair and
+the deferred-cleanup `local_*` pair side by side so it's clear when
+each one is the right shape for the job.
+
+## Functions
+
+The [**miniseed.R**](https://github.com/djnavarro/minis/blob/main/miniseed/miniseed.R)
+script supplies four functions:
+
+- `.seed_with_seed(seed, code)` is used to set the RNG seed, evaluate
+  `code`, and restore the RNG state as it was found -- so a call to
+  `.seed_with_seed()` is reproducible without disturbing the ambient
+  RNG stream for whatever runs after it.
+- `.seed_with_preserve_seed(code)` is used the same way, but doesn't
+  itself call `set.seed()`: it just guarantees that whatever `code`
+  does to the RNG state is undone once `code` finishes.
+- `.seed_local_seed(seed)` is used to set the RNG seed and schedule the
+  restore for when the *calling function* returns, rather than
+  wrapping a block of code -- for use directly inside a function body.
+- `.seed_local_preserve_seed()` is the `local_*` counterpart to
+  `.seed_with_preserve_seed()`: it schedules the restore without
+  setting a seed itself.
+
+It's supported by three internal helpers -- there's no need to call
+any of them directly. The helpers are these:
+
+- `.seed_get_state()`
+- `.seed_set_state()`
+- `.seed_defer()`
+
+## Reproducible draws with `.seed_with_seed()`
+
+Ordinarily, two calls to a function like `runif()` give different
+results, because each call continues drawing from wherever the
+ambient RNG stream happens to be. `.seed_with_seed()` fixes the seed
+just for the duration of one expression, which is enough to make that
+one call reproducible:
+
+```{r}
+identical(.seed_with_seed(42, runif(3)), .seed_with_seed(42, runif(3)))
+```
+
+## The ambient stream is left untouched
+
+Crucially, `.seed_with_seed()` doesn't just set a seed and leave it
+set -- it restores the RNG state exactly as it found it, so code
+running before and after a `.seed_with_seed()` call behaves as though
+the call was never there. One way to see this directly is to compare
+`.Random.seed` (the object R itself uses to track RNG state) before
+and after:
+
+```{r}
+set.seed(1)
+state_before <- .Random.seed
+.seed_with_seed(999, runif(5))
+state_after <- .Random.seed
+identical(state_before, state_after)
+```
+
+The practical consequence is that a draw taken after a
+`.seed_with_seed()` call continues the ambient stream exactly as if
+that call had been skipped entirely:
+
+```{r}
+set.seed(1)
+reference_draw <- runif(1)
+
+set.seed(1)
+.seed_with_seed(999, runif(3))
+draw_after_with_seed <- runif(1)
+
+identical(reference_draw, draw_after_with_seed)
+```
+
+## `.seed_with_preserve_seed()`: preserving without seeding
+
+Sometimes the code being wrapped already calls `set.seed()` itself --
+a legacy simulation function, say -- and all that's needed is a
+guarantee that it doesn't leak its RNG state into whatever runs next.
+That's what `.seed_with_preserve_seed()` is for: it restores the RNG
+state afterwards, but doesn't set a seed of its own beforehand.
+
+```{r}
+legacy_sim <- function() {
+  set.seed(123)
+  runif(3)
+}
+
+set.seed(5)
+state_before <- .Random.seed
+.seed_with_preserve_seed(legacy_sim())
+state_after <- .Random.seed
+identical(state_before, state_after)
+```
+
+## Side by side: wrapping a block vs. seeding inside a function
+
+Both `with_*` functions take a block of code as an argument, which
+works well when the code to seed is a single self-contained
+expression. But a function's body is often a sequence of statements
+rather than one expression -- and that's exactly the shape
+`.seed_local_seed()` is for. It's called directly inside the function,
+with no block to wrap, and schedules its cleanup for when that
+function returns instead. The following two functions do the same
+simulation, one written each way:
+
+```{r}
+simulate_with_block <- function(seed) {
+  .seed_with_seed(seed, {
+    x <- rnorm(3)
+    y <- rnorm(3)
+    x + y
+  })
+}
+
+simulate_with_local <- function(seed) {
+  .seed_local_seed(seed)
+  x <- rnorm(3)
+  y <- rnorm(3)
+  x + y
+}
+
+identical(simulate_with_block(42), simulate_with_local(42))
+```
+
+They give identical results, and `.seed_local_seed()` reads a little
+more naturally once a function has more than a line or two in its
+body -- there's no need to indent the whole thing inside a `{ }` block
+just to seed it. The trade-off is that `.seed_local_seed()`'s cleanup
+only happens once the *enclosing function* exits, so it's only
+reliable when called from inside a function -- calling it at the top
+level of a script leaves the seed in place until the session ends (or
+another `.seed_*` call resets it).
+
+Like `.seed_with_seed()`, the cleanup still runs even though
+`simulate_with_local()` never explicitly restores anything itself, and
+it doesn't leak past the call:
+
+```{r}
+set.seed(7)
+state_before <- .Random.seed
+simulate_with_local(42)
+state_after <- .Random.seed
+identical(state_before, state_after)
+```
+
+## `.seed_local_preserve_seed()`
+
+This is the `local_*` counterpart to `.seed_with_preserve_seed()`,
+following the same pattern: it schedules the restore for when the
+enclosing function returns, without setting a seed itself.
+
+```{r}
+wrapped_legacy <- function() {
+  .seed_local_preserve_seed()
+  legacy_sim()
+}
+
+set.seed(5)
+state_before <- .Random.seed
+wrapped_legacy()
+state_after <- .Random.seed
+identical(state_before, state_after)
+```
+
+## What's deliberately missing
+
+**miniseed** only covers withr's RNG-seed functions. Everything else
+in withr -- `with_options()`, `with_dir()`, `with_envvar()`, and so on
+-- is a separate concern, unrelated to random number generation, and
+would belong in a mini of its own if it's ever needed rather than
+being bolted onto this one.

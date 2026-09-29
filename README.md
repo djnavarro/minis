@@ -26,7 +26,7 @@ relevant mini and copy it straight into `R/`.
 - **Namespaced defensively, with a dot-prefix.** Every function in a
   mini is dot-prefixed with a short, mini-specific tag (`.cli_*`,
   `.iter_*`, `.trap_*`, `.verb_*`, `.join_*`, `.table_*`, `.cond_*`,
-  `.str_*`, `.rx_*`), whether the
+  `.str_*`, `.rx_*`, `.seed_*`), whether the
   mini itself thinks of it as a "core" function or an internal helper —
   once copied into a consuming package, everything from a mini is
   internal to that package anyway, so there's no reason to distinguish
@@ -61,6 +61,7 @@ relevant mini and copy it straight into `R/`.
 | [`ministr`](ministr/) | Minimal `stringr`-style basic string manipulation (`str_pad`/`str_trim`/`str_squish`/`str_sub`/`str_length`/case conversion/`str_dup`/`str_c`/`str_wrap`), built on base R string primitives. |
 | [`minirx`](minirx/) | Minimal `stringr`-style regex pattern matching (`str_detect`/`str_extract`/`str_match`/`str_replace`/`str_remove`/`str_split`/`str_count`/`str_locate`), built on base R's PCRE engine (`perl = TRUE`). |
 | [`minicuts`](minicuts/) | Minimal `erplots`-style `cut_quantile()` (with tie-breaking control) and `santoku`-style `cut_evenly()` (unifying `chop_evenly()`/`chop_width()`), cutting a numeric vector into quantile bins or equal-width bins, with a shared `exclude` argument for values that get their own label instead of joining the bin calculation. |
+| [`miniseed`](miniseed/) | Minimal `withr`-style RNG-seed management (`with_seed()`/`with_preserve_seed()`/`local_seed()`/`local_preserve_seed()`), seeding the RNG (or not) around a block of code or for the rest of a function's execution, then restoring the prior RNG state. |
 
 ## Using a mini
 
