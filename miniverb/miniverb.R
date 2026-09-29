@@ -1,5 +1,5 @@
 ## miniverb.R ----------------------------------------------------------------
-## stamp: a3e4b120 (2026-09-27)
+## stamp: 903fd7df (2026-09-29)
 ##
 ## A minimal, dependency-free reimplementation of five dplyr one-table
 ## verbs -- `filter()`, `select()`, `mutate()`, `arrange()`, `summarise()`
@@ -61,7 +61,20 @@
 
 #' @noRd
 .verb_dotdotdot <- function(...) {
-  eval(substitute(alist(...)))
+  .verb_drop_empty_dots(eval(substitute(alist(...))))
+}
+
+#' Drop the extra empty element a trailing comma leaves in `...`
+#'
+#' A trailing comma before the closing paren of a call (e.g.
+#' `f(a = 1, b = 2,)`) is valid syntax that produces a genuine extra,
+#' unnamed/missing element when `...` is captured via `alist(...)`.
+#' @param dots A list of unevaluated expressions, as returned by
+#'   `eval(substitute(alist(...)))`.
+#' @noRd
+.verb_drop_empty_dots <- function(dots) {
+  is_missing <- vapply(dots, identical, logical(1), quote(expr = ))
+  dots[!is_missing]
 }
 
 #' Split row indices of a data frame into groups
@@ -135,7 +148,7 @@
 #' @return A data frame with the selected columns, in the order given.
 #' @export
 .verb_select <- function(.data, ...) {
-  dots <- eval(substitute(alist(...)))
+  dots <- .verb_drop_empty_dots(eval(substitute(alist(...))))
   nms <- names(dots)
   if (is.null(nms)) nms <- rep("", length(dots))
   all_names <- names(.data)
@@ -196,7 +209,7 @@
 #' @return `.data` with the named columns added or overwritten.
 #' @export
 .verb_mutate <- function(.data, ..., .by = NULL) {
-  dots <- eval(substitute(alist(...)))
+  dots <- .verb_drop_empty_dots(eval(substitute(alist(...))))
   nms <- names(dots)
   if (length(dots) == 0L) return(.data)
   if (is.null(nms) || any(!nzchar(nms))) {
@@ -240,7 +253,7 @@
 #'   unchanged.
 #' @export
 .verb_arrange <- function(.data, ...) {
-  dots <- eval(substitute(alist(...)))
+  dots <- .verb_drop_empty_dots(eval(substitute(alist(...))))
   if (length(dots) == 0L) return(.data)
   frame <- parent.frame()
   keys <- lapply(dots, function(e) eval(e, .data, frame))
@@ -261,7 +274,7 @@
 #'   grouping columns, if `.by` is supplied).
 #' @export
 .verb_summarise <- function(.data, ..., .by = NULL) {
-  dots <- eval(substitute(alist(...)))
+  dots <- .verb_drop_empty_dots(eval(substitute(alist(...))))
   nms <- names(dots)
   if (length(dots) == 0L) {
     stop(".verb_summarise: no summary expressions supplied", call. = FALSE)

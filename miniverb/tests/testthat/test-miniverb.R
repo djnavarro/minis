@@ -43,6 +43,11 @@ test_that(".verb_filter() rejects a non-character `.by`", {
   expect_error(.verb_filter(df, x > 1, .by = 1), "character vector")
 })
 
+test_that(".verb_filter() tolerates a trailing comma in ...", {
+  out <- .verb_filter(df, g == "a",)
+  expect_equal(out$x, c(1, 2, NA))
+})
+
 ## .verb_select() ---------------------------------------------------------
 
 sdf <- data.frame(a = 1:3, b = 4:6, c = 7:9)
@@ -77,6 +82,11 @@ test_that(".verb_select() errors when mixing inclusion and exclusion", {
   expect_error(.verb_select(sdf, a, -b), "cannot mix")
 })
 
+test_that(".verb_select() tolerates a trailing comma in ...", {
+  out <- .verb_select(sdf, c, a,)
+  expect_equal(names(out), c("c", "a"))
+})
+
 ## .verb_mutate() ----------------------------------------------------------
 
 test_that(".verb_mutate() adds a new column", {
@@ -102,6 +112,11 @@ test_that(".verb_mutate() with `.by` evaluates per group", {
 
 test_that(".verb_mutate() requires named arguments", {
   expect_error(.verb_mutate(sdf, a + b), "must be named")
+})
+
+test_that(".verb_mutate() tolerates a trailing comma in ...", {
+  out <- .verb_mutate(sdf, d = a + b,)
+  expect_equal(out$d, sdf$a + sdf$b)
 })
 
 ## .verb_arrange() ---------------------------------------------------------
@@ -132,6 +147,11 @@ test_that(".verb_arrange() sorts NA last regardless of direction", {
 
 test_that(".verb_arrange() with no arguments returns .data unchanged", {
   expect_equal(.verb_arrange(adf), adf)
+})
+
+test_that(".verb_arrange() tolerates a trailing comma in ...", {
+  out <- .verb_arrange(adf, x,)
+  expect_equal(out$x, c(1, 2, 3))
 })
 
 ## .verb_summarise() --------------------------------------------------------
@@ -171,4 +191,9 @@ test_that(".verb_summarise() requires named arguments", {
 
 test_that(".verb_summarise() errors when an expression isn't scalar per group", {
   expect_error(.verb_summarise(sdf, all_a = a), "single value per group")
+})
+
+test_that(".verb_summarise() tolerates a trailing comma in ...", {
+  out <- .verb_summarise(sdf, total = sum(a),)
+  expect_equal(out$total, sum(sdf$a))
 })

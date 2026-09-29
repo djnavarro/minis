@@ -1,5 +1,5 @@
 ## minitable.R -------------------------------------------------------------
-## stamp: 122e11d0 (2026-09-27)
+## stamp: ff1a3b1e (2026-09-29)
 ##
 ## A minimal, dependency-free reimplementation of a few tibble
 ## construction/coercion helpers: `tibble()`, `as_tibble()`,
@@ -79,9 +79,15 @@
 .table_tibble <- function(...) {
   fn_call <- match.call()
   list_to_eval <- as.list(fn_call)[-1]
+  exprs <- lapply(substitute(list(...)), deparse)[-1]
+  # A trailing comma (e.g. `.table_tibble(a = 1, b = 2,)`) is valid syntax
+  # that leaves an extra, empty/missing element in `...` -- drop it (and
+  # its corresponding deparsed-expression fallback name) before evaluating.
+  keep <- !vapply(list_to_eval, identical, logical(1), quote(expr = ))
+  list_to_eval <- list_to_eval[keep]
+  exprs <- exprs[keep]
   out <- vector(mode = "list", length = length(list_to_eval))
   names(out) <- names(list_to_eval)
-  exprs <- lapply(substitute(list(...)), deparse)[-1]
   for (element in seq_along(list_to_eval)) {
     value <- list_to_eval[[element]]
     if (is.language(value)) {
@@ -135,9 +141,15 @@
 .table_add_row <- function(.data, ...) {
   fn_call <- match.call(expand.dots = FALSE)
   list_to_eval <- fn_call[["..."]]
+  exprs <- lapply(substitute(list(...)), deparse)[-1]
+  # A trailing comma (e.g. `.table_add_row(df, x = 3,)`) is valid syntax
+  # that leaves an extra, empty/missing element in `...` -- drop it (and
+  # its corresponding deparsed-expression fallback name) before evaluating.
+  keep <- !vapply(list_to_eval, identical, logical(1), quote(expr = ))
+  list_to_eval <- list_to_eval[keep]
+  exprs <- exprs[keep]
   out <- vector(mode = "list", length = length(list_to_eval))
   names(out) <- names(list_to_eval)
-  exprs <- lapply(substitute(list(...)), deparse)[-1]
   for (element in seq_along(list_to_eval)) {
     value <- list_to_eval[[element]]
     if (is.language(value)) {
