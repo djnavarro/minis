@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>minijoin – minis</title>
+<title>miniseed – minis</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -321,7 +321,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../minijoin/index.html">minijoin</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../miniseed/index.html">miniseed</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -380,7 +380,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../minijoin/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../minijoin/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">minijoin</span></a>
   </div>
 </li>
@@ -422,7 +422,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../miniseed/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../miniseed/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">miniseed</span></a>
   </div>
 </li>
@@ -439,12 +439,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
-  <li><a href="#minimal-data-frames" id="toc-minimal-data-frames" class="nav-link" data-scroll-target="#minimal-data-frames">Minimal data frames</a></li>
-  <li><a href="#inner-join-only-rows-matching-in-both" id="toc-inner-join-only-rows-matching-in-both" class="nav-link" data-scroll-target="#inner-join-only-rows-matching-in-both">Inner join: only rows matching in both</a></li>
-  <li><a href="#left-join-all-rows-of-x-bands" id="toc-left-join-all-rows-of-x-bands" class="nav-link" data-scroll-target="#left-join-all-rows-of-x-bands">Left join: all rows of <code>x</code> (<code>bands</code>)</a></li>
-  <li><a href="#right-join-all-rows-of-y-albums" id="toc-right-join-all-rows-of-y-albums" class="nav-link" data-scroll-target="#right-join-all-rows-of-y-albums">Right join: all rows of <code>y</code> (<code>albums</code>)</a></li>
-  <li><a href="#full-join-all-rows-of-both" id="toc-full-join-all-rows-of-both" class="nav-link" data-scroll-target="#full-join-all-rows-of-both">Full join: all rows of both</a></li>
-  <li><a href="#by-is-always-explicit" id="toc-by-is-always-explicit" class="nav-link" data-scroll-target="#by-is-always-explicit"><code>by</code> is always explicit</a></li>
+  <li><a href="#reproducible-draws-with-.seed_with_seed" id="toc-reproducible-draws-with-.seed_with_seed" class="nav-link" data-scroll-target="#reproducible-draws-with-.seed_with_seed">Reproducible draws with <code>.seed_with_seed()</code></a></li>
+  <li><a href="#the-ambient-stream-is-left-untouched" id="toc-the-ambient-stream-is-left-untouched" class="nav-link" data-scroll-target="#the-ambient-stream-is-left-untouched">The ambient stream is left untouched</a></li>
+  <li><a href="#seed_with_preserve_seed-preserving-without-seeding" id="toc-seed_with_preserve_seed-preserving-without-seeding" class="nav-link" data-scroll-target="#seed_with_preserve_seed-preserving-without-seeding"><code>.seed_with_preserve_seed()</code>: preserving without seeding</a></li>
+  <li><a href="#side-by-side-wrapping-a-block-vs.-seeding-inside-a-function" id="toc-side-by-side-wrapping-a-block-vs.-seeding-inside-a-function" class="nav-link" data-scroll-target="#side-by-side-wrapping-a-block-vs.-seeding-inside-a-function">Side by side: wrapping a block vs.&nbsp;seeding inside a function</a></li>
+  <li><a href="#seed_local_preserve_seed" id="toc-seed_local_preserve_seed" class="nav-link" data-scroll-target="#seed_local_preserve_seed"><code>.seed_local_preserve_seed()</code></a></li>
+  <li><a href="#whats-deliberately-missing" id="toc-whats-deliberately-missing" class="nav-link" data-scroll-target="#whats-deliberately-missing">What’s deliberately missing</a></li>
   </ul>
 </nav>
     </div>
@@ -452,9 +452,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../minijoin/index.html">minijoin</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../minicli/index.html">Minis</a></li><li class="breadcrumb-item"><a href="../miniseed/index.html">miniseed</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">minijoin</h1>
+<h1 class="title">miniseed</h1>
 </div>
 
 
@@ -471,123 +471,154 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The purpose of <strong>minijoin</strong> is to provide a zero-dependency slice of <a href="https://dplyr.tidyverse.org/"><strong>dplyr</strong></a>-style syntax for mutating joins, all built atop base R’s <code>merge()</code>. The <a href="https://github.com/djnavarro/minis/tree/main/minijoin">README</a> provides the full argument reference; this page compares all four join functions side by side on two small toy data frames with a partial overlap, then covers the <code>by</code> argument in more detail.</p>
+<p>The purpose of <strong>miniseed</strong> is to provide a zero-dependency reimplementation of the RNG-seed-management slice of <a href="https://withr.r-lib.org/"><strong>withr</strong></a>: <code>with_seed()</code>, <code>with_preserve_seed()</code>, <code>local_seed()</code>, and <code>local_preserve_seed()</code>. The <a href="https://github.com/djnavarro/minis/tree/main/miniseed">README</a> provides scope notes and the full API; this page walks through why these functions exist, and puts the block-wrapping <code>with_*</code> pair and the deferred-cleanup <code>local_*</code> pair side by side so it’s clear when each one is the right shape for the job.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<p>The <a href="https://github.com/djnavarro/minis/blob/main/minijoin/minijoin.R"><strong>minijoin.R</strong></a> script supplies four core functions:</p>
+<p>The <a href="https://github.com/djnavarro/minis/blob/main/miniseed/miniseed.R"><strong>miniseed.R</strong></a> script supplies four functions:</p>
 <ul>
-<li><code>.join_inner_join(x, y, by, ...)</code> is used to keep only rows with a match in both <code>x</code> and <code>y</code>.</li>
-<li><code>.join_left_join(x, y, by, ...)</code> is used to keep all rows of <code>x</code>, filling in <code>NA</code> for <code>y</code>’s columns where there’s no match.</li>
-<li><code>.join_right_join(x, y, by, ...)</code> is used to keep all rows of <code>y</code>, filling in <code>NA</code> for <code>x</code>’s columns where there’s no match.</li>
-<li><code>.join_full_join(x, y, by, ...)</code> is used to keep all rows of both <code>x</code> and <code>y</code>, filling in <code>NA</code> on whichever side has no match.</li>
+<li><code>.seed_with_seed(seed, code)</code> is used to set the RNG seed, evaluate <code>code</code>, and restore the RNG state as it was found – so a call to <code>.seed_with_seed()</code> is reproducible without disturbing the ambient RNG stream for whatever runs after it.</li>
+<li><code>.seed_with_preserve_seed(code)</code> is used the same way, but doesn’t itself call <code>set.seed()</code>: it just guarantees that whatever <code>code</code> does to the RNG state is undone once <code>code</code> finishes.</li>
+<li><code>.seed_local_seed(seed)</code> is used to set the RNG seed and schedule the restore for when the <em>calling function</em> returns, rather than wrapping a block of code – for use directly inside a function body.</li>
+<li><code>.seed_local_preserve_seed()</code> is the <code>local_*</code> counterpart to <code>.seed_with_preserve_seed()</code>: it schedules the restore without setting a seed itself.</li>
 </ul>
-<p>There is also one internal helper:</p>
+<p>It’s supported by three internal helpers – there’s no need to call any of them directly. The helpers are these:</p>
 <ul>
-<li><code>.join_worker()</code> is the shared implementation that all four join functions delegate to, after fixing the right combination of <code>merge()</code>’s <code>all.x</code>/<code>all.y</code> arguments; it also restores <code>x</code>’s original row order, which <code>merge()</code> doesn’t guarantee on its own.</li>
+<li><code>.seed_get_state()</code></li>
+<li><code>.seed_set_state()</code></li>
+<li><code>.seed_defer()</code></li>
 </ul>
 </section>
-<section id="minimal-data-frames" class="level2">
-<h2 class="anchored" data-anchor-id="minimal-data-frames">Minimal data frames</h2>
+<section id="reproducible-draws-with-.seed_with_seed" class="level2">
+<h2 class="anchored" data-anchor-id="reproducible-draws-with-.seed_with_seed">Reproducible draws with <code>.seed_with_seed()</code></h2>
+<p>Ordinarily, two calls to a function like <code>runif()</code> give different results, because each call continues drawing from wherever the ambient RNG stream happens to be. <code>.seed_with_seed()</code> fixes the seed just for the duration of one expression, which is enough to make that one call reproducible:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">band =</span> <span class="fu">c</span>(<span class="st">"Beatles"</span>, <span class="st">"Rolling Stones"</span>, <span class="st">"Kinks"</span>),</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">founded =</span> <span class="fu">c</span>(<span class="dv">1960</span>, <span class="dv">1962</span>, <span class="dv">1963</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>albums <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">band =</span> <span class="fu">c</span>(<span class="st">"Beatles"</span>, <span class="st">"Kinks"</span>, <span class="st">"Queen"</span>),</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">album =</span> <span class="fu">c</span>(<span class="st">"Abbey Road"</span>, <span class="st">"Arthur"</span>, <span class="st">"A Night at the Opera"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>bands</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">.seed_with_seed</span>(<span class="dv">42</span>, <span class="fu">runif</span>(<span class="dv">3</span>)), <span class="fu">.seed_with_seed</span>(<span class="dv">42</span>, <span class="fu">runif</span>(<span class="dv">3</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>            band founded
-1        Beatles    1960
-2 Rolling Stones    1962
-3          Kinks    1963</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>albums</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>     band                album
-1 Beatles           Abbey Road
-2   Kinks               Arthur
-3   Queen A Night at the Opera</code></pre>
-</div>
-</div>
-<p>Here we have <code>bands</code> and <code>albums</code> as the data sets, sharing <code>"Beatles"</code> and <code>"Kinks"</code>. The <code>"Rolling Stones"</code> exist only in <code>bands</code>, but <code>"Queen"</code> exists only in <code>albums</code>. The four join types differ only in which of those non-matching rows they keep.</p>
-</section>
-<section id="inner-join-only-rows-matching-in-both" class="level2">
-<h2 class="anchored" data-anchor-id="inner-join-only-rows-matching-in-both">Inner join: only rows matching in both</h2>
-<p>Neither <code>"Rolling Stones"</code> nor <code>"Queen"</code> appears – an inner join is the most restrictive of the four, keeping only rows with a counterpart on the other side:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_inner_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>     band founded      album
-1 Beatles    1960 Abbey Road
-2   Kinks    1963     Arthur</code></pre>
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 </section>
-<section id="left-join-all-rows-of-x-bands" class="level2">
-<h2 class="anchored" data-anchor-id="left-join-all-rows-of-x-bands">Left join: all rows of <code>x</code> (<code>bands</code>)</h2>
-<p>The <code>"Rolling Stones"</code> row is kept, with <code>NA</code> for <code>album</code>, since it has no match in <code>albums</code>. This is the join to reach for when <code>x</code> is your “main” table and you’re enriching it with optional data from <code>y</code>:</p>
+<section id="the-ambient-stream-is-left-untouched" class="level2">
+<h2 class="anchored" data-anchor-id="the-ambient-stream-is-left-untouched">The ambient stream is left untouched</h2>
+<p>Crucially, <code>.seed_with_seed()</code> doesn’t just set a seed and leave it set – it restores the RNG state exactly as it found it, so code running before and after a <code>.seed_with_seed()</code> call behaves as though the call was never there. One way to see this directly is to compare <code>.Random.seed</code> (the object R itself uses to track RNG state) before and after:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_left_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>state_before <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.seed_with_seed</span>(<span class="dv">999</span>, <span class="fu">runif</span>(<span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>            band founded      album
-1        Beatles    1960 Abbey Road
-2 Rolling Stones    1962       &lt;NA&gt;
-3          Kinks    1963     Arthur</code></pre>
+<pre><code>[1] 0.38907138 0.58306072 0.09466569 0.85263123 0.78674676</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>state_after <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(state_before, state_after)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>The practical consequence is that a draw taken after a <code>.seed_with_seed()</code> call continues the ambient stream exactly as if that call had been skipped entirely:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>reference_draw <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.seed_with_seed</span>(<span class="dv">999</span>, <span class="fu">runif</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.38907138 0.58306072 0.09466569</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>draw_after_with_seed <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(reference_draw, draw_after_with_seed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 </section>
-<section id="right-join-all-rows-of-y-albums" class="level2">
-<h2 class="anchored" data-anchor-id="right-join-all-rows-of-y-albums">Right join: all rows of <code>y</code> (<code>albums</code>)</h2>
-<p>The <code>"Queen"</code> row is kept, with <code>NA</code> for <code>founded</code>. A right join is really just a left join with the arguments swapped – <code>.join_right_join(x, y, ...)</code> behaves like <code>.join_left_join(y, x, ...)</code>, with columns in <code>x</code>‘s original order. Note the row order below: matched rows still come first, in <code>bands</code>’ original order, with the unmatched-in-<code>x</code> row (<code>"Queen"</code>) appended at the end – <code>minijoin</code> always restores <code>x</code>’s original row order for matched rows, rather than <code>y</code>’s:</p>
+<section id="seed_with_preserve_seed-preserving-without-seeding" class="level2">
+<h2 class="anchored" data-anchor-id="seed_with_preserve_seed-preserving-without-seeding"><code>.seed_with_preserve_seed()</code>: preserving without seeding</h2>
+<p>Sometimes the code being wrapped already calls <code>set.seed()</code> itself – a legacy simulation function, say – and all that’s needed is a guarantee that it doesn’t leak its RNG state into whatever runs next. That’s what <code>.seed_with_preserve_seed()</code> is for: it restores the RNG state afterwards, but doesn’t set a seed of its own beforehand.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_right_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>legacy_sim <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">runif</span>(<span class="dv">3</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>state_before <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">.seed_with_preserve_seed</span>(<span class="fu">legacy_sim</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>     band founded                album
-1 Beatles    1960           Abbey Road
-2   Kinks    1963               Arthur
-3   Queen      NA A Night at the Opera</code></pre>
+<pre><code>[1] 0.2875775 0.7883051 0.4089769</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>state_after <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(state_before, state_after)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 </section>
-<section id="full-join-all-rows-of-both" class="level2">
-<h2 class="anchored" data-anchor-id="full-join-all-rows-of-both">Full join: all rows of both</h2>
-<p>Both <code>"Rolling Stones"</code> and <code>"Queen"</code> are kept, each with an <code>NA</code> in the column they don’t have a match for – a full join never drops a row from either side, so it’s the join to reach for when you want to see everything and let missing matches show up as <code>NA</code> rather than disappearing silently:</p>
+<section id="side-by-side-wrapping-a-block-vs.-seeding-inside-a-function" class="level2">
+<h2 class="anchored" data-anchor-id="side-by-side-wrapping-a-block-vs.-seeding-inside-a-function">Side by side: wrapping a block vs.&nbsp;seeding inside a function</h2>
+<p>Both <code>with_*</code> functions take a block of code as an argument, which works well when the code to seed is a single self-contained expression. But a function’s body is often a sequence of statements rather than one expression – and that’s exactly the shape <code>.seed_local_seed()</code> is for. It’s called directly inside the function, with no block to wrap, and schedules its cleanup for when that function returns instead. The following two functions do the same simulation, one written each way:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_full_join</span>(bands, albums, <span class="at">by =</span> <span class="st">"band"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>simulate_with_block <span class="ot">&lt;-</span> <span class="cf">function</span>(seed) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.seed_with_seed</span>(seed, {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    x <span class="sc">+</span> y</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>simulate_with_local <span class="ot">&lt;-</span> <span class="cf">function</span>(seed) {</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.seed_local_seed</span>(seed)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">+</span> y</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">simulate_with_block</span>(<span class="dv">42</span>), <span class="fu">simulate_with_local</span>(<span class="dv">42</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>            band founded                album
-1        Beatles    1960           Abbey Road
-2 Rolling Stones    1962                 &lt;NA&gt;
-3          Kinks    1963               Arthur
-4          Queen      NA A Night at the Opera</code></pre>
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>They give identical results, and <code>.seed_local_seed()</code> reads a little more naturally once a function has more than a line or two in its body – there’s no need to indent the whole thing inside a <code>{ }</code> block just to seed it. The trade-off is that <code>.seed_local_seed()</code>’s cleanup only happens once the <em>enclosing function</em> exits, so it’s only reliable when called from inside a function – calling it at the top level of a script leaves the seed in place until the session ends (or another <code>.seed_*</code> call resets it).</p>
+<p>Like <code>.seed_with_seed()</code>, the cleanup still runs even though <code>simulate_with_local()</code> never explicitly restores anything itself, and it doesn’t leak past the call:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>state_before <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_with_local</span>(<span class="dv">42</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  2.0038211 -0.1604298  0.2570039</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>state_after <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(state_before, state_after)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 </section>
-<section id="by-is-always-explicit" class="level2">
-<h2 class="anchored" data-anchor-id="by-is-always-explicit"><code>by</code> is always explicit</h2>
-<p>Unlike <code>dplyr</code>, there’s no auto-detection of shared column names – <code>by</code> must always be supplied. This is a deliberate simplification, not an oversight, to avoid a class of silent bugs from an unintended shared column name (two data frames that happen to both have an <code>id</code> column with unrelated meanings, for instance).</p>
-<p>When the join column has different names on each side, <code>by</code> takes a named character vector instead of a single string, <code>c("x_name" = "y_name")</code> – mirroring <code>dplyr</code>’s own syntax for the same situation:</p>
+<section id="seed_local_preserve_seed" class="level2">
+<h2 class="anchored" data-anchor-id="seed_local_preserve_seed"><code>.seed_local_preserve_seed()</code></h2>
+<p>This is the <code>local_*</code> counterpart to <code>.seed_with_preserve_seed()</code>, following the same pattern: it schedules the restore for when the enclosing function returns, without setting a seed itself.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>albums_renamed <span class="ot">&lt;-</span> albums</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(albums_renamed)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"artist"</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>albums_renamed</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>wrapped_legacy <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.seed_local_preserve_seed</span>()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">legacy_sim</span>()</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>state_before <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="fu">wrapped_legacy</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   artist                album
-1 Beatles           Abbey Road
-2   Kinks               Arthur
-3   Queen A Night at the Opera</code></pre>
+<pre><code>[1] 0.2875775 0.7883051 0.4089769</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.join_inner_join</span>(bands, albums_renamed, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"band"</span> <span class="ot">=</span> <span class="st">"artist"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>state_after <span class="ot">&lt;-</span> .Random.seed</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(state_before, state_after)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>     band founded      album
-1 Beatles    1960 Abbey Road
-2   Kinks    1963     Arthur</code></pre>
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
-<p>Note that the output keeps <code>x</code>’s column name (<code>band</code>), not <code>y</code>’s (<code>artist</code>) – the join collapses the two into a single column, using whichever name <code>x</code> had.</p>
+</section>
+<section id="whats-deliberately-missing" class="level2">
+<h2 class="anchored" data-anchor-id="whats-deliberately-missing">What’s deliberately missing</h2>
+<p><strong>miniseed</strong> only covers withr’s RNG-seed functions. Everything else in withr – <code>with_options()</code>, <code>with_dir()</code>, <code>with_envvar()</code>, and so on – is a separate concern, unrelated to random number generation, and would belong in a mini of its own if it’s ever needed rather than being bolted onto this one.</p>
 
 
 </section>
