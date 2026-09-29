@@ -23,6 +23,12 @@ test_that(".table_tibble() converts NULL/length-0 columns to NA", {
   expect_true(is.na(out$b))
 })
 
+test_that(".table_tibble() tolerates a trailing comma in ...", {
+  out <- .table_tibble(a = 1, b = 2,)
+  expect_equal(out$a, 1)
+  expect_equal(out$b, 2)
+})
+
 test_that(".table_as_tibble() coerces to a plain data.frame", {
   out <- .table_as_tibble(matrix(1:4, nrow = 2))
   expect_s3_class(out, "data.frame")
@@ -80,4 +86,11 @@ test_that(".table_add_row() allows integer/double columns to mix without errorin
   df <- data.frame(x = 1:2)
   out <- .table_add_row(df, x = 3.5)
   expect_equal(out$x, c(1, 2, 3.5))
+})
+
+test_that(".table_add_row() tolerates a trailing comma in ...", {
+  df <- data.frame(x = 1:2, y = c("a", "b"), stringsAsFactors = FALSE)
+  out <- .table_add_row(df, x = 3, y = "c",)
+  expect_equal(out$x, c(1, 2, 3))
+  expect_equal(out$y, c("a", "b", "c"))
 })
