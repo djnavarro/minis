@@ -784,7 +784,7 @@
     "href": "minicuts/index.html#ties-at-a-quantile-boundary",
     "title": "minicuts",
     "section": "Ties at a quantile boundary",
-    "text": "Ties at a quantile boundary\nRepeated values sitting exactly on a quantile break point are common with skewed or rounded data. The ties argument controls which bin they land in:\n\ntied &lt;- c(1, 2, 3, 4, 4, 4, 4, 5, 6, 7)\n.cut_quantile(tied, n_bins = 2, ties = \"upward\")\n\n [1] Q1 Q1 Q1 Q1 Q1 Q1 Q1 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] upward\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2\n\n.cut_quantile(tied, n_bins = 2, ties = \"downward\")\n\n [1] Q1 Q1 Q1 Q2 Q2 Q2 Q2 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] downward\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2\n\n\nThe \"split-even\" option instead divides a tied group between its two candidate bins, aiming for equal bin sizes rather than sending every tied value the same way. It’s random, so it takes a seed to be reproducible:\n\n.cut_quantile(tied, n_bins = 2, ties = \"split-even\", seed = 6017)\n\n [1] Q1 Q1 Q1 Q2 Q1 Q1 Q2 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] split-even\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2",
+    "text": "Ties at a quantile boundary\nRepeated values sitting exactly on a quantile break point are common with skewed or rounded data. The ties argument controls which bin they land in:\n\ntied &lt;- c(1, 2, 3, 4, 4, 4, 4, 5, 6, 7)\n.cut_quantile(tied, n_bins = 2, ties = \"upward\")\n\n [1] Q1 Q1 Q1 Q2 Q2 Q2 Q2 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] upward\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2\n\n.cut_quantile(tied, n_bins = 2, ties = \"downward\")\n\n [1] Q1 Q1 Q1 Q1 Q1 Q1 Q1 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] downward\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2\n\n\nThe \"split-even\" option instead divides a tied group between its two candidate bins, aiming for equal bin sizes rather than sending every tied value the same way. It’s random, so it takes a seed to be reproducible:\n\n.cut_quantile(tied, n_bins = 2, ties = \"split-even\", seed = 6017)\n\n [1] Q1 Q1 Q1 Q2 Q1 Q1 Q2 Q2 Q2 Q2\nattr(,\"breaks\")\n  0%  50% 100% \n   1    4    7 \nattr(,\"ties\")\n[1] split-even\nattr(,\"quantile_type\")\n[1] 7\nLevels: Q1 Q2",
     "crumbs": [
       "Minis",
       "minicuts"
@@ -806,7 +806,7 @@
     "href": "minicuts/index.html#equal-width-bins-with-.cut_evenly",
     "title": "minicuts",
     "section": "Equal-width bins with .cut_evenly()",
-    "text": "Equal-width bins with .cut_evenly()\nWhere .cut_quantile() fixes the group size and lets the bin edges follow from the data, .cut_evenly() does the opposite: it fixes the bin geometry and lets the group sizes follow from the data. Giving it n_bins spans range(x) with that many equal-width bins:\n\ndoses &lt;- exposure[exposure &gt; 0]\ntable(.cut_evenly(doses, n_bins = 4))\n\n\nQ1 Q2 Q3 Q4 \n30  8  7  3 \n\nattr(.cut_evenly(doses, n_bins = 4), \"breaks\")\n\n[1]  0.300 13.525 26.750 39.975 53.200\n\n\nGiving it width instead fixes the bin width and works out how many bins are needed to cover the data, anchored at min(x) by default:\n\ntable(.cut_evenly(doses, width = 10))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n25  9  7  4  2  1",
+    "text": "Equal-width bins with .cut_evenly()\nWhere .cut_quantile() fixes the group size and lets the bin edges follow from the data, .cut_evenly() does the opposite: it fixes the bin geometry and lets the group sizes follow from the data. Giving it n_bins spans range(x) with that many equal-width bins:\n\ndoses &lt;- exposure[exposure &gt; 0]\ntable(.cut_evenly(doses, n_bins = 4))\n\n\nQ1 Q2 Q3 Q4 \n30  8  7  3 \n\nattr(.cut_evenly(doses, n_bins = 4), \"breaks\")\n\n[1]  0.300 13.525 26.750 39.975 53.200\n\n\nGiving it width instead fixes the bin width and works out how many bins are needed to cover the data, anchored at min(x) by default:\n\ntable(.cut_evenly(doses, width = 10))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n24 10  7  4  2  1",
     "crumbs": [
       "Minis",
       "minicuts"
@@ -817,7 +817,7 @@
     "href": "minicuts/index.html#anchoring-bins-with-start",
     "title": "minicuts",
     "section": "Anchoring bins with start",
-    "text": "Anchoring bins with start\nAn explicit start moves that anchor. Here, bins are anchored at 0 rather than min(doses), so the bin edges land on round numbers:\n\ntable(.cut_evenly(doses, width = 10, start = 0))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n24  9  8  4  2  1 \n\n\nA negative width builds bins downward from start (max(x) by default) instead of upward from it:\n\ntable(.cut_evenly(doses, width = -10))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n10 20  6  9  1  2",
+    "text": "Anchoring bins with start\nAn explicit start moves that anchor. Here, bins are anchored at 0 rather than min(doses), so the bin edges land on round numbers:\n\ntable(.cut_evenly(doses, width = 10, start = 0))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n24  9  8  4  2  1 \n\n\nA negative width builds bins downward from start (max(x) by default) instead of upward from it:\n\ntable(.cut_evenly(doses, width = -10))\n\n\nQ1 Q2 Q3 Q4 Q5 Q6 \n10 20  6  8  2  2",
     "crumbs": [
       "Minis",
       "minicuts"

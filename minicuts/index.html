@@ -546,7 +546,7 @@ Q1 Q2 Q3 Q4
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>tied <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.cut_quantile</span>(tied, <span class="at">n_bins =</span> <span class="dv">2</span>, <span class="at">ties =</span> <span class="st">"upward"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] Q1 Q1 Q1 Q1 Q1 Q1 Q1 Q2 Q2 Q2
+<pre><code> [1] Q1 Q1 Q1 Q2 Q2 Q2 Q2 Q2 Q2 Q2
 attr(,"breaks")
   0%  50% 100% 
    1    4    7 
@@ -558,7 +558,7 @@ Levels: Q1 Q2</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.cut_quantile</span>(tied, <span class="at">n_bins =</span> <span class="dv">2</span>, <span class="at">ties =</span> <span class="st">"downward"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] Q1 Q1 Q1 Q2 Q2 Q2 Q2 Q2 Q2 Q2
+<pre><code> [1] Q1 Q1 Q1 Q1 Q1 Q1 Q1 Q2 Q2 Q2
 attr(,"breaks")
   0%  50% 100% 
    1    4    7 
@@ -626,7 +626,7 @@ Q1 Q2 Q3 Q4
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Q1 Q2 Q3 Q4 Q5 Q6 
-25  9  7  4  2  1 </code></pre>
+24 10  7  4  2  1 </code></pre>
 </div>
 </div>
 </section>
@@ -647,7 +647,7 @@ Q1 Q2 Q3 Q4 Q5 Q6
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Q1 Q2 Q3 Q4 Q5 Q6 
-10 20  6  9  1  2 </code></pre>
+10 20  6  8  2  2 </code></pre>
 </div>
 </div>
 </section>
