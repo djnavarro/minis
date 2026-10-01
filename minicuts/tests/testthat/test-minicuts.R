@@ -36,15 +36,26 @@ test_that("NA in x propagates to NA in the result regardless of exclude", {
   expect_equal(sum(is.na(result)), 1)
 })
 
-test_that("ties = 'upward'/'downward' match cut()'s right = TRUE/FALSE", {
+test_that("ties = 'upward'/'downward' match cut()'s right = FALSE/TRUE", {
   x <- c(1, 1, 2, 2, 3, 3, 4, 4)
   breaks <- stats::quantile(x, probs = 0:4 / 4, type = 7)
 
   up <- .cut_quantile(x, n_bins = 4, ties = "upward")
   down <- .cut_quantile(x, n_bins = 4, ties = "downward")
 
-  expect_equal(as.integer(up), as.integer(cut(x, breaks, labels = 1:4, include.lowest = TRUE)))
-  expect_equal(as.integer(down), as.integer(cut(x, breaks, labels = 1:4, right = FALSE, include.lowest = TRUE)))
+  expect_equal(as.integer(up), as.integer(cut(x, breaks, labels = 1:4, right = FALSE, include.lowest = TRUE)))
+  expect_equal(as.integer(down), as.integer(cut(x, breaks, labels = 1:4, include.lowest = TRUE)))
+})
+
+test_that("ties = 'upward' moves a tied value into the higher bin, not the lower one", {
+  # three 4s sit exactly on the Q2/Q3 break
+  x <- c(1, 2, 3, 4, 4, 4, 5, 6, 7, 8)
+
+  up <- .cut_quantile(x, n_bins = 4, ties = "upward")
+  down <- .cut_quantile(x, n_bins = 4, ties = "downward")
+
+  expect_equal(as.character(up[4:6]), rep("Q3", 3))
+  expect_equal(as.character(down[4:6]), rep("Q2", 3))
 })
 
 test_that("ties = 'split-even' is reproducible with a seed and leaves the ambient RNG stream untouched", {
@@ -58,7 +69,7 @@ test_that("ties = 'split-even' is reproducible with a seed and leaves the ambien
   result2 <- .cut_quantile(x, n_bins = 5, ties = "split-even", seed = 999)
   expect_identical(result1, result2)
 
-  # bin sizes should be much closer to equal than the "upward" baseline
+  # bin sizes should be much closer to equal than the "downward" baseline
   # would give for this tied data
   expect_true(max(table(result1)) - min(table(result1)) <= 1)
 })
@@ -185,15 +196,26 @@ test_that("values outside the bins implied by an explicit start are NA with a wa
   expect_false(anyNA(result[-1]))
 })
 
-test_that("ties = 'upward'/'downward' match cut()'s right = TRUE/FALSE for evenly cut bins", {
+test_that("ties = 'upward'/'downward' match cut()'s right = FALSE/TRUE for evenly cut bins", {
   x <- c(0, 2, 4, 6, 8, 10)
   breaks <- seq(0, 10, by = 2)
 
   up <- .cut_evenly(x, width = 2, ties = "upward")
   down <- .cut_evenly(x, width = 2, ties = "downward")
 
-  expect_equal(as.integer(up), as.integer(cut(x, breaks, labels = 1:5, include.lowest = TRUE)))
-  expect_equal(as.integer(down), as.integer(cut(x, breaks, labels = 1:5, right = FALSE, include.lowest = TRUE)))
+  expect_equal(as.integer(up), as.integer(cut(x, breaks, labels = 1:5, right = FALSE, include.lowest = TRUE)))
+  expect_equal(as.integer(down), as.integer(cut(x, breaks, labels = 1:5, include.lowest = TRUE)))
+})
+
+test_that("ties = 'upward' moves a tied value into the higher bin for evenly cut bins", {
+  # 4 sits exactly on the bin boundary between Q2 and Q3
+  x <- c(0, 2, 4, 6, 8)
+
+  up <- .cut_evenly(x, width = 2, start = 0, ties = "upward")
+  down <- .cut_evenly(x, width = 2, start = 0, ties = "downward")
+
+  expect_equal(as.character(up[3]), "Q3")
+  expect_equal(as.character(down[3]), "Q2")
 })
 
 test_that("exactly one of n_bins/width must be supplied", {

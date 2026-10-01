@@ -72,19 +72,23 @@
 # Shared bin-assignment logic: assigns each element of `x` to an
 # integer bin (`1:n_bins`, `NA` where `x` is missing or outside
 # `range(breaks)`) according to the `ties` rule. `"upward"`/
-# `"downward"` are direct `cut()` calls; `"split-even"` is handled by
-# `.cuts_resolve_ties()` below.
+# `"downward"` are direct `cut()` calls -- note that `cut()`'s own
+# `right = TRUE` (the default) sends a tied value to the *lower* of its
+# two candidate bins and `right = FALSE` sends it to the *upper* one,
+# the opposite of what the names suggest, so `"upward"` must use
+# `right = FALSE` and `"downward"` must use `right = TRUE`.
+# `"split-even"` is handled by `.cuts_resolve_ties()` below.
 #' @noRd
 .cuts_bin_num <- function(x, breaks, n_bins, ties, seed = NULL) {
   switch(
     ties,
-    upward = as.numeric(cut(x, breaks, labels = 1:n_bins, include.lowest = TRUE)),
-    downward = as.numeric(cut(x, breaks, labels = 1:n_bins, right = FALSE, include.lowest = TRUE)),
+    upward = as.numeric(cut(x, breaks, labels = 1:n_bins, right = FALSE, include.lowest = TRUE)),
+    downward = as.numeric(cut(x, breaks, labels = 1:n_bins, include.lowest = TRUE)),
     `split-even` = .cuts_resolve_ties(x, breaks, n_bins, seed = seed)
   )
 }
 
-# `ties = "split-even"`'s implementation. Starts from the `"upward"`
+# `ties = "split-even"`'s implementation. Starts from the `"downward"`
 # baseline (every tied value assigned to the lower of its two candidate
 # bins), then, for each interior break in turn, randomly moves just
 # enough of that break's tied group up into the higher bin to bring the
@@ -194,11 +198,13 @@
 #'   `exclude` is not `NULL`.
 #' @param ties Controls how values falling exactly on a quantile break
 #'   point are assigned, where the bin membership would otherwise be
-#'   ambiguous. `"upward"` (the default) is equivalent to [cut()] with
-#'   `right = TRUE`; `"downward"` is equivalent to `right = FALSE`;
-#'   `"split-even"` randomly divides each tied group between its two
-#'   candidate bins so that final bin sizes are as equal as possible,
-#'   rather than sending every tied value the same direction.
+#'   ambiguous. `"upward"` (the default) moves tied values into the
+#'   higher of their two candidate bins, equivalent to [cut()] with
+#'   `right = FALSE`; `"downward"` moves them into the lower bin,
+#'   equivalent to `right = TRUE`; `"split-even"` randomly divides each
+#'   tied group between its two candidate bins so that final bin sizes
+#'   are as equal as possible, rather than sending every tied value the
+#'   same direction.
 #' @param seed Optional single number used to seed the random tie-break
 #'   used by `ties = "split-even"` (ignored for `"upward"`/
 #'   `"downward"`, which involve no randomness). `NULL` (the default)
@@ -349,11 +355,12 @@
 #'   result under their own `exclude_label` level, rather than being
 #'   dropped or set to `NA`.
 #' @param ties Controls how values falling exactly on a bin boundary
-#'   are assigned. `"upward"` (the default) is equivalent to [cut()]
-#'   with `right = TRUE`; `"downward"` is equivalent to `right = FALSE`.
-#'   Unlike [.cut_quantile()], there is no `"split-even"` option (bin
-#'   geometry here is fixed, not derived from equal group sizes) and so
-#'   no `seed` argument either.
+#'   are assigned. `"upward"` (the default) moves tied values into the
+#'   higher of their two candidate bins, equivalent to [cut()] with
+#'   `right = FALSE`; `"downward"` moves them into the lower bin,
+#'   equivalent to `right = TRUE`. Unlike [.cut_quantile()], there is no
+#'   `"split-even"` option (bin geometry here is fixed, not derived from
+#'   equal group sizes) and so no `seed` argument either.
 #' @param labeller As in [.cut_quantile()]: `NULL` (the default) labels
 #'   bins `"Q1"`, `"Q2"`, etc.; a function is called as
 #'   `labeller(n_bins, breaks)`; a character vector of length `n_bins`
@@ -445,8 +452,8 @@
 
   raw_bin_num <- switch(
     ties,
-    upward = as.numeric(cut(calc_x, breaks, labels = 1:n_bins, include.lowest = TRUE)),
-    downward = as.numeric(cut(calc_x, breaks, labels = 1:n_bins, right = FALSE, include.lowest = TRUE))
+    upward = as.numeric(cut(calc_x, breaks, labels = 1:n_bins, right = FALSE, include.lowest = TRUE)),
+    downward = as.numeric(cut(calc_x, breaks, labels = 1:n_bins, include.lowest = TRUE))
   )
   bin_num <- rep(NA_real_, length(x))
   bin_num[in_calc] <- raw_bin_num
