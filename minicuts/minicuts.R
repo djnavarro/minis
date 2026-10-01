@@ -1,5 +1,5 @@
 ## minicuts.R -------------------------------------------------------------
-## stamp: 33edeb5f (2026-09-27)
+## stamp: 55a8a2f1 (2026-10-01)
 ##
 ## Two ways to cut a numeric vector into bins: `.cut_quantile()` (fixed
 ## group size, boundaries determined by the data) and `.cut_evenly()`
